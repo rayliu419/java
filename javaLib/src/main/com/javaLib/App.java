@@ -1,13 +1,15 @@
-package javaLib;
+package com.javaLib;
+
+import com.javaLib.B;
 
 /**
  * Hello world!
  *
  */
-public class App 
+public class App
 {
     public static void main( String[] args )
     {
-        System.out.println( "Hello World!" );
+        B b = new B();
     }
 }
