@@ -1,4 +1,4 @@
-package com.javaLib;
+package com.sample.teststatic;
 
 public class A {
 
