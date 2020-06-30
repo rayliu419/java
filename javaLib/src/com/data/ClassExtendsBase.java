@@ -1,5 +1,8 @@
 package com.data;
 
+import lombok.Data;
+
+@Data
 public class ClassExtendsBase extends BaseClass {
-    private int b;
+    public int b;
 }
