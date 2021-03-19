@@ -1,11 +1,9 @@
-package com.sample.testObjectMapper;
+package main.objectmapper;
 
-import com.data.MyCalculator;
 import lombok.Data;
+import main.lombokapp.MyCalculator;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Data

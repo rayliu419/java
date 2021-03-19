@@ -1,4 +1,4 @@
-package com.sample.testObjectMapper;
+package main.objectmapper;
 
 import lombok.Data;
 

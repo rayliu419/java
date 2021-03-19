@@ -1,4 +1,4 @@
-package com.data;
+package main.lombokapp;
 
 import lombok.Data;
 

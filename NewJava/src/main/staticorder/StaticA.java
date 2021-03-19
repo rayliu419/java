@@ -1,9 +1,9 @@
-package com.sample.teststatic;
+package main.staticorder;
 
-public class A {
+public class StaticA {
 
     static {
-        System.out.println("static block in A");
+        System.out.println("static block in StaticA");
     }
 
     private final static String test = getString();

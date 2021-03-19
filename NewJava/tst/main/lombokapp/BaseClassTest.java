@@ -1,23 +1,22 @@
-package com.sample.testClass;
+package main.lombokapp;
 
-import com.data.BaseClass;
-import com.data.ClassExtendsBase;
-import com.data.ClassExtendsBase2;
-import com.data.MyCalculator;
+import org.junit.Test;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Calendar;
 
-/**
- * class.forName()
- * ClassEntendsBase.class
- * Class<T> 的用法
- * https://www.cnblogs.com/sharpest/p/7807009.html
- */
-public class TestClassUtils {
-    public static void main(String[] args) {
+
+public class BaseClassTest {
+
+    /**
+     * class.forName()
+     * ClassEntendsBase.class
+     * Class<T> 的用法
+     * https://www.cnblogs.com/sharpest/p/7807009.html
+     */
+    @Test
+    public void testBaseClass() {
         BaseClass x0 = new BaseClass();
         ClassExtendsBase x1 = new ClassExtendsBase();
         ClassExtendsBase2 x2 = new ClassExtendsBase2();
@@ -90,8 +89,7 @@ public class TestClassUtils {
             Method m[] = c.getDeclaredMethods();
             for (int i = 0; i < m.length; i++)
                 System.out.println(m[i].toString());
-        }
-        catch (Throwable e) {
+        } catch (Throwable e) {
             System.err.println(e);
         }
         System.out.println();
@@ -112,10 +110,9 @@ public class TestClassUtils {
             arglist[0] = new Integer(37);
             arglist[1] = new Integer(47);
             Object retobj = add.invoke(calculator, arglist);
-            Integer retval = (Integer)retobj;
+            Integer retval = (Integer) retobj;
             System.out.println(retval.intValue());
-        }
-        catch (Throwable e) {
+        } catch (Throwable e) {
             System.err.println(e);
         }
         System.out.println();
@@ -133,8 +130,7 @@ public class TestClassUtils {
             System.out.println(cal);
             fld.setInt(cal, 2);
             System.out.println(cal);
-        }
-        catch (Throwable e) {
+        } catch (Throwable e) {
             System.err.println(e);
         }
         System.out.println();
@@ -147,10 +143,9 @@ public class TestClassUtils {
             Class cls = Class.forName("java.lang.String");
             Object arr = Array.newInstance(cls, 10);
             Array.set(arr, 5, "this is a test");
-            String s = (String)Array.get(arr, 5);
+            String s = (String) Array.get(arr, 5);
             System.out.println(s);
-        }
-        catch (Throwable e) {
+        } catch (Throwable e) {
             System.err.println(e);
         }
         System.out.println();
