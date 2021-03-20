@@ -16,7 +16,10 @@ public class Java8Test {
 
     /**
      * 下面的代码主要是使用了java8的function interface/lambda和generic的混合使用。
-     * lambda主要是可以代替接口的使用，使得代码更简洁。
+     * 当使用function interface的时候有三种方法：
+     * 1. 实现function interface，例如testFilterGreenApplesWithApplePredicate。
+     * 2.使用匿名类，例如testFilterApplesWithAnonymousApplePredicate。
+     * 3. 使用lambda。避免需要单独的实现，使得代码更简洁。testFilterApplesWithLambda。
      */
     @Test
     public void testFilterGreenApples() {
