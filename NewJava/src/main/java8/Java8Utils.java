@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 
-public class Utils {
+public class Java8Utils {
 
     /**
      * 传统的Java写法，比较笨重。

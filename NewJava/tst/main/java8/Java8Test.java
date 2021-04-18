@@ -23,12 +23,12 @@ public class Java8Test {
      */
     @Test
     public void testFilterGreenApples() {
-        System.out.println(Utils.filterGreenApplesOldStyle(apples));
+        System.out.println(Java8Utils.filterGreenApplesOldStyle(apples));
     }
 
     @Test
     public void testFilterGreenApplesWithApplePredicate() {
-        System.out.println(Utils.filterApplesWithApplePredicate(apples, new AppleGreenColorPredicate()));
+        System.out.println(Java8Utils.filterApplesWithApplePredicate(apples, new AppleGreenColorPredicate()));
     }
 
     /**
@@ -38,7 +38,7 @@ public class Java8Test {
     @Test
     public void testFilterApplesWithAnonymousApplePredicate() {
         List<Apple> redApples = Lists.newArrayList();
-        redApples = Utils.filterApplesWithApplePredicate(apples, new ApplePredicate() {
+        redApples = Java8Utils.filterApplesWithApplePredicate(apples, new ApplePredicate() {
             @Override
             public boolean test(Apple apple) {
                 return "red".equals(apple.getColor());
@@ -56,7 +56,7 @@ public class Java8Test {
      */
     @Test
     public void testFilterApplesWithLambda() {
-        System.out.println(Utils.filterApplesWithApplePredicate(apples,
+        System.out.println(Java8Utils.filterApplesWithApplePredicate(apples,
                 (Apple apple) -> "red".equals(apple.getColor())));
     }
 
