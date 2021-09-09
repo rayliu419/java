@@ -1,4 +1,4 @@
-package main.completablefuture;
+package main.mymultithread;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;

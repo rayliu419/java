@@ -1,4 +1,4 @@
-package main.completablefuture;
+package main.mymultithread;
 
 import org.junit.Test;
 
