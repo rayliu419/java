@@ -1,5 +1,6 @@
 package main.mymultithread;
 
+import main.concurrency.CompletableFutureApp;
 import org.junit.Test;
 
 import java.util.concurrent.CompletableFuture;

@@ -1,8 +1,8 @@
 package main.java8;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.groupingBy;
 
@@ -59,5 +59,12 @@ public class JavaStream {
                         }
                 )));
         return result;
+    }
+
+    public void streamToContainer() {
+        Integer[] x = new Integer[]{1, 2, 3};
+        Set<Integer> set = Arrays.stream(x).collect(Collectors.toSet());
+        List<Integer> list = Arrays.stream(x).collect(Collectors.toList());
+
     }
 }
