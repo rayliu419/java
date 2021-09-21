@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class JavaQueueTest {
+public class JavaConcurrencyBlockingQueue {
 
     @Test
     public void queueBasic() {
