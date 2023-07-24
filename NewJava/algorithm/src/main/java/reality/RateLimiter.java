@@ -25,6 +25,7 @@ public class RateLimiter {
      */
     private void startTokenRefillTask() {
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+        // 怎么关闭RateLimiter启动的线程?
         executor.scheduleAtFixedRate(this::addTokens, 0, 1, TimeUnit.SECONDS);
     }
 

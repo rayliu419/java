@@ -19,11 +19,13 @@ public class Singleton {
     }
 
     /**
-     * 
+     *
      * @return
      */
     public static Object getInstance() {
+        // 前面的判断在object != null的时候，不需要加锁，直接返回
         if (object == null) {
+            // 后面的synchronized是为了防止多个线程同时访问
             synchronized (Singleton.class) {
                 if (object == null) {
                     object = new Object();
