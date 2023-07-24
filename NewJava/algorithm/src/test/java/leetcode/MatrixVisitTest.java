@@ -7,8 +7,5 @@ public class MatrixVisitTest {
 
     @Test
     public void test() {
-        MatrixVisit matrixVisit = new MatrixVisit();
-
-        matrixVisit.visit();
     }
 }

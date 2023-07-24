@@ -32,15 +32,8 @@ public class ConsistentHashAlgorithm<T> {
      * @param key
      * @return
      */
-    public long getVirtualIndex(String key) {
-        MessageDigest md5 = null;
-        if (md5 == null) {
-            try {
-                md5 = MessageDigest.getInstance("MD5");
-            } catch (NoSuchAlgorithmException e) {
-                throw new IllegalStateException("no md5 algorythm found");
-            }
-        }
+    public long getVirtualIndex(String key) throws NoSuchAlgorithmException {
+        MessageDigest md5 = MessageDigest.getInstance("MD5");
         md5.reset();
         md5.update(key.getBytes());
         byte[] bKey = md5.digest();
@@ -53,7 +46,7 @@ public class ConsistentHashAlgorithm<T> {
      * 如果某个hash值发生碰撞怎么办？- TreeMap 会保存后面的那个key/value。
      * @param node
      */
-    public void add(T node) {
+    public void add(T node) throws NoSuchAlgorithmException {
         for (int i = 0; i < PHYSICAL_TO_VIRTUAL_MAPPING_NUMBER; i++) {
             // 为每个节点生成PHYSICAL_TO_VIRTUAL_MAPPING_NUMBER个虚拟节点，并把对应关系存放起来。
             circle.put(getVirtualIndex(node.toString() + i), node);
@@ -64,7 +57,7 @@ public class ConsistentHashAlgorithm<T> {
      * 删除节点和节点的映射关系
      * @param node
      */
-    public void remove(T node) {
+    public void remove(T node) throws NoSuchAlgorithmException {
         for (int i = 0; i < PHYSICAL_TO_VIRTUAL_MAPPING_NUMBER; i++) {
             // 如果有hash碰撞的情况，摘取的对应关系可能有误。我觉得在删除前需要比较返回的node是不是当前的node。
             circle.remove(getVirtualIndex(node.toString() + i));
@@ -76,7 +69,7 @@ public class ConsistentHashAlgorithm<T> {
      * @param key 为给定键取Hash，取得顺时针方向上最近的一个虚拟节点对应的实际节点
      * @return
      */
-    public T get(Object key) {
+    public T get(Object key) throws NoSuchAlgorithmException {
         if (circle.isEmpty()) {
             return null;
         }

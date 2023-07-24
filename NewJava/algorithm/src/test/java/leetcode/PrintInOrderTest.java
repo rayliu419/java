@@ -1,11 +1,7 @@
 package leetcode;
 
-import leetcode.PrintInOrder;
+import thread.PrintInOrder;
 import org.junit.Test;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
 
 public class PrintInOrderTest {
 
