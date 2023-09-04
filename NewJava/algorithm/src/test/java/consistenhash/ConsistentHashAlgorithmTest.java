@@ -2,6 +2,7 @@ package consistenhash;
 
 import org.junit.Test;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -13,7 +14,7 @@ public class ConsistentHashAlgorithmTest {
      *
      */
     @Test
-    public void testConsistentHashAlgorithm() {
+    public void testConsistentHashAlgorithm() throws NoSuchAlgorithmException {
         Node node1 = new Node(1, "A");
         Node node2 = new Node(2, "B");
         ConsistentHashAlgorithm<Node> consistentHashAlgorithm = new ConsistentHashAlgorithm();

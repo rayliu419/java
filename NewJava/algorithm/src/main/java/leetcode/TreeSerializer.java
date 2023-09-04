@@ -8,11 +8,10 @@ import java.util.Queue;
 /**
  * 树的序列化
  * 有几种不同的序列化方式：
- *     前序树序列化
- *     后序序列化
- *     层次序列化
- *     中序序列化是不行的，因为中序对于两种树的序列化一样，反序列化时区分不了。
- *
+ * 前序树序列化
+ * 后序序列化
+ * 层次序列化
+ * 中序序列化是不行的，因为中序对于两种树的序列化一样，反序列化时区分不了。
  */
 public class TreeSerializer {
 
@@ -21,6 +20,7 @@ public class TreeSerializer {
      */
     class Counter {
         int index;
+
         public Counter() {
             index = 0;
         }
@@ -36,6 +36,13 @@ public class TreeSerializer {
         return sb.toString();
     }
 
+    /**
+     * 这种序列化方式对于一个单根的，会多打印一层。
+     * 30 -> [30, #, #]，不过好像也没什么事情
+     *
+     * @param sb
+     * @param node
+     */
     private void doPreOrderSerialize(StringBuilder sb, TreeNode node) {
         if (node == null) {
             sb.append(EMPTY);
@@ -80,34 +87,38 @@ public class TreeSerializer {
         return node;
     }
 
-    public static void testPreOrderSerialize() {
+    public void testPreOrderSerialize() {
         TreeSerializer treeSerializer = new TreeSerializer();
 //                  30
 //                /     \
 //              10      20
 //            /        /  \
 //          50        45    35
-        TreeNode treeNode50 = new TreeNode(50, null, null);
-        TreeNode treeNode45 = new TreeNode(45, null, null);
-        TreeNode treeNode35 = new TreeNode(35, null, null);
-        TreeNode treeNode10 = new TreeNode(10, treeNode50, null);
-        TreeNode treeNode20 = new TreeNode(20, treeNode45, treeNode35);
-        TreeNode treeNode30 = new TreeNode(30, treeNode10, treeNode20);
-        String result = treeSerializer.preOrderSerialize(treeNode30);
+        TreeNode root1 = new TreeNode(30,
+                new TreeNode(10,
+                        new TreeNode(50, null, null),
+                        null),
+                new TreeNode(20,
+                        new TreeNode(45, null, null),
+                        new TreeNode(35, null, null))
+        );
+        String result = treeSerializer.preOrderSerialize(root1);
         System.out.println(result);
-        // [30 10 50 # # # 20 45 # # 35 # #]
-
         TreeNode root = treeSerializer.preOrderDeserialize(result);
         System.out.println(root.val);
+
+        TreeNode root2 = new TreeNode(30, null, null);
+        System.out.println(treeSerializer.preOrderSerialize(root2));
+
     }
 
 
     /**
-     *            1
-     *         2    3
-     *      4
-     *
-     *  [1, 2, 3, 4, #, #, #] 当前我的方式
+     * 1
+     * 2    3
+     * 4
+     * <p>
+     * [1, 2, 3, 4, #, #, #] 当前我的方式
      *
      * @param node
      * @return
@@ -186,6 +197,6 @@ public class TreeSerializer {
 
 
     public static void main(String[] args) {
-
+        new TreeSerializer().testPreOrderSerialize();
     }
 }

@@ -18,11 +18,11 @@ public class Sort {
     }
 
     /**
-     *
-     *  这是个最简洁的写法
-     *  1. 初始i = low - 1
+     *  1. 初始i = low - 1，i表示现在小于pivot的
      *  2. for循环从[low, high)
-     *  3. 先i++
+     *  3. 先i++，给交换腾出位置;
+     *  这是个最简洁且精妙的写法，尤其是初始i=low-1的赋值，和后续先i++，再交换的写法
+     *
      * @param nums
      * @param low
      * @param high
