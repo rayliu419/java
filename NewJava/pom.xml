@@ -31,6 +31,7 @@
         <module>annotation</module>
         <module>concurrency</module>
         <module>compiler</module>
+        <module>engineering</module>
     </modules>
     <groupId>org.example</groupId>
     <artifactId>NewJava</artifactId>
