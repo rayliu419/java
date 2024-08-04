@@ -31,7 +31,7 @@
         <module>annotation</module>
         <module>concurrency</module>
         <module>compiler</module>
-        <module>engineering</module>
+        <module>codeanalyzer</module>
     </modules>
     <groupId>org.example</groupId>
     <artifactId>NewJava</artifactId>
@@ -131,5 +131,24 @@
             <artifactId>antlr4-runtime</artifactId>
             <version>4.7.2</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.sonarsource.api.plugin</groupId>
+            <artifactId>sonar-plugin-api</artifactId>
+            <version>10.1.0.809</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.sonarsource.sonarqube</groupId>
+            <artifactId>sonar-plugin-api-impl</artifactId>
+            <version>10.1.0.73491</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.sonarsource.java</groupId>
+            <artifactId>java-frontend</artifactId>
+            <version>8.1.0.36477</version>
+        </dependency>
+
     </dependencies>
 </project>
