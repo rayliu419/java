@@ -1,6 +1,6 @@
 package org.example;
 
-import org.apache.commons.io.input.TeeInputStream;
+import com.google.common.collect.Lists;
 import org.sonar.java.model.JParser;
 import org.sonar.java.model.JParserConfig;
 import org.sonar.java.model.JavaTree;
@@ -65,6 +65,7 @@ public class ComplicatedAST {
             case CLASS: {
                 // 最复杂的Tree
                 printClassInformation(node);
+                return;
             }
         }
         /**
@@ -107,14 +108,14 @@ public class ComplicatedAST {
         ExpressionTree expressionTree = packageDeclarationTree.packageName();
         MemberSelectExpressionTree memberSelectExpressionTree = (MemberSelectExpressionTree)expressionTree;
         // 按照帮助文档，MemberSelectExpressionTree.expressionTree是前缀，MemberSelectExpressionTree.identifier是后缀，所以拼起来就是包名
-        String pkgName = getPackageNameOrImportName(memberSelectExpressionTree);
+        String pkgName = processExpressionTree(memberSelectExpressionTree);
         System.out.println("package name - " + pkgName);
     }
 
     private static void printImportInformation(Tree node) {
         ImportTree importTree = (ImportTree)node;
         MemberSelectExpressionTree memberSelectExpressionTree = (MemberSelectExpressionTree)importTree.qualifiedIdentifier();
-        String importLibName = getPackageNameOrImportName(memberSelectExpressionTree);
+        String importLibName = processExpressionTree(memberSelectExpressionTree);
         String staticImport = importTree.isStatic() ? "static " : "";
         System.out.println(staticImport + "import lib - " + importLibName);
     }
@@ -127,12 +128,12 @@ public class ComplicatedAST {
      * 其他情况可能更复杂
      * @return
      */
-    private static String getPackageNameOrImportName(MemberSelectExpressionTree memberSelectExpressionTree) {
+    private static String processExpressionTree(MemberSelectExpressionTree memberSelectExpressionTree) {
         ExpressionTree expressionTree = memberSelectExpressionTree.expression();
         if (expressionTree instanceof IdentifierTree) {
             return ((IdentifierTree) expressionTree).name() + "." + memberSelectExpressionTree.identifier().name();
         } else {
-            return getPackageNameOrImportName((MemberSelectExpressionTree) memberSelectExpressionTree.expression())
+            return processExpressionTree((MemberSelectExpressionTree) memberSelectExpressionTree.expression())
                     + "." + memberSelectExpressionTree.identifier().name();
         }
     }
@@ -148,14 +149,100 @@ public class ComplicatedAST {
                 printVariableInformation(member);
             } else if (member instanceof MethodTree) {
                 // 函数
+                printMethodInformation(member);
             }
         }
     }
 
+    /**
+     * 处理变量的相关信息方面，这种方式比用Java反射要麻烦太多了。
+     *
+     * @param node
+     */
     private static void printVariableInformation(Tree node) {
         VariableTree variableTree = (VariableTree) node;
-        String fieldName = variableTree.simpleName().name();
-        String fieldType = variableTree.type().toString();
-        System.out.println("fieldName - " + fieldName + " fieldType - " + fieldType);
+        String name = variableTree.simpleName().name();
+        System.out.println("name - " + name);
+        processTypeTree(variableTree.type());
     }
+
+    private static void processTypeTree(TypeTree typeTree) {
+        if (typeTree instanceof ParameterizedTypeTree) {
+            ParameterizedTypeTree parameterizedType = (ParameterizedTypeTree) typeTree;
+            System.out.println("Parameterized Type: " + parameterizedType.type());
+            for (TypeTree typeArgument : parameterizedType.typeArguments()) {
+                // 递归处理泛型参数
+                processTypeTree(typeArgument);
+            }
+        } else if (typeTree instanceof ArrayTypeTree) {
+            ArrayTypeTree arrayType = (ArrayTypeTree) typeTree;
+            System.out.println("Array Type: " + arrayType.type());
+            // 递归处理数组基础类型
+            processTypeTree(arrayType.type());
+        } else if (typeTree instanceof IdentifierTree) {
+            IdentifierTree identifier = (IdentifierTree) typeTree;
+            System.out.println("Identifier: " + identifier.name());
+        } else {
+            System.out.println("Other Type: " + typeTree);
+        }
+    }
+
+    /**
+     * 真正可能有更大作用的是根据函数分析
+     * @param node
+     */
+    private static void printMethodInformation(Tree node) {
+        MethodTree methodTree = (MethodTree) node;
+        BlockTree blockTree = methodTree.block();
+        if (blockTree == null) return;
+        processBlockTree(blockTree);
+    }
+
+    private static void processBlockTree(BlockTree blockTree) {
+        System.out.println("Processing a block...");
+        for (StatementTree statement : blockTree.body()) {
+            if (statement instanceof BlockTree) {
+                processBlockTree((BlockTree) statement); // 递归处理嵌套的块
+            } else {
+                System.out.println("Processing statement: " + statement);
+                if (statement instanceof ForStatementTree) {
+                    processForStatementTree((ForStatementTree) statement);
+                } else {
+                    //
+                }
+            }
+        }
+        System.out.println("End of block.");
+    }
+
+    //TODO
+    private static void processForStatementTree(ForStatementTree forStatementTree) {
+        System.out.println("Processing ForStatementTree");
+    }
+
+    /**
+     * TODO:
+     * 直接将某些树过滤出来，例如过滤出来MethodTree。
+     * 直接遍历来过滤子树吗？
+     */
+    private List<Tree> filterMethodTree(Tree node) {
+        List<Tree> result = Lists.newArrayList();
+        filterMethodTree(node, result);
+        return result;
+    }
+
+    private void filterMethodTree(Tree node, List<Tree> result) {
+        JavaTree cur = (JavaTree) node;
+        if (cur.isLeaf()) {
+            return;
+        }
+        if (node instanceof MethodTree) {
+            result.add(node);
+        }
+        List<Tree> children = cur.getChildren();
+        for (Tree tree: children) {
+            filterMethodTree(tree, result);
+        }
+    }
+
 }

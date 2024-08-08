@@ -18,7 +18,7 @@ class ComplicatedSample {
 
     ComplicatedSample() {
         this.objectList = new List<Object>();
-        this.objectDeque = new ArrayDeque<>();
+        this.stringDeque = new ArrayDeque<>();
     }
 
     private void forLoopFunction() {
