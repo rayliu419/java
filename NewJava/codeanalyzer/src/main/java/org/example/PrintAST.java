@@ -21,11 +21,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class PrintAST {
 
     public static void main(String[] args) throws IOException {
-//        for (String fileName : args) {
-//            System.out.println("=== " + fileName + " ===");
-//            CompilationUnitTree ast = parseJava(Path.of(fileName));
-//            System.out.println(renderAST(ast));
-//        }
         CompilationUnitTree ast = parseJava(Path.of
                 ("/Users/liurui/workspace/java/NewJava/codeanalyzer/src/main/resources/Sample.java"));
         System.out.println(renderAST(ast));
