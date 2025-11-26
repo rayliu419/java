@@ -25,4 +25,15 @@ public class ListNode {
         }
         System.out.print("null");
     }
+
+    public static ListNode buildList(int[] a) {
+        ListNode head = new ListNode(a[0]);
+        ListNode cur = head;
+        for (int i = 1; i < a.length; i++) {
+            ListNode newNode = new ListNode(a[i]);
+            cur.next = newNode;
+            cur = cur.next;
+        }
+        return head;
+    }
 }

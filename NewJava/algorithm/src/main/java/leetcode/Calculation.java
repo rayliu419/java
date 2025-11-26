@@ -28,7 +28,6 @@ public class Calculation {
         curResult += sign * num;
         return curResult;
     }
-    
 
     /**
      * TODO: 依然不熟练，还需要单独练习。这里对curResult和num的赋值的时机有点模糊。
