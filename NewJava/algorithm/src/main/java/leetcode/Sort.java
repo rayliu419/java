@@ -58,10 +58,10 @@ public class Sort {
     public static void main(String[] args) {
         int[] array = new int[]{3, 2, 1};
         new Sort().quickSort(array);
-        Arrays.stream(array).forEach(e -> System.out.println(e));
+        Arrays.stream(array).forEach(System.out::println);
 
         int[] array2 = new int[]{3, 2, 1, 4};
         new Sort().quickSort(array2);
-        Arrays.stream(array2).forEach(e -> System.out.println(e));
+        Arrays.stream(array2).forEach(System.out::println);
     }
 }
