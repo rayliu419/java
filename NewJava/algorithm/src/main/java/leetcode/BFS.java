@@ -87,6 +87,7 @@ public class BFS {
 
     /**
      * Leetcode: <a href="https://leetcode.com/problems/longest-increasing-path-in-a-matrix/description/?envType=problem-list-v2&envId=breadth-first-search">Longest Increasing Path in a Matrix</a>
+     * TODO: 这种题目用BFS做，visited矩阵的作用是不一样的!!!!
      */
     static class LongestIncreasePath {
 
@@ -124,6 +125,18 @@ public class BFS {
                     int nextJ = cur[1] + direction[1];
                     // TODO: visited[nextI][nextJ] = 1; wrong to set here, why?
                     // Important!!
+                    // visited 到底应该代表什么？
+                    // visited 的作用不是“这个格子我看过一眼”
+                    // 这个格子已经通过一条严格递增路径被加入过队列（将要或已经被层序访问）
+                    /**
+                     * 考虑测试测试矩阵：     {9, 9, 4},
+                     *                     {6, 6, 8},
+                     *                     {2, 1, 1}
+                     * 在从i = 2, j = 1 位置探索时，i = 1, j = 0的6位置：
+                     * 1->2->6->9 的路线会因为 前一条探索路线 1->6->6 打断。
+                     * 可以认为在同一层探索时，必须得使用才能设置visited。
+                     * 即使只有一条路线被探索，最终结果也可以得到保存。
+                     */
                     if (isValidPos(nextI, nextJ, visited, matrix)) {
                         if (matrix[nextI][nextJ] > curValue) {
                             nextLevel.add(new int[]{nextI, nextJ});
