@@ -32,6 +32,7 @@
         <module>concurrency</module>
         <module>compiler</module>
         <module>codeanalyzer</module>
+        <module>engineering</module>
     </modules>
     <groupId>org.example</groupId>
     <artifactId>NewJava</artifactId>
