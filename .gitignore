@@ -1,3 +1,7 @@
 *.class
 *.xml
 *target
+*.classpath
+*.settings
+*.project
+*.factorypath

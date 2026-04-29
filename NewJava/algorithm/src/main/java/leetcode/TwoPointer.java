@@ -6,6 +6,35 @@ import java.util.List;
 
 public class TwoPointer {
 
+    public int maxArea(int[] height) {
+        // 两个指针从最左和最右开始，是因为宽度越大面积潜力越大。
+        // 从最宽开始，然后逐步缩小宽度，每次只移动短板，
+        // 确保不会遗漏可能更大的面积。
+        int i = 0, j = height.length - 1, max = 0;
+        while (i < j) {
+            // 考虑能形成解的i, j位置。
+            int area = Math.min(height[i], height[j]) * (j - i);
+            max = Math.max(max, area);
+            // 面积由短板决定，移动长板不可能得到更大面积：
+            //   - 宽度 (j-i) 减小
+            //   - 新高度 ≤ 原短板高度
+            // 所以只移动短板（或相等时同时移动）
+            if (height[i] == height[j]) {
+                // 两边都是短板，i 和 j 都不可能参与构造更大面积
+                i++;
+                j--;
+            } else if (height[i] < height[j]) {
+                // 短板在左，移动 i 才有可能遇到更高的柱子
+                // 其实这里可以进一步优化，即可以一直向有边走，直到遇到比当前的柱子还高的才有机会形成更优解，但是这种写法不如这种不优化的整洁
+                i++;
+            } else {
+                // 短板在右，移动 j
+                j--;
+            }
+        }
+        return max;
+    }
+
     public List<List<Integer>> threeSum(int[] nums) {
         List<List<Integer>> ans = new ArrayList<>();
         Arrays.sort(nums);
