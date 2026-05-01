@@ -111,4 +111,81 @@ public class TwoPointerTest {
     public void testThreeSumArrayTooShort() {
         assertTrue(twoPointer.threeSum(new int[]{1, 2}).isEmpty());
     }
+
+    // ----- findContentChildren test cases -----
+
+    @Test
+    public void testFindContentChildrenExample1() {
+        assertEquals(1, twoPointer.findContentChildren(new int[]{1, 2, 3}, new int[]{1, 1}));
+    }
+
+    @Test
+    public void testFindContentChildrenExample2() {
+        assertEquals(2, twoPointer.findContentChildren(new int[]{1, 2}, new int[]{1, 2, 3}));
+    }
+
+    @Test
+    public void testFindContentChildrenNoChildSatisfied() {
+        assertEquals(0, twoPointer.findContentChildren(new int[]{2, 3}, new int[]{1, 1}));
+    }
+
+    @Test
+    public void testFindContentChildrenAllSatisfied() {
+        assertEquals(2, twoPointer.findContentChildren(new int[]{1, 2}, new int[]{2, 3}));
+    }
+
+    @Test
+    public void testFindContentChildrenEmptyChildren() {
+        assertEquals(0, twoPointer.findContentChildren(new int[]{}, new int[]{1, 2, 3}));
+    }
+
+    @Test
+    public void testFindContentChildrenEmptyCookies() {
+        assertEquals(0, twoPointer.findContentChildren(new int[]{1, 2}, new int[]{}));
+    }
+
+    @Test
+    public void testFindContentChildrenBothEmpty() {
+        assertEquals(0, twoPointer.findContentChildren(new int[]{}, new int[]{}));
+    }
+
+    @Test
+    public void testFindContentChildrenSameGreed() {
+        assertEquals(2, twoPointer.findContentChildren(new int[]{2, 2, 2}, new int[]{1, 2, 3}));
+    }
+
+    @Test
+    public void testFindContentChildrenSingleMatch() {
+        assertEquals(1, twoPointer.findContentChildren(new int[]{5}, new int[]{5}));
+    }
+
+    @Test
+    public void testFindContentChildrenSingleTooSmall() {
+        assertEquals(0, twoPointer.findContentChildren(new int[]{5}, new int[]{1}));
+    }
+
+    @Test
+    public void testFindContentChildrenAllCookiesMatch() {
+        assertEquals(3, twoPointer.findContentChildren(new int[]{1, 1, 1}, new int[]{1, 1, 1}));
+    }
+
+    @Test
+    public void testFindContentChildrenGreedTooHigh() {
+        assertEquals(0, twoPointer.findContentChildren(new int[]{10, 10, 10}, new int[]{1, 2, 3}));
+    }
+
+    @Test
+    public void testFindContentChildrenUnsortedInput() {
+        assertEquals(3, twoPointer.findContentChildren(new int[]{3, 1, 2}, new int[]{2, 3, 1}));
+    }
+
+    @Test
+    public void testFindContentChildrenMoreCookiesThanNeeded() {
+        assertEquals(3, twoPointer.findContentChildren(new int[]{1, 2, 3}, new int[]{1, 2, 3, 4, 5}));
+    }
+
+    @Test
+    public void testFindContentChildrenPartialMatch() {
+        assertEquals(2, twoPointer.findContentChildren(new int[]{1, 2, 5, 6}, new int[]{2, 3, 4}));
+    }
 }

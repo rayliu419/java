@@ -2,8 +2,6 @@ package leetcode;
 
 import org.junit.Test;
 
-import java.util.List;
-
 import static leetcode.ListNode.printList;
 
 public class LinkListTest {

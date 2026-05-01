@@ -26,6 +26,7 @@ public class TwoPointer {
             } else if (height[i] < height[j]) {
                 // 短板在左，移动 i 才有可能遇到更高的柱子
                 // 其实这里可以进一步优化，即可以一直向有边走，直到遇到比当前的柱子还高的才有机会形成更优解，但是这种写法不如这种不优化的整洁
+                // 优化的方法其实也应该会，因为老是会有类似在循环里也多次移动的，主要是内部移动的，容易造成死循环。
                 i++;
             } else {
                 // 短板在右，移动 j
@@ -69,5 +70,46 @@ public class TwoPointer {
             }
         }
         return ans;
+    }
+
+    public int findContentChildren(int[] children, int[] cookies) {
+        Arrays.sort(children);
+        Arrays.sort(cookies);
+        int i = 0, j = 0;
+        while (i < children.length && j < cookies.length) {
+            if (cookies[j] >= children[i]) {
+                i++;
+            }
+            j++;
+        }
+        return i;
+    }
+
+    /**
+     * https://leetcode.com/problems/backspace-string-compare
+     * @param s
+     * @param t
+     * @return
+     */
+    public boolean backspaceCompare(String s, String t) {
+        String trimS = simplify(s);
+        String trimT = simplify(t);
+        return trimS.equals(trimT);
+    }
+
+    private String simplify(String s) {
+        int i = s.length() - 1;
+        StringBuilder sb = new StringBuilder();
+        int skip = 0;
+        while (i >= 0) {
+            if (s.charAt(i) == '#') {
+                skip++;
+            } else {
+                if (skip != 0) skip--;
+                else sb.append(s.charAt(i));
+            }
+            i--;
+        }
+        return sb.reverse().toString();
     }
 }
