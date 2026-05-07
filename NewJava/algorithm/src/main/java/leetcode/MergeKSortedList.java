@@ -49,11 +49,10 @@ public class MergeKSortedList {
         }
         while (!pq.isEmpty()) {
             Node cur = pq.poll();
-            Node next = cur.next;
-            if (next != null) {
-                pq.add(next);
+            result.add(cur.value);
+            if (cur.next != null) {
+                pq.add(cur.next);
             }
-            pq.add(cur);
         }
         return result;
     }
