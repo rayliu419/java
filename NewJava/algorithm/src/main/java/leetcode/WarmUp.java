@@ -1,7 +1,7 @@
 package leetcode;
 
 // https://leetcode.com/problems/final-value-of-variable-after-performing-operations/
-public class Operations {
+public class WarmUp {
 
     public int finalValueAfterOperations(String[] operations) {
         int count = 0;
@@ -28,10 +28,10 @@ public class Operations {
         String[] case2 = new String[]{"++X","++X","X++"};
         String[] case3 = new String[]{"X++","++X","--X","X--"};
 
-        Operations operations = new Operations();
-        System.out.println(operations.finalValueAfterOperations(case1));
-        System.out.println(operations.finalValueAfterOperations(case2));
-        System.out.println(operations.finalValueAfterOperations(case3));
+        WarmUp warmUp = new WarmUp();
+        System.out.println(warmUp.finalValueAfterOperations(case1));
+        System.out.println(warmUp.finalValueAfterOperations(case2));
+        System.out.println(warmUp.finalValueAfterOperations(case3));
 
     }
 

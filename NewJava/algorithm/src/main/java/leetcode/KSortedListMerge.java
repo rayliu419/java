@@ -15,7 +15,7 @@ import java.util.PriorityQueue;
  * #2, #3还可以采用二分法来找，其中#2其实有点类似于快排分治中用的查找第k大的数
  *
  */
-public class MergeKSortedList {
+public class KSortedListMerge {
 
     public static class Node {
 
