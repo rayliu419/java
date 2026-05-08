@@ -1,8 +1,104 @@
 package leetcode;
 
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Deque;
 import java.util.Stack;
 
-public class StackAlgorithm {
+public class StackS {
+
+    /**
+     * <a href="https://leetcode.cn/problems/next-greater-element-i">...</a>
+     *
+     * 题目：在一个无序数组中，找出每个元素右边第一个比它大的元素，不存在则返回 -1。
+     *
+     * 思路分析：
+     * 暴力解法是 O(n²) —— 每个元素都向右扫描找到第一个更大值。
+     * 单调栈优化到 O(n) 的核心是：利用"元素之间的大小关系"及时丢弃不可能成为答案的候选者。
+     *
+     * 从左到右遍历，维护一个栈底到栈顶单调递减的栈（存下标）：
+     * - 当前元素 nums[i] 比栈顶大 → 栈顶找到了它的下一个更大元素，出栈
+     * - 当前元素 nums[i] 比栈顶小或等于 → 入栈（成为新的候选）
+     * - 遍历结束后栈中剩余元素 → 无下一个更大元素，返回 -1
+     *
+     * 为什么能丢弃？因为当 nums[stack.peek()] < nums[i] 时，
+     * 这个栈顶元素已经被 nums[i]"挡住"了，它右边的元素即使更大也不可能是"第一个"更大，
+     * 而且 nums[i] 比它大且更靠右，对再左边的元素来说也更有资格成为候选。
+     * 每出栈一个元素，它的答案就确定了 —— 这就是单调栈"及时结算"的思想。
+     *
+     * 时间复杂度 O(n)，空间复杂度 O(n)
+     */
+    public static int[] nextGreaterElement(int[] nums) {
+        int n = nums.length;
+        int[] result = new int[n];
+        // 初始化为 -1，栈中剩余元素无需再处理
+        Arrays.fill(result, -1);
+        // 单调递减栈，存下标
+        Deque<Integer> stack = new ArrayDeque<>();
+
+        for (int i = 0; i < n; i++) {
+            // 当前元素比栈顶大 → 栈顶找到了下一个更大元素
+            while (!stack.isEmpty() && nums[stack.peek()] < nums[i]) {
+                result[stack.pop()] = nums[i];
+            }
+            stack.push(i);
+        }
+
+        return result;
+    }
+
+    /**
+     * <a href="https://leetcode.cn/problems/trapping-rain-water/">接雨水</a>
+     *
+     * 题目：给定 n 个非负整数表示每个宽度为 1 的柱子的高度图，计算下雨后能接多少雨水。
+     *
+     * 思路分析（单调栈 + 逆序对视角）：
+     * 接雨水本质上是在找"凹槽"——两侧高、中间低的结构。
+     * 用单调递减栈来维护可能的左墙壁。当遇到 height[i] > height[stack.peek()] 时，
+     * 形成了一个逆序对（当前 > 栈顶，但栈是递减的预期），这说明出现了凹槽的右壁。
+     *
+     * 具体过程：
+     * - 栈中存下标，高度从栈底到栈顶递减
+     * - 遍历到 i 时，如果 height[i] > height[stack.peek()]：
+     *   1. pop 出栈顶作为"底部"
+     *   2. 如果栈空了 → 没有左壁，盛不了水，跳出
+     *   3. 新的栈顶就是左壁，i 是右壁
+     *   4. 积水 = (min(height[左壁], height[i]) - height[底部]) × (i - 左壁 - 1)
+     * - 注意这里是 height[i] > height[stack.peek()]（严格大于），
+     *   因为高度相等时不会形成能蓄水的凹槽
+     *
+     * 与柱状图最大矩形的区别：
+     * - 柱状图最大矩形：找左右第一个更矮的（递增栈，逆序对触发结算）
+     * - 接雨水：找左右第一个更高的（递减栈，逆序对形成凹槽）
+     * - 矩形结算的是栈顶自身高度；雨水结算的是栈顶被 pop 后的左右壁形成的"水坑"
+     *
+     * 时间复杂度 O(n)，空间复杂度 O(n)
+     */
+    public static int trap(int[] height) {
+        int n = height.length;
+        Deque<Integer> stack = new ArrayDeque<>();
+        int totalWater = 0;
+
+        for (int i = 0; i < n; i++) {
+            while (!stack.isEmpty() && height[stack.peek()] < height[i]) {
+                // 弹出底部（凹槽最低处）
+                int bottom = stack.pop();
+                if (stack.isEmpty()) {
+                    // 没有左壁，无法形成凹槽
+                    break;
+                }
+                int left = stack.peek();
+                // 积水高度 = min(左壁, 右壁) - 底部
+                int h = Math.min(height[left], height[i]) - height[bottom];
+                // 积水宽度 = 距离 - 1
+                int w = i - left - 1;
+                totalWater += h * w;
+            }
+            stack.push(i);
+        }
+
+        return totalWater;
+    }
 
     /**
      * https://leetcode.com/problems/basic-calculator-ii/
@@ -100,7 +196,7 @@ public class StackAlgorithm {
         int curNum = 0;
         // 没有*/，所以用sign表示正负，其实作用类似lastOp
         int sign = 1;
-        Stack<Integer> stack = new Stack<>();
+        Stack<Integer> stack = new Stack();
         for (int i = 0; i < s.length(); i++) {
             /**
              * 遇到的字符只有两类：
