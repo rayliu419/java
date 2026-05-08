@@ -1,5 +1,7 @@
 package leetcode;
 
+import infra.TreeNode;
+
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;

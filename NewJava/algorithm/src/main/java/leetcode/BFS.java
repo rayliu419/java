@@ -1,89 +1,46 @@
 package leetcode;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
+import infra.TreeNode;
+
+import java.util.*;
 
 public class BFS {
 
-    static class TreeNode {
-        int val;
-        TreeNode left;
-        TreeNode right;
-
-        TreeNode() {
-        }
-
-        TreeNode(int val) {
-            this.val = val;
-        }
-
-        TreeNode(int val, TreeNode left, TreeNode right) {
-            this.val = val;
-            this.left = left;
-            this.right = right;
-        }
-
-        public static TreeNode buildTree(Integer[] values) {
-            if (values == null || values.length == 0) {
-                return null;
-            }
-            return buildTree(values, 0);
-        }
-
-        private static TreeNode buildTree(Integer[] values, int index) {
-            if (index >= values.length || values[index] == null) {
-                return null;
-            }
-            TreeNode node = new TreeNode(values[index]);
-            node.left = buildTree(values, index * 2 + 1);
-            node.right = buildTree(values, index * 2 + 2);
-            return node;
-        }
-
-    }
-
     /**
-     * LeetCode: <a href="https://leetcode.com/problems/find-largest-value-in-each-tree-row/?envType=problem-list-v2&envId=breadth-first-search">Find Largest Value in Each Tree Row</a>
+     * 返回每一层的最大值。基础题
+     * @param root
+     * @return
      */
-    static class FindLargestValues {
-        public static void testLargestValues() {
-            TreeNode root = TreeNode.buildTree(new Integer[]{1, 3, 2, 5, 3, null, 9});
-            List<Integer> result = largestValues(root);
-            result.forEach(System.out::println);
+    public static List<Integer> largestValues(TreeNode root) {
+        if (root == null) {
+            return new ArrayList<>();
         }
-
-        public static List<Integer> largestValues(TreeNode root) {
-            if (root == null) {
-                return new ArrayList<>();
+        Queue<TreeNode> curLevel = new ArrayDeque<>();
+        Queue<TreeNode> nextLevel = new ArrayDeque<>();
+        List<Integer> result = new ArrayList<>();
+        curLevel.offer(root);
+        int maxValue = Integer.MIN_VALUE;
+        while (!curLevel.isEmpty()) {
+            TreeNode cur = curLevel.poll();
+            if (cur.val > maxValue) {
+                maxValue = cur.val;
             }
-            Deque<TreeNode> curLevel = new ArrayDeque<>();
-            Deque<TreeNode> nextLevel = new ArrayDeque<>();
-            List<Integer> result = new ArrayList<>();
-            curLevel.add(root);
-            int maxValue = Integer.MIN_VALUE;
-            while (!curLevel.isEmpty()) {
-                TreeNode cur = curLevel.pop();
-                if (cur.val > maxValue) {
-                    maxValue = cur.val;
-                }
-                if (cur.left != null) {
-                    nextLevel.add(cur.left);
-                }
-                if (cur.right != null) {
-                    nextLevel.add(cur.right);
-                }
-                if (curLevel.isEmpty()) {
-                    result.add(maxValue);
-                    maxValue = Integer.MIN_VALUE;
-                    curLevel.addAll(nextLevel);
-                    nextLevel.clear();
-                }
+            if (cur.left != null) {
+                nextLevel.offer(cur.left);
             }
-            return result;
+            if (cur.right != null) {
+                nextLevel.offer(cur.right);
+            }
+            if (curLevel.isEmpty()) {
+                result.add(maxValue);
+                maxValue = Integer.MIN_VALUE;
+                curLevel.addAll(nextLevel);
+                nextLevel.clear();
+            }
         }
+        return result;
     }
+
 
     /**
      * Leetcode: <a href="https://leetcode.com/problems/longest-increasing-path-in-a-matrix/description/?envType=problem-list-v2&envId=breadth-first-search">Longest Increasing Path in a Matrix</a>
@@ -174,7 +131,7 @@ public class BFS {
             }));
 
             System.out.println(longestIncreasingPath(new int[][]{
-                    {3,4,5},{3,2,6},{2,2,1}
+                    {3, 4, 5}, {3, 2, 6}, {2, 2, 1}
             }));
         }
 

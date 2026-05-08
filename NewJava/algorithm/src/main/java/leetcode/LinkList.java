@@ -1,6 +1,8 @@
 package leetcode;
 
-import static leetcode.ListNode.buildList;
+import infra.ListNode;
+
+import static infra.ListNode.buildList;
 
 public class LinkList {
 

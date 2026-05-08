@@ -1,8 +1,9 @@
 package leetcode;
 
+import infra.ListNode;
 import org.junit.Test;
 
-import static leetcode.ListNode.printList;
+import static infra.ListNode.printList;
 
 public class LinkListTest {
 
