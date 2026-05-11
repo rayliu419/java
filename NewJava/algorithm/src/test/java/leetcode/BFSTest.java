@@ -50,4 +50,68 @@ public class BFSTest {
     public void testLongestIncreasingPathSingleElement() {
         assertEquals(1, BFS.longestIncreasingPath(new int[][]{{1}}));
     }
+
+    @Test
+    public void testOrangesRottingExample1() {
+        assertEquals(4, bfs.orangesRotting(new int[][]{
+                {2, 1, 1},
+                {1, 1, 0},
+                {0, 1, 1}
+        }));
+    }
+
+    @Test
+    public void testOrangesRottingImpossible() {
+        assertEquals(-1, bfs.orangesRotting(new int[][]{
+                {2, 1, 1},
+                {0, 1, 1},
+                {1, 0, 1}
+        }));
+    }
+
+    @Test
+    public void testOrangesRottingNoFresh() {
+        assertEquals(0, bfs.orangesRotting(new int[][]{{0, 2}}));
+    }
+
+    @Test
+    public void testOrangesRottingAllEmpty() {
+        assertEquals(0, bfs.orangesRotting(new int[][]{
+                {0, 0, 0},
+                {0, 0, 0}
+        }));
+    }
+
+    @Test
+    public void testOrangesRottingAllFreshNoRotten() {
+        assertEquals(-1, bfs.orangesRotting(new int[][]{
+                {1, 1, 1},
+                {1, 1, 1}
+        }));
+    }
+
+    @Test
+    public void testOrangesRottingAllRotten() {
+        assertEquals(0, bfs.orangesRotting(new int[][]{
+                {2, 2},
+                {2, 2}
+        }));
+    }
+
+    @Test
+    public void testOrangesRottingSingleStep() {
+        assertEquals(1, bfs.orangesRotting(new int[][]{{2, 1}}));
+    }
+
+    @Test
+    public void testOrangesRottingSingleFresh() {
+        assertEquals(-1, bfs.orangesRotting(new int[][]{{1}}));
+    }
+
+    @Test
+    public void testOrangesRottingDisconnected() {
+        assertEquals(-1, bfs.orangesRotting(new int[][]{
+                {2, 1, 0, 1}
+        }));
+    }
 }
