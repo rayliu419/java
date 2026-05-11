@@ -11,6 +11,7 @@ public class Intervals {
      */
     public static int[][] merge(int[][] intervals) {
         Arrays.sort(intervals, (a, b) -> a[0] - b[0]);
+        // 使用ArrayList可以动态的添加，避免了
         List<int[]> result = new ArrayList<>();
         int[] prev = intervals[0];
         for (int i = 1; i < intervals.length; i++) {
@@ -54,6 +55,52 @@ public class Intervals {
             i++;
         }
         return result.toArray(new int[0][]);
+    }
+
+    /**
+     * Meeting room II
+     *   最小堆思
+     *   堆里存当前所有正在进行的会议的结束时间，堆的大小就是当前同时进行的会议数。
+     *   步骤
+     *   1. 按 start 排序所有会议
+     *   2. 遍历每个会议，把它的 end 加入堆
+     *   3. 每次加入前，先把堆中所有已经结束的会议（end <= 当前 start）弹出
+     *   4. 堆的 size 最大值就是最少会议室数
+     *
+     *   堆顶是最早结束的会议。每次新会议来的时候，只关心最早结束的那个是否已经结束：
+     *   如果最早结束的还没结束（堆顶 > 当前 start），那其他更晚结束的肯定也没结束，不用再看了
+     *   如果最早结束的已经结束了，就把它弹出，直到堆顶的会议还没结束
+     */
+    public static int minMeetingRooms(int[][] meetings) {
+        if (meetings.length == 0) return 0;
+        // [start, end] 中的start 排序
+        Arrays.sort(meetings, new Comparator<int[]>() {
+            @Override
+            public int compare(int[] o1, int[] o2) {
+                return o1[0] - o2[0];
+            }
+        });
+        PriorityQueue<Integer> priorityQueue = new PriorityQueue<>();
+        priorityQueue.add(meetings[0][1]);
+        int min = 1;
+        for (int i = 1; i < meetings.length; i++) {
+            int curStart = meetings[i][0];
+            popUpFinishedMeetings(curStart, priorityQueue);
+            priorityQueue.add(meetings[i][1]);
+            min = Math.max(min, priorityQueue.size());
+        }
+        return min;
+    }
+
+    private static void popUpFinishedMeetings(int start, PriorityQueue<Integer> priorityQueue) {
+        while (!priorityQueue.isEmpty()) {
+            int minEnd = priorityQueue.peek();
+            if (minEnd <= start) {
+                priorityQueue.poll();
+            } else {
+                break;
+            }
+        }
     }
 
     /***

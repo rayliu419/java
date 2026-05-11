@@ -44,12 +44,66 @@ public class MatrixVisit {
         return result;
     }
 
-    public static void main(String[] args) {
-        int[][] matrix = new int[][]{
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9}
-        };
-        List<Integer> result = spiralOrder(matrix);
+    /**
+     * https://leetcode.com/problems/set-matrix-zeroes/description/
+     * in place set row/col zeroes
+     *
+     * 易错点: 第0行和第0列被用作标记区, 遍历标记清零时必须跳过 (j=1/i=1 开始),
+     * 否则 matrix[0][0] 为0时会提前将整列清0, 导致标记区被破坏, 进而误清其他行列.
+     * 第0行/列本身通过 setRowZero/setColZero 标志在最后单独处理.
+     */
+    public void setZeroes(int[][] matrix) {
+        boolean setRowZero = false;
+        boolean setColZero = false;
+        for (int i = 0; i < matrix.length; i++) {
+            if (matrix[i][0] == 0) {
+                setColZero = true;
+            }
+        }
+        for (int j = 0; j < matrix[0].length; j++) {
+            if (matrix[0][j] == 0) {
+                setRowZero = true;
+            }
+        }
+        // 用第一行和第一列标注0 (跳过标记区本身)
+        for (int i = 1; i < matrix.length; i++) {
+            for (int j = 1; j < matrix[0].length; j++) {
+                if (matrix[i][j] == 0) {
+                    matrix[i][0] = 0;
+                    matrix[0][j] = 0;
+                }
+            }
+        }
+        // 根据标记清零, 从1开始避免破坏标记区
+        // IMPORTANT: i/j 必须从1开始。如果从0开始，第一个循环会干扰到第二个循环。
+        // 第0列清0会导致后面的每一行都被清0。
+        for (int j = 1; j < matrix[0].length; j++) {
+            if (matrix[0][j] == 0) {
+                setColZero(matrix, j);
+            }
+        }
+        for (int i = 1; i < matrix.length; i++) {
+            if (matrix[i][0] == 0) {
+                setRowZero(matrix, i);
+            }
+        }
+        if (setRowZero) {
+            setRowZero(matrix, 0);
+        }
+        if (setColZero) {
+            setColZero(matrix, 0);
+        }
+    }
+
+    private static void setRowZero(int[][] matrics, int row) {
+        for (int j = 0; j < matrics[0].length; j++) {
+            matrics[row][j] = 0;
+        }
+    }
+
+    private static void setColZero(int[][] matrics, int col) {
+        for (int i = 0; i < matrics.length; i++) {
+            matrics[i][col] = 0;
+        }
     }
 }

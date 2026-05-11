@@ -115,4 +115,40 @@ public class IntervalsTest {
         int[][] expected = {{2, 5}};
         assertTrue(Arrays.deepEquals(expected, Intervals.insert(input, newInterval)));
     }
+
+    @Test
+    public void testMinMeetingRoomsBasic() {
+        int[][] input = {{0, 30}, {5, 10}, {15, 20}};
+        assertEquals(2, Intervals.minMeetingRooms(input));
+    }
+
+    @Test
+    public void testMinMeetingRoomsNoOverlap() {
+        int[][] input = {{0, 5}, {5, 10}, {10, 15}};
+        assertEquals(1, Intervals.minMeetingRooms(input));
+    }
+
+    @Test
+    public void testMinMeetingRoomsAllOverlap() {
+        int[][] input = {{0, 10}, {1, 9}, {2, 8}};
+        assertEquals(3, Intervals.minMeetingRooms(input));
+    }
+
+    @Test
+    public void testMinMeetingRoomsSingle() {
+        int[][] input = {{1, 5}};
+        assertEquals(1, Intervals.minMeetingRooms(input));
+    }
+
+    @Test
+    public void testMinMeetingRoomsOneAtATime() {
+        int[][] input = {{0, 2}, {2, 4}, {4, 6}};
+        assertEquals(1, Intervals.minMeetingRooms(input));
+    }
+
+    @Test
+    public void testMinMeetingRoomsEmpty() {
+        int[][] input = {};
+        assertEquals(0, Intervals.minMeetingRooms(input));
+    }
 }
