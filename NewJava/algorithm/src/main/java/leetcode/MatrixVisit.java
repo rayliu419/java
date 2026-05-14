@@ -45,6 +45,50 @@ public class MatrixVisit {
     }
 
     /**
+     * https://leetcode.com/problems/transpose-matrix/description/
+     * 矩阵转置，基本题型
+     * 方阵转置，原地置换
+     */
+    public int[][] transpose(int[][] matrix) {
+        int[][] result = new int[matrix[0].length][matrix.length];
+        for (int i = 0; i < matrix.length; i++) {
+            // j = i + 1, 中轴线不用
+            for (int j = 0; j < matrix[0].length; j++) {
+                result[j][i] = matrix[i][j];
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 矩阵旋转 - 转置上的改进
+     *  顺时针90° = 转置 + 每行反转；逆时针 = 转置 + 每列反转
+     */
+    public void rotate(int[][] matrix) {
+        // 方阵转置
+        for(int i = 0; i < matrix.length; i++) {
+            // 注意方阵转置j = i + 1
+            for (int j = i + 1; j < matrix[0].length; j++) {
+                int temp = matrix[i][j];
+                matrix[i][j] = matrix[j][i];
+                matrix[j][i] = temp;
+            }
+        }
+        // 每行里的数组做交换
+        for (int i = 0; i < matrix.length; i++) {
+            int low = 0;
+            int high = matrix[0].length - 1;
+            while (low < high) {
+                int temp = matrix[i][low];
+                matrix[i][low] = matrix[i][high];
+                matrix[i][high] = temp;
+                low++;
+                high--;
+            }
+        }
+    }
+
+    /**
      * https://leetcode.com/problems/set-matrix-zeroes/description/
      * in place set row/col zeroes
      *
