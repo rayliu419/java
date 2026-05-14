@@ -7,8 +7,8 @@ import lombok.Data;
 @AllArgsConstructor
 public class Apple {
 
-    public String color;
+    private String color;
 
-    public Integer weight;
+    private Integer weight;
 
 }

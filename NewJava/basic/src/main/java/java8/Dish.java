@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class Dish {
-    public Integer calorics;
+    private Integer calorics;
 
-    public String type;
+    private String type;
 }
