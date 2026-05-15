@@ -57,6 +57,56 @@ public class ArrayStringOperation {
     }
 
     /**
+     * 反转 int 数组的指定区间 [left, right]
+     */
+    private void reverse(int[] nums, int left, int right) {
+        while (left < right) {
+            int temp = nums[left];
+            nums[left] = nums[right];
+            nums[right] = temp;
+            left++;
+            right--;
+        }
+    }
+
+    /**
+     * https://leetcode.com/problems/rotate-array/
+     *
+     * 将数组右移 k 步。
+     *
+     * 解法一：三次翻转（最优解，O(n) 时间，O(1) 空间）
+     *
+     * 核心洞察：
+     *   右移 k 步就是把末尾 k 个元素（B 段）移到开头，前 n-k 个（A 段）后移，
+     *   相当于把数组从 A|B 变成 B|A。
+     *   利用 reverse 的可逆性：reverse(A+B) = reverse(B) + reverse(A)，
+     *   再分别对两段 reverse 就能恢复内部顺序。
+     *
+     *   以 [1,2,3,4,5,6,7], k=3 为例：
+     *     原始:     [1,2,3,4, 5,6,7]        A = [1,2,3,4], B = [5,6,7]
+     *     ① 整体:   [7,6,5, 4,3,2,1]        reverse(A+B) = reverse(B) + reverse(A)
+     *     ② 前 k:   [5,6,7, 4,3,2,1]        reverse(reverse(B)) = B
+     *     ③ 后 n-k: [5,6,7, 1,2,3,4] ✓      reverse(reverse(A)) = A
+     *
+     * 解法二：额外数组（O(n) 时间，O(n) 空间）
+     *   新数组每个元素放到 (i + k) % n 位置，最直观但占额外空间。
+     *
+     * 解法三：环状替换（O(n) 时间，O(1) 空间）
+     *   从下标 0 开始，把 nums[i] 放到 (i+k)%n，取出目标值继续替换，
+     *   直到回到起点。若一轮没覆盖所有元素（n 和 k 不互质），
+     *   从下一个未处理位置继续。代码容易出 bug，面试不优先。
+     */
+    public void rotate(int[] nums, int k) {
+        int n = nums.length;
+        if (n <= 1) return;
+        k %= n;          // k 可能大于 n，取模归一
+        if (k == 0) return;
+        reverse(nums, 0, n - 1);  // 整体翻转
+        reverse(nums, 0, k - 1);  // 翻转前 k 个
+        reverse(nums, k, n - 1);  // 翻转后 n-k 个
+    }
+
+    /**
      * https://leetcode.com/problems/reverse-words-in-a-string/
      *
      */
