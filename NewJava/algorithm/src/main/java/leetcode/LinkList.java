@@ -2,29 +2,124 @@ package leetcode;
 
 import infra.ListNode;
 
+import java.util.List;
+
 import static infra.ListNode.buildList;
 
 public class LinkList {
 
-
-    public static void testDeleteDuplicates() {
-        int[] a = new int[]{1, 1, 2, 3, 3};
-        ListNode head1 = buildList(a);
-        ListNode result = deleteDuplicates1(head1);
-        ListNode.printList(result);
+    /**
+     * https://leetcode.com/problems/reverse-linked-list/
+     */
+    public ListNode reverseList(ListNode head) {
+        ListNode pre, current, next;
+        pre = null;
+        current = head;
+        while (current != null) {
+            next = current.next;
+            current.next = pre;
+            pre = current;
+            current = next;
+        }
+        return pre;
     }
 
-    public static void main(String[] args) {
-//        testDeleteDuplicates();
-        testDeleteDuplicates2();
+    /**
+     * https://leetcode.com/problems/middle-of-the-linked-list/
+     */
+    public ListNode middleNode(ListNode head) {
+        if (head == null) return null;
+        ListNode slow, fast;
+        slow = fast = head;
+        while (fast!= null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+        }
+        return slow;
     }
 
-    public static void testDeleteDuplicates2() {
-        int[] a = new int[]{1, 1, 2, 3, 3};
-        ListNode head1 = buildList(a);
-        ListNode result = deleteDuplicates2(head1);
-        ListNode.printList(result);
+    /**
+     * https://leetcode.com/problems/merge-two-sorted-lists/
+     */
+    public ListNode mergeTwoLists(ListNode list1, ListNode list2) {
+        ListNode dummy = new ListNode();
+        ListNode cur = dummy;
+        while (list1 != null && list2 != null) {
+            if (list1.val <= list2.val) {
+                cur.next = list1;
+                list1 = list1.next;
+            } else {
+                cur.next = list2;
+                list2 = list2.next;
+            }
+            cur = cur.next;
+        }
+        cur.next = list1 == null ? list2 : list1;
+        return dummy.next;
     }
+
+    /**
+     * https://leetcode.com/problems/linked-list-cycle/
+     * Detect if linked list has a cycle using Floyd's Tortoise and Hare.
+     */
+    public boolean hasCycle(ListNode head) {
+        if (head == null) return false;
+        ListNode slow = head, fast = head;
+        while (fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+            if (slow == fast) return true;
+        }
+        return false;
+    }
+
+    /**
+     * https://leetcode.com/problems/linked-list-cycle-ii/
+     * Find the entry point of the cycle, or null if no cycle.
+     * After slow/fast meet, reset one pointer to head and move both at same speed.
+     * They meet at the cycle entry point.
+     */
+    public ListNode detectCycle(ListNode head) {
+        if (head == null) return null;
+        ListNode slow = head, fast = head;
+        while (fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+            if (slow == fast) {
+                slow = head;
+                while (slow != fast) {
+                    slow = slow.next;
+                    fast = fast.next;
+                }
+                return slow;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * https://leetcode.com/problems/remove-linked-list-elements/
+     *
+     * 可能有连续的val
+     */
+    public ListNode removeElements(ListNode head, int val) {
+        ListNode dummy = new ListNode();
+        ListNode pre = dummy;
+        ListNode cur = head;
+        while (cur != null) {
+            if (cur.val == val) {
+                cur = cur.next;
+            } else {
+                pre.next = cur;
+                pre = cur;
+                cur = cur.next;
+            }
+        }
+        // 非常容易漏掉
+        pre.next = null;
+        return dummy.next;
+    }
+
     /**
      * https://leetcode.com/problems/remove-duplicates-from-sorted-list
      *
@@ -52,71 +147,4 @@ public class LinkList {
         }
         return result;
     }
-
-    /**
-     * https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii
-     * TODO: has bug.
-     * @param head
-     * @return
-     */
-    public static ListNode deleteDuplicates2(ListNode head) {
-        ListNode result = new ListNode(Integer.MIN_VALUE);
-        ListNode finalResult = result;
-        ListNode cur = head;
-        boolean dup = false;
-        while (cur != null) {
-            int val = cur.val;
-            while (cur.next != null && cur.next.val == val) {
-                dup = true;
-                cur = cur.next;
-            }
-            if (!dup) {
-                result.next = cur;
-                result = cur;
-            }
-            // 1. cur.next.val != cur.val -> 下一个cur待判断
-            // 2. cur.next = null. -> 到最后节点
-            cur = cur.next;
-            dup = false;
-        }
-        result.next = null;
-
-        return finalResult.next;
-    }
-
-
-    public ListNode removeElements(ListNode head, int val) {
-        ListNode newHeader = new ListNode();
-        ListNode temp = newHeader;
-        ListNode cur = head;
-        while (cur != null) {
-            if (cur.val != val) {
-                temp.next = cur;
-                temp = cur;
-            }
-            cur = cur.next;
-        }
-        temp.next = null;
-        return newHeader.next;
-    }
-
-    /**
-     * 反转链表
-     *
-     * @param head
-     */
-    public ListNode reverseList(ListNode head) {
-        ListNode temp = new ListNode(Integer.MIN_VALUE, head);
-        ListNode pre = temp;
-        ListNode cur = head;
-        while (cur != null) {
-            ListNode next = cur.next;
-            cur.next = pre;
-            pre = cur;
-            cur = next;
-        }
-        head.next = null;
-        return pre;
-    }
-
 }
