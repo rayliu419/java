@@ -121,30 +121,35 @@ public class LinkList {
     }
 
     /**
-     * https://leetcode.com/problems/remove-duplicates-from-sorted-list
-     *
+     * 此题不熟练，看起来简单，其实不好做。
+     * https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii
+     * remove 有两个题型，一个是重复的保留一个，一个是重复的不保留任何。
+     * 本题是不保留任何
      * @param head
      * @return
      */
-    public static ListNode deleteDuplicates1(ListNode head) {
+    public ListNode deleteDuplicates(ListNode head) {
+        ListNode dummy = new ListNode();
         ListNode cur = head;
-        ListNode result = head;
-        ListNode next = null;
+        ListNode pre = dummy;
+        pre.next = head;
         while (cur != null) {
-            next = cur.next;
-            while (next != null) {
-                if (next.val == cur.val) {
-                    next = next.next;
-                } else {
-                    cur.next = next;
-                    cur = next;
-                }
+            while (cur.next != null && cur.next.val == cur.val) {
+                cur = cur.next;
             }
-            if (next == null) {
-                cur.next = null;
-                break;
+            // 重点在这：
+            if (pre.next == cur) {
+                // pre.next 在循环过程中从未变过
+                // 如果 cur 被移动过（有重复），pre.next != cur
+                // 如果 cur 没被移动过（无重复），pre.next == cur
+                pre.next = cur;
+                pre = cur;
+            } else {
+                pre.next = cur.next;
             }
+            cur = cur.next;
         }
-        return result;
+        pre.next = null;
+        return dummy.next;
     }
 }
