@@ -22,6 +22,7 @@
 | ★★ | 26 | Remove Duplicates from Sorted Array | 🟢 Easy | 快慢指针，慢指针维护不重复区 | ⬜ |
 | ★★ | 283 | Move Zeroes | 🟢 Easy | 快慢指针，非零元素前移 | ⬜ |
 | ★ | 188 | Best Time to Buy and Sell Stock IV | 🔴 Hard | 三维 DP，面试一般不考 | ⬜ |
+| ★ | 962 | Maximum Width Ramp | 🟡 Medium | LMin/RMax 双指针 / 单调栈 | ⬜ |
 
 ## 核心套路
 
@@ -418,3 +419,72 @@ for (int j = 0; j < nums.length; j++) {
 }
 while (i < nums.length) nums[i++] = 0;
 ```
+
+---
+
+### 15. Maximum Width Ramp
+
+| 项目 | 内容 |
+|------|------|
+| 题号 | [962. Maximum Width Ramp](https://leetcode.com/problems/maximum-width-ramp/) |
+| 模式 | LMin/RMax 双指针 / 单调栈 |
+
+**问题：** 找到最大的 `j - i`，使得 `a[j] >= a[i]`。
+
+**双指针解法（推荐面试）：**
+
+1. 预处理两个辅助数组：
+   - `LMin[i]` = `a[0..i]` 的最小值（从左到右递减）
+   - `RMax[j]` = `a[j..n-1]` 的最大值（从右到左递增）
+2. 两个指针分别扫 LMin 和 RMax，贪心扩展 j：
+   - `LMin[i] <= RMax[j]` → 满足条件，更新 max，`j++`（尝试更远的距离）
+   - 否则 → `i++`（需要更小的左边界）
+
+```java
+public int maxWidthRamp(int[] a) {
+    int n = a.length;
+    int[] lMin = new int[n], rMax = new int[n];
+    lMin[0] = a[0];
+    for (int i = 1; i < n; i++) lMin[i] = Math.min(lMin[i - 1], a[i]);
+    rMax[n - 1] = a[n - 1];
+    for (int i = n - 2; i >= 0; i--) rMax[i] = Math.max(rMax[i + 1], a[i]);
+
+    int i = 0, j = 0, max = 0;
+    while (i < n && j < n) {
+        if (lMin[i] <= rMax[j]) {
+            max = Math.max(max, j - i);
+            j++;
+        } else {
+            i++;
+        }
+    }
+    return max;
+}
+```
+
+**单调栈解法（进阶）：**
+
+1. **构建递减栈** — 从左到右遍历，当前值比栈顶对应的值小时入栈（值递减，索引递增）
+2. **反向扫描** — 从右向左遍历 j，弹出栈顶满足 `a[stack.peek()] <= a[j]` 的索引，更新 max
+
+```java
+public int maxWidthRamp(int[] a) {
+    int n = a.length;
+    Deque<Integer> stack = new ArrayDeque<>();
+    for (int i = 0; i < n; i++)
+        if (stack.isEmpty() || a[stack.peek()] > a[i]) stack.push(i);
+    int max = 0;
+    for (int j = n - 1; j >= 0; j--)
+        while (!stack.isEmpty() && a[stack.peek()] <= a[j])
+            max = Math.max(max, j - stack.pop());
+    return max;
+}
+```
+
+**两种解法对比：**
+
+| 维度 | 双指针（LMin/RMax） | 单调栈 |
+|:----|:------------------:|:------:|
+| 空间 | O(n) 辅助数组 | O(n) 栈 |
+| 可读性 | 直白，从暴力演进自然 | 需要理解递减栈 + 反向扫描 |
+| 代码量 | 稍长 | 更短 |
