@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>K Pairs with Smallest Sums — 可视化</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'San Francisco', -apple-system, 'Segoe UI', sans-serif; background: #1a1a2e; color: #e0e0e0; display: flex; justify-content: center; padding: 20px; }
+  .container { max-width: 1100px; width: 100%; }
+  h1 { text-align: center; font-size: 24px; margin-bottom: 4px; color: #fff; }
+  h1 span { color: #f59e0b; }
+  .subtitle { text-align: center; color: #888; font-size: 14px; margin-bottom: 20px; }
+
+  .main-panel { display: flex; gap: 20px; }
+  .left-col { flex: 1; min-width: 0; }
+  .right-col { flex: 0 0 300px; }
+
+  /* Matrix section */
+  .matrix-section { background: #16213e; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+  .matrix-section h2 { font-size: 14px; color: #888; margin-bottom: 8px; }
+  .matrix-wrapper { overflow-x: auto; }
+  .matrix-grid { display: inline-grid; gap: 4px; }
+  .matrix-row { display: contents; }
+  .matrix-label-row, .matrix-label-col { display: flex; align-items: center; justify-content: center; font-weight: 600; color: #888; font-size: 13px; }
+  .matrix-cell { width: 90px; height: 60px; border-radius: 8px; background: #0f3460; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.3s; cursor: default; position: relative; }
+  .matrix-cell .pair { font-size: 13px; font-weight: 600; color: #fff; }
+  .matrix-cell .sum { font-size: 11px; color: #888; margin-top: 2px; }
+  .matrix-cell.in-heap { background: #3730a3; box-shadow: 0 0 12px rgba(124,58,237,0.4); }
+  .matrix-cell.in-heap .pair { color: #c4b5fd; }
+  .matrix-cell.current { background: #f59e0b; transform: scale(1.05); box-shadow: 0 0 16px rgba(245,158,11,0.5); }
+  .matrix-cell.current .pair { color: #fff; }
+  .matrix-cell.current .sum { color: #fef3c7; }
+  .matrix-cell.done { background: #065f46; opacity: 0.7; }
+  .matrix-cell.done .pair { color: #6ee7b7; }
+  .matrix-cell.exhausted { background: #1f2937; opacity: 0.4; }
+  .matrix-cell.exhausted .pair { color: #6b7280; }
+
+  /* Heap section */
+  .heap-section { background: #16213e; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+  .heap-section h2 { font-size: 14px; color: #888; margin-bottom: 8px; }
+  .heap-section h2 span { color: #7c3aed; }
+  .heap-visual { display: flex; flex-wrap: wrap; gap: 6px; min-height: 60px; padding: 10px; border: 2px dashed #2a2a4a; border-radius: 8px; justify-content: center; align-items: center; }
+  .heap-empty { color: #555; font-size: 13px; }
+  .heap-item { padding: 6px 12px; background: linear-gradient(135deg, #7c3aed, #6d28d9); border-radius: 6px; font-weight: 600; font-size: 13px; color: #fff; transition: all 0.3s; text-align: center; }
+  .heap-item .heap-pair { font-size: 11px; opacity: 0.8; }
+  .heap-item.poll { animation: pollAnim 0.4s; }
+  .heap-item.push { animation: pushAnim 0.4s; }
+  @keyframes pollAnim { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.15); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes pushAnim { 0% { transform: translateY(-10px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+
+  /* Result section */
+  .result-section { background: #16213e; border-radius: 12px; padding: 16px; }
+  .result-section h2 { font-size: 14px; color: #888; margin-bottom: 8px; }
+  .result-section h2 span { color: #10b981; }
+  .result-list { display: flex; flex-wrap: wrap; gap: 6px; min-height: 40px; padding: 10px; border: 2px dashed #2a2a4a; border-radius: 8px; justify-content: center; align-items: center; }
+  .result-empty { color: #555; font-size: 13px; }
+  .result-item { padding: 6px 10px; background: #065f46; border-radius: 6px; font-weight: 600; font-size: 13px; color: #6ee7b7; animation: pushAnim 0.4s; }
+
+  /* Explain */
+  .explain { background: #16213e; border-radius: 12px; padding: 16px; margin-top: 16px; min-height: 70px; }
+  .explain .phase { font-size: 12px; color: #7c3aed; font-weight: 600; margin-bottom: 4px; }
+  .explain .action { font-size: 15px; color: #fff; margin-bottom: 4px; }
+  .explain .detail { font-size: 13px; color: #aaa; }
+
+  /* Controls */
+  .controls { display: flex; gap: 10px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+  .controls button { padding: 10px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .controls button:hover { transform: translateY(-1px); }
+  .btn-prev { background: #374151; color: #e0e0e0; }
+  .btn-next { background: #7c3aed; color: #fff; }
+  .btn-reset { background: #374151; color: #e0e0e0; }
+  .btn-auto { background: #047857; color: #fff; }
+  .controls button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .step-counter { text-align: center; font-size: 13px; color: #888; margin-top: 10px; }
+
+  .legend { display: flex; gap: 16px; justify-content: center; margin: 10px 0; font-size: 12px; flex-wrap: wrap; }
+  .legend span { display: flex; align-items: center; gap: 4px; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
+  .legend-heap { background: #3730a3; }
+  .legend-cur { background: #f59e0b; }
+  .legend-done { background: #065f46; }
+  .legend-exhausted { background: #1f2937; }
+
+  .formula { text-align: center; font-size: 13px; color: #888; margin-bottom: 10px; }
+  .formula code { background: #0f3460; padding: 2px 6px; border-radius: 4px; color: #c4b5fd; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>K Pairs with <span>Smallest Sums</span></h1>
+  <p class="subtitle">把问题看作 K 个有序链表合并，观察最小堆取 TopK 的过程</p>
+
+  <div class="legend">
+    <span><span class="legend-dot legend-heap"></span> 在堆中</span>
+    <span><span class="legend-dot legend-cur"></span> 当前 poll</span>
+    <span><span class="legend-dot legend-done"></span> 已选入结果</span>
+    <span><span class="legend-dot legend-exhausted"></span> 该行已耗尽</span>
+  </div>
+
+  <div class="main-panel">
+    <div class="left-col">
+      <div class="matrix-section">
+        <h2>二维矩阵视角 — 每行是一条有序链表</h2>
+        <div class="formula">固定 <code>nums1[i]</code>，遍历 <code>nums2</code>，每行和递增</div>
+        <div class="matrix-wrapper">
+          <div class="matrix-grid" id="matrixGrid"></div>
+        </div>
+      </div>
+      <div class="explain" id="explainPanel">
+        <div class="phase">准备</div>
+        <div class="action">点击"下一步"开始模拟</div>
+        <div class="detail">nums1 = [1, 7, 11], nums2 = [2, 4, 6]，取 k=6 个最小和 pair</div>
+      </div>
+    </div>
+    <div class="right-col">
+      <div class="heap-section">
+        <h2>最小堆 <span>(PriorityQueue)</span></h2>
+        <div class="heap-visual" id="heapVisual">
+          <div class="heap-empty">堆为空</div>
+        </div>
+      </div>
+      <div class="result-section">
+        <h2>结果 <span>result</span></h2>
+        <div class="result-list" id="resultList">
+          <div class="result-empty">暂无结果</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn-prev" id="prevBtn" disabled>← 上一步</button>
+    <button class="btn-next" id="nextBtn">下一步 →</button>
+    <button class="btn-auto" id="autoBtn">▶ 自动播放</button>
+    <button class="btn-reset" id="resetBtn">↺ 重置</button>
+  </div>
+  <div class="step-counter" id="stepCounter">步骤 0 / 0</div>
+</div>
+
+<script>
+const nums1 = [1, 7, 11];
+const nums2 = [2, 4, 6];
+const K = 6;
+
+// Step builder: each step records full state
+function buildSteps() {
+  const steps = [];
+  const heap = []; // elements: { row, col, sum, pair: (n1, n2) }
+  const result = []; // collected pairs
+  const exhausted = new Set(); // exhausted row indices
+  const inHeap = new Set(); // "row,col" strings currently in heap
+
+  function snapshot(action, phase, explanation, detail) {
+    steps.push({
+      action,
+      phase,
+      explanation,
+      detail: detail || '',
+      heap: heap.map(e => ({ ...e })),
+      heapVals: heap.map(e => e.sum),
+      result: [...result],
+      inHeap: new Set(inHeap),
+      exhausted: new Set(exhausted),
+      currentPoll: null
+    });
+  }
+
+  // Step 0: init — push first column
+  for (let r = 0; r < nums1.length; r++) {
+    const el = { row: r, col: 0, sum: nums1[r] + nums2[0], pair: `(${nums1[r]},${nums2[0]})` };
+    heap.push(el);
+    inHeap.add(`${r},0`);
+  }
+  heap.sort((a, b) => a.sum - b.sum); // min-heap invariant
+  steps.push({
+    action: 'init',
+    phase: '初始化',
+    explanation: '所有行的第一列入堆（K 个头）',
+    detail: `每个 nums1[i] + nums2[0] 入堆，共 ${nums1.length} 个元素`,
+    heap: heap.map(e => ({ ...e })),
+    heapVals: heap.map(e => e.sum),
+    result: [],
+    inHeap: new Set(inHeap),
+    exhausted: new Set(),
+    currentPoll: null
+  });
+
+  while (result.length < K && heap.length > 0) {
+    // Poll min
+    heap.sort((a, b) => a.sum - b.sum);
+    const min = heap.shift();
+    inHeap.delete(`${min.row},${min.col}`);
+
+    const polled = { ...min };
+
+    // Step: poll
+    steps.push({
+      action: 'poll',
+      phase: `⛏ 第 ${result.length + 1} 次 poll`,
+      explanation: `弹出堆顶 ${min.pair}（和 = ${min.sum}）`,
+      detail: '',
+      heap: heap.map(e => ({ ...e })),
+      heapVals: heap.map(e => e.sum),
+      result: [...result],
+      inHeap: new Set(inHeap),
+      exhausted: new Set(exhausted),
+      currentPoll: polled
+    });
+
+    // Add to result
+    result.push(polled);
+
+    // Step: add to result
+    steps.push({
+      action: 'addResult',
+      phase: `✅ 加入结果`,
+      explanation: `(${min.pair}) 加入结果列表`,
+      detail: `当前结果: ${result.map(e => e.pair).join(', ')}`,
+      heap: heap.map(e => ({ ...e })),
+      heapVals: heap.map(e => e.sum),
+      result: [...result],
+      inHeap: new Set(inHeap),
+      exhausted: new Set(exhausted),
+      currentPoll: null
+    });
+
+    // Push next in same row
+    const nextCol = min.col + 1;
+    if (nextCol < nums2.length) {
+      const el = { row: min.row, col: nextCol, sum: nums1[min.row] + nums2[nextCol], pair: `(${nums1[min.row]},${nums2[nextCol]})` };
+      heap.push(el);
+      inHeap.add(`${min.row},${nextCol}`);
+      heap.sort((a, b) => a.sum - b.sum);
+
+      steps.push({
+        action: 'push',
+        phase: '📥 入堆',
+        explanation: `取行 ${min.row} 下一个元素 ${el.pair}（和 = ${el.sum}）入堆`,
+        detail: '',
+        heap: heap.map(e => ({ ...e })),
+        heapVals: heap.map(e => e.sum),
+        result: [...result],
+        inHeap: new Set(inHeap),
+        exhausted: new Set(exhausted),
+        currentPoll: null
+      });
+    } else {
+      exhausted.add(min.row);
+      steps.push({
+        action: 'exhausted',
+        phase: '⛔ 行耗尽',
+        explanation: `行 ${min.row}（nums1[${min.row}] = ${nums1[min.row]}）已耗尽，不再入堆`,
+        detail: '',
+        heap: heap.map(e => ({ ...e })),
+        heapVals: heap.map(e => e.sum),
+        result: [...result],
+        inHeap: new Set(inHeap),
+        exhausted: new Set(exhausted),
+        currentPoll: null
+      });
+    }
+
+    if (result.length >= K) break;
+  }
+
+  steps.push({
+    action: 'done',
+    phase: '✅ 完成',
+    explanation: `已取到前 ${K} 个最小和 pair！`,
+    detail: `最终结果: ${result.map(e => e.pair).join(' → ')}`,
+    heap: [],
+    heapVals: [],
+    result: [...result],
+    inHeap: new Set(),
+    exhausted: new Set(exhausted),
+    currentPoll: null
+  });
+
+  return steps;
+}
+
+const steps = buildSteps();
+let currentStep = -1;
+
+// ========== Render Matrix ==========
+function renderMatrix(step) {
+  const grid = document.getElementById('matrixGrid');
+
+  // Build grid: rows = nums1.length + 1 (header), cols = nums2.length + 1
+  let html = '';
+  const totalRows = nums1.length + 1;
+  const totalCols = nums2.length + 1;
+
+  // Column headers
+  html += `<div style="display: grid; grid-template-columns: 40px repeat(${nums2.length}, 90px); gap: 4px; align-items: center;">`;
+  html += `<div class="matrix-label-col"></div>`;
+  for (let c = 0; c < nums2.length; c++) {
+    html += `<div class="matrix-label-col" style="font-size:13px;">nums2[${c}]=${nums2[c]}</div>`;
+  }
+  html += `</div>`;
+
+  // Data rows
+  for (let r = 0; r < nums1.length; r++) {
+    html += `<div style="display: grid; grid-template-columns: 40px repeat(${nums2.length}, 90px); gap: 4px; align-items: center; margin-top: 4px;">`;
+    html += `<div class="matrix-label-row" style="font-size:13px;">${nums1[r]}</div>`;
+    for (let c = 0; c < nums2.length; c++) {
+      const key = `${r},${c}`;
+      let cls = 'matrix-cell';
+      if (step) {
+        if (step.exhausted && step.exhausted.has(r) && c > step.result.filter(pr => pr.row === r).length - 1) {
+          // Check if this specific cell was ever added to heap or result
+          const isInResult = step.result.some(pr => pr.row === r && pr.col === c);
+          const isInHeap = step.inHeap && step.inHeap.has(key);
+          if (!isInResult && !isInHeap) cls += ' exhausted';
+        }
+        if (step.currentPoll && step.currentPoll.row === r && step.currentPoll.col === c) {
+          cls += ' current';
+        } else if (step.inHeap && step.inHeap.has(key)) {
+          cls += ' in-heap';
+        } else if (step.result.some(pr => pr.row === r && pr.col === c)) {
+          cls += ' done';
+        } else if (step.exhausted && step.exhausted.has(r)) {
+          const lastResultInRow = Math.max(-1, ...step.result.filter(pr => pr.row === r).map(pr => pr.col));
+          if (c > lastResultInRow) cls += ' exhausted';
+        }
+      }
+      const sum = nums1[r] + nums2[c];
+      html += `<div class="${cls}"><div class="pair">(${nums1[r]},${nums2[c]})</div><div class="sum">=${sum}</div></div>`;
+    }
+    html += `</div>`;
+  }
+
+  // Row label indicator
+  html += `<div style="display: grid; grid-template-columns: 40px repeat(${nums2.length}, 90px); gap: 4px; margin-top: 8px;">`;
+  html += `<div></div>`;
+  for (let c = 0; c < nums2.length; c++) {
+    const arrow = c === 0 ? '↓ head' : `→ idx=${c}`;
+    html += `<div style="text-align:center;font-size:11px;color:#6b7280;">${arrow}</div>`;
+  }
+  html += `</div>`;
+
+  grid.innerHTML = html;
+}
+
+// ========== Render Heap ==========
+function renderHeap(step) {
+  const container = document.getElementById('heapVisual');
+  if (!step || step.heap.length === 0) {
+    container.innerHTML = '<div class="heap-empty">堆为空</div>';
+    return;
+  }
+  let html = '';
+  for (const e of step.heap) {
+    const isPoll = step.currentPoll && step.currentPoll.row === e.row && step.currentPoll.col === e.col;
+    html += `<div class="heap-item ${isPoll ? 'poll' : ''}">${e.sum}<div class="heap-pair">${e.pair}</div></div>`;
+  }
+  // Show min label
+  html += `<div style="width:100%;text-align:center;font-size:11px;color:#7c3aed;margin-top:4px;">↑ 堆顶（最小）</div>`;
+  container.innerHTML = html;
+}
+
+// ========== Render Result ==========
+function renderResult(step) {
+  const container = document.getElementById('resultList');
+  if (!step || step.result.length === 0) {
+    container.innerHTML = '<div class="result-empty">暂无结果</div>';
+    return;
+  }
+  let html = '';
+  for (const e of step.result) {
+    html += `<div class="result-item">${e.pair} <span style="color:#888;font-weight:400;">=${e.sum}</span></div>`;
+  }
+  container.innerHTML = html;
+}
+
+// ========== Render Explain ==========
+function renderExplain(step) {
+  const panel = document.getElementById('explainPanel');
+  if (!step) return;
+
+  const phaseLabels = {
+    'init': '初始化',
+    '⛏ 第 1 次 poll': '⛏ 第①轮 — 取最小值',
+    '⛏ 第 2 次 poll': '⛏ 第②轮 — 取最小值',
+    '⛏ 第 3 次 poll': '⛏ 第③轮 — 取最小值',
+    '⛏ 第 4 次 poll': '⛏ 第④轮 — 取最小值',
+    '⛏ 第 5 次 poll': '⛏ 第⑤轮 — 取最小值',
+    '⛏ 第 6 次 poll': '⛏ 第⑥轮 — 取最小值',
+    '✅ 加入结果': '✅ 加入结果列表',
+    '📥 入堆': '📥 补充新元素到堆',
+    '⛔ 行耗尽': '⛔ 该行已无更多元素',
+    '✅ 完成': '✅ 完成'
+  };
+
+  panel.innerHTML = `
+    <div class="phase">${phaseLabels[step.phase] || step.phase}</div>
+    <div class="action">${step.explanation}</div>
+    <div class="detail">${step.detail}</div>
+  `;
+}
+
+// ========== Main Render ==========
+function render() {
+  const step = currentStep >= 0 ? steps[currentStep] : null;
+  renderMatrix(step);
+  renderHeap(step);
+  renderResult(step);
+  renderExplain(step);
+  document.getElementById('stepCounter').textContent = `步骤 ${Math.max(0, currentStep + 1)} / ${steps.length}`;
+  document.getElementById('prevBtn').disabled = currentStep <= 0;
+  document.getElementById('nextBtn').disabled = currentStep >= steps.length - 1;
+}
+
+// ========== Controls ==========
+function goToStep(idx) {
+  currentStep = Math.max(0, Math.min(idx, steps.length - 1));
+  render();
+}
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+  if (currentStep < steps.length - 1) goToStep(currentStep + 1);
+});
+
+document.getElementById('prevBtn').addEventListener('click', () => {
+  if (currentStep > 0) goToStep(currentStep - 1);
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  stopAuto();
+  currentStep = -1;
+  render();
+});
+
+let autoInterval = null;
+function stopAuto() {
+  if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+  document.getElementById('autoBtn').textContent = '▶ 自动播放';
+}
+
+document.getElementById('autoBtn').addEventListener('click', () => {
+  if (autoInterval) { stopAuto(); return; }
+  if (currentStep >= steps.length - 1) { currentStep = -1; render(); }
+  document.getElementById('autoBtn').textContent = '⏸ 暂停';
+  autoInterval = setInterval(() => {
+    if (currentStep >= steps.length - 1) { stopAuto(); return; }
+    goToStep(currentStep + 1);
+  }, 1200);
+});
+
+// Init
+render();
+</script>
+</body>
+</html>
