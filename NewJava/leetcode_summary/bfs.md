@@ -6,28 +6,28 @@
 
 | 频次 | 题号 | 题目 | 难度 | 核心思路 | 状态 |
 |:---:|:----:|------|:----:|---------|:----:|
-| ⭐⭐⭐⭐⭐ | 102 | Binary Tree Level Order Traversal | 🟡 Medium | 队列逐层遍历，每层先取当前 queue size | ⬜ |
-| ⭐⭐⭐⭐⭐ | 200 | Number of Islands | 🟡 Medium | BFS/DFS 遍历整个网格，每遇到一个 '1' 启动 BFS 并将相连的 '1' 标记 | ⬜ |
-| ⭐⭐⭐⭐⭐ | 207/210 | Course Schedule I/II | 🟡 Medium | 拓扑排序（入度表 + BFS 队列），完成顺序即入度 0 的出队顺序 | ⬜ |
-| ⭐⭐⭐⭐⭐ | 103 | Binary Tree Zigzag Level Order Traversal | 🟡 Medium | 层次遍历 + 奇偶层方向反转（deque 或 reverse） | ⬜ |
-| ⭐⭐⭐⭐⭐ | 994 | Rotting Oranges | 🟡 Medium | 多源 BFS：所有腐烂橘子同时入队作为第一批 | ✅ BFS.java |
-| ⭐⭐⭐⭐ | 127/126 | Word Ladder I/II | 🔴 Hard | 单词差一字符即为边 → 图 BFS；II 需记录所有最短路径（前驱 map + 回溯） | ⬜ |
-| ⭐⭐⭐⭐ | 199 | Binary Tree Right Side View | 🟡 Medium | 层次遍历取每层最后一个节点 | ⬜ |
-| ⭐⭐⭐⭐ | 130 | Surrounded Regions | 🟡 Medium | 从边界 'O' 出发 BFS/DFS 标记，未被标记的 'O' 全变 'X' | ⬜ |
-| ⭐⭐⭐⭐ | 542 | 01 Matrix | 🟡 Medium | 多源 BFS 从所有 0 出发，逐层扩散计算距离 | ⬜ |
-| ⭐⭐⭐⭐ | 107 | Binary Tree Level Order Traversal II | 🟡 Medium | 层次遍历结果反转（List.add(0, level)） | ⬜ |
-| ⭐⭐⭐ | 111 | Minimum Depth of Binary Tree | 🟢 Easy | BFS 首遇叶子节点即返回深度（比 DFS 更优） | ⬜ |
-| ⭐⭐⭐ | 116/117 | Populating Next Right Pointers in Each Node | 🟡 Medium | 层次遍历连接同层节点，或用 O(1) 空间利用已建立的 next 指针 | ⬜ |
-| ⭐⭐⭐ | 637 | Average of Levels in Binary Tree | 🟢 Easy | 层次遍历每层求和取平均 | ⬜ |
-| ⭐⭐⭐ | 429 | N-ary Tree Level Order Traversal | 🟡 Medium | 同二叉树层次遍历，children list 代替 left/right | ⬜ |
-| ⭐⭐⭐ | 513 | Find Bottom Left Tree Value | 🟡 Medium | BFS 按层遍历，记录每层首节点 | ⬜ |
-| ⭐⭐⭐ | 417 | Pacific Atlantic Water Flow | 🟡 Medium | 从边界反流 BFS/DFS，两洋可达区域取交集 | ⬜ |
-| ⭐⭐⭐ | 310 | Minimum Height Trees | 🟡 Medium | 拓扑排序剥洋葱法：从所有叶子开始逐层删除 | ⬜ |
-| ⭐⭐ | Top View of Binary Tree | 🟡 Medium | 层次遍历 + 水平坐标 map，记录每个水平坐标首个访问到的节点（即最上层节点） | ⬜ |
-| ⭐⭐ | 329 | Longest Increasing Path in a Matrix | 🔴 Hard | DFS + 记忆化搜索（BFS 也可但 DFS 更优；依赖拓扑序的本质） | ✅ BFS.java |
-| ⭐⭐ | 279 | Perfect Squares | 🟡 Medium | 从 0 开始 BFS，每次加一个完全平方数，先到达 n 的路径最短 | ⬜ |
-| ⭐⭐ | 909 | Snakes and Ladders | 🟡 Medium | 编号棋盘 BFS，蛇梯强制跳跃 | ⬜ |
-| ⭐⭐ | 787 | Cheapest Flights Within K Stops | 🟡 Medium | BFS + Bellman-Ford（层次约束的最短路径） | ⬜ |
+| ★★★★★ | 102 | Binary Tree Level Order Traversal | 🟡 Medium | 队列逐层遍历，每层先取当前 queue size | ⬜ |
+| ★★★★★ | 200 | Number of Islands | 🟡 Medium | BFS/DFS 遍历整个网格，每遇到一个 '1' 启动 BFS 并将相连的 '1' 标记 | ⬜ |
+| ★★★★★ | 207/210 | Course Schedule I/II | 🟡 Medium | 拓扑排序（入度表 + BFS 队列），完成顺序即入度 0 的出队顺序 | ⬜ |
+| ★★★★★ | 103 | Binary Tree Zigzag Level Order Traversal | 🟡 Medium | 层次遍历 + 奇偶层方向反转（deque 或 reverse） | ⬜ |
+| ★★★★★ | 994 | Rotting Oranges | 🟡 Medium | 多源 BFS：所有腐烂橘子同时入队作为第一批 | ✅ BFS.java |
+| ★★★★ | 127/126 | Word Ladder I/II | 🔴 Hard | 单词差一字符即为边 → 图 BFS；II 需记录所有最短路径（前驱 map + 回溯） | ⬜ |
+| ★★★★ | 199 | Binary Tree Right Side View | 🟡 Medium | 层次遍历取每层最后一个节点 | ⬜ |
+| ★★★★ | 130 | Surrounded Regions | 🟡 Medium | 从边界 'O' 出发 BFS/DFS 标记，未被标记的 'O' 全变 'X' | ⬜ |
+| ★★★★ | 542 | 01 Matrix | 🟡 Medium | 多源 BFS 从所有 0 出发，逐层扩散计算距离 | ⬜ |
+| ★★★★ | 107 | Binary Tree Level Order Traversal II | 🟡 Medium | 层次遍历结果反转（List.add(0, level)） | ⬜ |
+| ★★★ | 111 | Minimum Depth of Binary Tree | 🟢 Easy | BFS 首遇叶子节点即返回深度（比 DFS 更优） | ⬜ |
+| ★★★ | 116/117 | Populating Next Right Pointers in Each Node | 🟡 Medium | 层次遍历连接同层节点，或用 O(1) 空间利用已建立的 next 指针 | ⬜ |
+| ★★★ | 637 | Average of Levels in Binary Tree | 🟢 Easy | 层次遍历每层求和取平均 | ⬜ |
+| ★★★ | 429 | N-ary Tree Level Order Traversal | 🟡 Medium | 同二叉树层次遍历，children list 代替 left/right | ⬜ |
+| ★★★ | 513 | Find Bottom Left Tree Value | 🟡 Medium | BFS 按层遍历，记录每层首节点 | ⬜ |
+| ★★★ | 417 | Pacific Atlantic Water Flow | 🟡 Medium | 从边界反流 BFS/DFS，两洋可达区域取交集 | ⬜ |
+| ★★★ | 310 | Minimum Height Trees | 🟡 Medium | 拓扑排序剥洋葱法：从所有叶子开始逐层删除 | ⬜ |
+| ★★ | Top View of Binary Tree | 🟡 Medium | 层次遍历 + 水平坐标 map，记录每个水平坐标首个访问到的节点（即最上层节点） | ⬜ |
+| ★★ | 329 | Longest Increasing Path in a Matrix | 🔴 Hard | DFS + 记忆化搜索（BFS 也可但 DFS 更优；依赖拓扑序的本质） | ✅ BFS.java |
+| ★★ | 279 | Perfect Squares | 🟡 Medium | 从 0 开始 BFS，每次加一个完全平方数，先到达 n 的路径最短 | ⬜ |
+| ★★ | 909 | Snakes and Ladders | 🟡 Medium | 编号棋盘 BFS，蛇梯强制跳跃 | ⬜ |
+| ★★ | 787 | Cheapest Flights Within K Stops | 🟡 Medium | BFS + Bellman-Ford（层次约束的最短路径） | ⬜ |
 
 ## 核心套路
 

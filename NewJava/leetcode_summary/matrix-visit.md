@@ -6,21 +6,21 @@
 
 | 频次 | 题号 | 题目 | 难度 | 核心思路 | 状态 |
 |:---:|:----:|------|:----:|---------|:----:|
-| ⭐⭐⭐⭐⭐ | 48 | Rotate Image | 🟡 Medium | 方阵旋转：转置 + 每行反转（逆时针则每列反转） | ✅ MatrixVisit.java |
-| ⭐⭐⭐⭐⭐ | 73 | Set Matrix Zeroes | 🟡 Medium | 用第一行/列做标记，注意标记区污染问题 | ✅ MatrixVisit.java |
-| ⭐⭐⭐⭐⭐ | 54 | Spiral Matrix | 🟡 Medium | 四边界收缩遍历，每轮后检查边界是否越界 | ✅ MatrixVisit.java |
-| ⭐⭐⭐⭐ | 240 | Search a 2D Matrix II | 🟡 Medium | 从右上/左下开始，根据大小关系缩小搜索范围 | ⬜ |
-| ⭐⭐⭐⭐ | 74 | Search a 2D Matrix | 🟡 Medium | 二分查找（行有序+行内有序） | ⬜ |
-| ⭐⭐⭐⭐ | 59 | Spiral Matrix II | 🟡 Medium | 同 Spiral Matrix，生成式填充 | ⬜ |
-| ⭐⭐⭐ | 867 | Transpose Matrix | 🟢 Easy | 非方阵 new 新矩阵，方阵可原地转置（j = i + 1） | ✅ MatrixVisit.java |
-| ⭐⭐⭐ | 36 | Valid Sudoku | 🟡 Medium | 行列/九宫格用 HashSet 或数组判重 | ⬜ |
-| ⭐⭐⭐ | 79 | Word Search | 🟡 Medium | 回溯 + visited 标记 | ⬜ |
-| ⭐⭐⭐ | 378 | Kth Smallest Element in a Sorted Matrix | 🟡 Medium | 行/列有序 → 二分查找/优先队列 | ⬜ |
-| ⭐⭐ | 48 | Rotate Image (already covered) | 同上 | |
-| ⭐⭐ | 498 | Diagonal Traverse | 🟡 Medium | 方向交替 + 边界反转 | ⬜ |
-| ⭐⭐ | 329 | Longest Increasing Path in a Matrix | 🔴 Hard | DFS + 记忆化搜索 | ✅ BFS.java |
-| ⭐⭐ | 200 | Number of Islands | 🟡 Medium | DFS/BFS 遍历 | ⬜ |
-| ⭐⭐ | 54 | Spiral Matrix (already covered) | 同上 | |
+| ★★★★★ | 48 | Rotate Image | 🟡 Medium | 方阵旋转：转置 + 每行反转（逆时针则每列反转） | ✅ MatrixVisit.java |
+| ★★★★★ | 73 | Set Matrix Zeroes | 🟡 Medium | 用第一行/列做标记，注意标记区污染问题 | ✅ MatrixVisit.java |
+| ★★★★★ | 54 | Spiral Matrix | 🟡 Medium | 四边界收缩遍历，每轮后检查边界是否越界 | ✅ MatrixVisit.java |
+| ★★★★ | 240 | Search a 2D Matrix II | 🟡 Medium | 从右上/左下开始，根据大小关系缩小搜索范围 | ⬜ |
+| ★★★★ | 74 | Search a 2D Matrix | 🟡 Medium | 二分查找（行有序+行内有序） | ⬜ |
+| ★★★★ | 59 | Spiral Matrix II | 🟡 Medium | 同 Spiral Matrix，生成式填充 | ⬜ |
+| ★★★ | 867 | Transpose Matrix | 🟢 Easy | 非方阵 new 新矩阵，方阵可原地转置（j = i + 1） | ✅ MatrixVisit.java |
+| ★★★ | 36 | Valid Sudoku | 🟡 Medium | 行列/九宫格用 HashSet 或数组判重 | ⬜ |
+| ★★★ | 79 | Word Search | 🟡 Medium | 回溯 + visited 标记 | ⬜ |
+| ★★★ | 378 | Kth Smallest Element in a Sorted Matrix | 🟡 Medium | 行/列有序 → 二分查找/优先队列 | ⬜ |
+| ★★ | 48 | Rotate Image (already covered) | 同上 | |
+| ★★ | 498 | Diagonal Traverse | 🟡 Medium | 方向交替 + 边界反转 | ⬜ |
+| ★★ | 329 | Longest Increasing Path in a Matrix | 🔴 Hard | DFS + 记忆化搜索 | ✅ BFS.java |
+| ★★ | 200 | Number of Islands | 🟡 Medium | DFS/BFS 遍历 | ⬜ |
+| ★★ | 54 | Spiral Matrix (already covered) | 同上 | |
 
 ## 核心套路
 
@@ -36,7 +36,7 @@
 行/列有序找第K小   → 二分查找或优先队列
 ```
 
-### 刷题路线
+## 刷题路线
 
 ```
 第一梯队（必会）：48 → 73 → 54 → 240 → 74

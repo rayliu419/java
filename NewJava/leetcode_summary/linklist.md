@@ -6,32 +6,32 @@
 
 | 频次 | 题号 | 题目 | 难度 | 核心思路 | 状态 |
 |:---:|:----:|------|:----:|---------|:----:|
-| ⭐⭐⭐⭐⭐ | 206 | Reverse Linked List | 🟢 Easy | pre/cur/next 三指针反转 | ✅ LinkList.java |
-| ⭐⭐⭐⭐⭐ | 141 | Linked List Cycle | 🟢 Easy | 快慢指针相遇判环 | ✅ LinkList.java |
-| ⭐⭐⭐⭐⭐ | 21 | Merge Two Sorted Lists | 🟢 Easy | dummy + 双指针合并 | ✅ LinkList.java |
-| ⭐⭐⭐⭐⭐ | 876 | Middle of the Linked List | 🟢 Easy | 快慢指针找中点 | ✅ LinkList.java |
-| ⭐⭐⭐⭐⭐ | 19 | Remove Nth Node From End | 🟡 Medium | 快慢指针，fast 先走 n 步 | ⬜ |
-| ⭐⭐⭐⭐ | 142 | Linked List Cycle II | 🟡 Medium | 相遇后 slow 从头，fast 从相遇点，再遇即入口 | ✅ LinkList.java |
-| ⭐⭐⭐⭐ | 160 | Intersection of Two Linked Lists | 🟢 Easy | 长度差 / 双指针遍历到相交 | ⬜ |
-| ⭐⭐⭐⭐ | 143 | Reorder List | 🟡 Medium | 找中点 → 反转 → 合并 | ⬜ |
-| ⭐⭐⭐⭐ | 234 | Palindrome Linked List | 🟢 Easy | 找中点 → 反转后半 → 比较 | ⬜ |
-| ⭐⭐⭐⭐ | 2 | Add Two Numbers | 🟡 Medium | dummy + 模拟加法进位 | ⬜ |
-| ⭐⭐⭐⭐ | 82 | Remove Duplicates from Sorted List II | 🟡 Medium | pre 指针判断重复段，不保留任何重复 | ✅ LinkList.java |
-| ⭐⭐⭐⭐ | 148 | Sort List | 🟡 Medium | 归并排序：找中点 → 递归 → 合并 | ⬜ |
-| ⭐⭐⭐⭐ | 138 | Copy List with Random Pointer | 🟡 Medium | HashMap 映射 / 原地三次遍历 | ⬜ |
-| ⭐⭐⭐ | 83 | Remove Duplicates from Sorted List | 🟢 Easy | 重复保留一个，直接跳过 | ✅ LinkList.java |
-| ⭐⭐⭐ | 203 | Remove Linked List Elements | 🟢 Easy | dummy 节点，注意尾部置空 | ✅ LinkList.java |
-| ⭐⭐⭐ | 328 | Odd Even Linked List | 🟡 Medium | 奇偶指针分离再连接 | ⬜ |
-| ⭐⭐⭐ | 61 | Rotate List | 🟡 Medium | 先成环再找新头断开 | ⬜ |
-| ⭐⭐⭐ | 109 | Convert Sorted List to BST | 🟡 Medium | 找中点递归构建，注意尾部置空 | ⬜ |
-| ⭐⭐⭐ | 92 | Reverse Linked List II | 🟡 Medium | 区间反转，四指针定位 | ⬜ |
-| ⭐⭐⭐ | 24 | Swap Nodes in Pairs | 🟡 Medium | dummy + 两两交换指针操作 | ⬜ |
-| ⭐⭐⭐ | 146 | LRU Cache | 🟡 Medium | HashMap + 双向链表 | ⬜ |
-| ⭐⭐ | 86 | Partition List | 🟡 Medium | 大小两个 dummy 链表再合并 | ⬜ |
-| ⭐⭐ | 147 | Insertion Sort List | 🟡 Medium | dummy + 逐个插入 | ⬜ |
-| ⭐⭐ | 23 | Merge k Sorted Lists | 🔴 Hard | 分治合并 / 优先队列 | ⬜ |
-| ⭐⭐ | 430 | Flatten Multilevel DLL | 🟡 Medium | DFS 展平 / 迭代栈 | ⬜ |
-| ⭐⭐ | 237 | Delete Node in a Linked List | 🟢 Easy | 替换删除（无 head 参数） | ⬜ |
+| ★★★★★ | 206 | Reverse Linked List | 🟢 Easy | pre/cur/next 三指针反转 | ✅ LinkList.java |
+| ★★★★★ | 141 | Linked List Cycle | 🟢 Easy | 快慢指针相遇判环 | ✅ LinkList.java |
+| ★★★★★ | 21 | Merge Two Sorted Lists | 🟢 Easy | dummy + 双指针合并 | ✅ LinkList.java |
+| ★★★★★ | 876 | Middle of the Linked List | 🟢 Easy | 快慢指针找中点 | ✅ LinkList.java |
+| ★★★★★ | 19 | Remove Nth Node From End | 🟡 Medium | 快慢指针，fast 先走 n 步 | ⬜ |
+| ★★★★ | 142 | Linked List Cycle II | 🟡 Medium | 相遇后 slow 从头，fast 从相遇点，再遇即入口 | ✅ LinkList.java |
+| ★★★★ | 160 | Intersection of Two Linked Lists | 🟢 Easy | 长度差 / 双指针遍历到相交 | ⬜ |
+| ★★★★ | 143 | Reorder List | 🟡 Medium | 找中点 → 反转 → 合并 | ⬜ |
+| ★★★★ | 234 | Palindrome Linked List | 🟢 Easy | 找中点 → 反转后半 → 比较 | ⬜ |
+| ★★★★ | 2 | Add Two Numbers | 🟡 Medium | dummy + 模拟加法进位 | ⬜ |
+| ★★★★ | 82 | Remove Duplicates from Sorted List II | 🟡 Medium | pre 指针判断重复段，不保留任何重复 | ✅ LinkList.java |
+| ★★★★ | 148 | Sort List | 🟡 Medium | 归并排序：找中点 → 递归 → 合并 | ⬜ |
+| ★★★★ | 138 | Copy List with Random Pointer | 🟡 Medium | HashMap 映射 / 原地三次遍历 | ⬜ |
+| ★★★ | 83 | Remove Duplicates from Sorted List | 🟢 Easy | 重复保留一个，直接跳过 | ✅ LinkList.java |
+| ★★★ | 203 | Remove Linked List Elements | 🟢 Easy | dummy 节点，注意尾部置空 | ✅ LinkList.java |
+| ★★★ | 328 | Odd Even Linked List | 🟡 Medium | 奇偶指针分离再连接 | ⬜ |
+| ★★★ | 61 | Rotate List | 🟡 Medium | 先成环再找新头断开 | ⬜ |
+| ★★★ | 109 | Convert Sorted List to BST | 🟡 Medium | 找中点递归构建，注意尾部置空 | ⬜ |
+| ★★★ | 92 | Reverse Linked List II | 🟡 Medium | 区间反转，四指针定位 | ⬜ |
+| ★★★ | 24 | Swap Nodes in Pairs | 🟡 Medium | dummy + 两两交换指针操作 | ⬜ |
+| ★★★ | 146 | LRU Cache | 🟡 Medium | HashMap + 双向链表 | ⬜ |
+| ★★ | 86 | Partition List | 🟡 Medium | 大小两个 dummy 链表再合并 | ⬜ |
+| ★★ | 147 | Insertion Sort List | 🟡 Medium | dummy + 逐个插入 | ⬜ |
+| ★★ | 23 | Merge k Sorted Lists | 🔴 Hard | 分治合并 / 优先队列 | ⬜ |
+| ★★ | 430 | Flatten Multilevel DLL | 🟡 Medium | DFS 展平 / 迭代栈 | ⬜ |
+| ★★ | 237 | Delete Node in a Linked List | 🟢 Easy | 替换删除（无 head 参数） | ⬜ |
 
 ## 核心套路
 
@@ -48,7 +48,7 @@ LRU             → HashMap + 双向链表
 尾部门置空      → 删除/修改链表后必检查
 ```
 
-### 刷题路线
+## 刷题路线
 
 ```
 第一梯队（必会）：206 → 141 → 21 → 876 → 19 → 142

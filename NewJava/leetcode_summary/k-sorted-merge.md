@@ -8,14 +8,14 @@
 
 | 频次 | 题号 | 题目 | 难度 | 核心思路 | 状态 |
 |:---:|:----:|------|:----:|---------|:----:|
-| ⭐⭐⭐⭐⭐ | 23 | Merge k Sorted Lists | 🔴 Hard | 最小堆 / 分治两两合并，**K-Way Merge 原型题** | ⬜ |
-| ⭐⭐⭐⭐ | 378 | Kth Smallest Element in a Sorted Matrix | 🟡 Medium | 行/列有序 → 每行=1个有序数组，堆取TopK；也可值域二分 | ✅ KSortedListMerge.java |
-| ⭐⭐⭐⭐ | 373 | Find K Pairs with Smallest Sums | 🟡 Medium | 以短数组为行，每行是1条有序链表，堆取前K个最小和 | ✅ KSortedListMerge.java |
-| ⭐⭐⭐ | 632 | Smallest Range Covering Elements from K Lists | 🔴 Hard | K路指针移动最小值以缩小区间，堆取min，维护max | ⬜ |
-| ⭐⭐⭐ | 264 | Ugly Number II | 🟡 Medium | 合并3个有序序列（×2, ×3, ×5），三指针/DP；也可堆 | ⬜ |
-| ⭐⭐ | 313 | Super Ugly Number | 🟡 Medium | 推广到K个质数→K个序列→K个指针，兼容堆解法 | ⬜ |
-| ⭐⭐ | 786 | K-th Smallest Prime Fraction | 🔴 Hard | 固定分母，每个分母=1条有序链表；还可二分 | ⬜ |
-| ⭐ | 1508 | Range Sum of Sorted Subarray Sums | 🟡 Medium | 子数组和构成K个有序序列，堆取前K个 | ⬜ |
+| ★★★★★ | 23 | Merge k Sorted Lists | 🔴 Hard | 最小堆 / 分治两两合并，**K-Way Merge 原型题** | ⬜ |
+| ★★★★ | 378 | Kth Smallest Element in a Sorted Matrix | 🟡 Medium | 行/列有序 → 每行=1个有序数组，堆取TopK；也可值域二分 | ✅ KSortedListMerge.java |
+| ★★★★ | 373 | Find K Pairs with Smallest Sums | 🟡 Medium | 以短数组为行，每行是1条有序链表，堆取前K个最小和 | ✅ KSortedListMerge.java |
+| ★★★ | 632 | Smallest Range Covering Elements from K Lists | 🔴 Hard | K路指针移动最小值以缩小区间，堆取min，维护max | ⬜ |
+| ★★★ | 264 | Ugly Number II | 🟡 Medium | 合并3个有序序列（×2, ×3, ×5），三指针/DP；也可堆 | ⬜ |
+| ★★ | 313 | Super Ugly Number | 🟡 Medium | 推广到K个质数→K个序列→K个指针，兼容堆解法 | ⬜ |
+| ★★ | 786 | K-th Smallest Prime Fraction | 🔴 Hard | 固定分母，每个分母=1条有序链表；还可二分 | ⬜ |
+| ★ | 1508 | Range Sum of Sorted Subarray Sums | 🟡 Medium | 子数组和构成K个有序序列，堆取前K个 | ⬜ |
 
 ## 核心套路
 

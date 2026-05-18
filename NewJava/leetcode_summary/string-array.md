@@ -6,40 +6,40 @@
 
 | 频次 | 题号 | 题目 | 难度 | 核心思路 | 状态 |
 |:---:|:----:|------|:----:|---------|:----:|
-| ⭐⭐⭐⭐⭐ | 151 | Reverse Words in a String | 🟡 Medium | 去多余空格 → 整体反转 → 逐单词反转 | ✅ ArrayStringOperation.java |
-| ⭐⭐⭐⭐⭐ | 189 | Rotate Array | 🟡 Medium | 三次翻转：整体 → 前 k → 后 n-k | ✅ ArrayStringOperation.java |
-| ⭐⭐⭐⭐⭐ | 415 | Add Strings | 🟢 Easy | 双指针 + carry 模拟，循环条件带 `\|\| carry > 0` | ✅ ArrayStringOperation.java |
-| ⭐⭐⭐⭐⭐ | 43 | Multiply Strings | 🟡 Medium | 竖式乘法，结果数组 len = m+n，从后往前累加 | ⬜ |
-| ⭐⭐⭐⭐⭐ | 344 | Reverse String | 🟢 Easy | 双指针交换 | ⬜ |
-| ⭐⭐⭐⭐⭐ | 125 | Valid Palindrome | 🟢 Easy | 双指针 + Character.isLetterOrDigit | ⬜ |
-| ⭐⭐⭐⭐⭐ | 20 | Valid Parentheses | 🟢 Easy | 栈匹配 | ⬜ |
-| ⭐⭐⭐⭐⭐ | 268 | Missing Number | 🟢 Easy | 求和 / 异或 | ⬜ |
-| ⭐⭐⭐⭐⭐ | 41 | First Missing Positive | 🔴 Hard | 原地置换：将数字放到正确位置 | ⬜ |
-| ⭐⭐⭐⭐⭐ | 5 | Longest Palindromic Substring | 🟡 Medium | 中心扩展 / DP | ⬜ |
-| ⭐⭐⭐⭐ | 448 | Find All Numbers Disappeared | 🟢 Easy | 原地标记：下标对应值 | ⬜ |
-| ⭐⭐⭐⭐ | 287 | Find the Duplicate Number | 🟡 Medium | 快慢指针（看作有环链表） | ⬜ |
-| ⭐⭐⭐⭐ | 442 | Find All Duplicates in Array | 🟡 Medium | 原地标记：值→下标取反 | ⬜ |
-| ⭐⭐⭐⭐ | 242 | Valid Anagram | 🟢 Easy | 字符计数数组 | ⬜ |
-| ⭐⭐⭐⭐ | 14 | Longest Common Prefix | 🟢 Easy | 纵向比较所有字符串 | ⬜ |
-| ⭐⭐⭐⭐ | 28 | Find the Index of First Occurrence | 🟢 Easy | KMP / 暴力 | ⬜ |
-| ⭐⭐⭐⭐ | 3 | Longest Substring Without Repeating | 🟡 Medium | 滑动窗口 + 哈希 | ⬜ |
-| ⭐⭐⭐⭐ | 49 | Group Anagrams | 🟡 Medium | 排序+哈希 / 计数+哈希 | ⬜ |
-| ⭐⭐⭐⭐ | 67 | Add Binary | 🟢 Easy | 同字符串相加，二进制 carry=sum/2 | ⬜ |
-| ⭐⭐⭐⭐ | 8 | String to Integer (atoi) | 🟡 Medium | 去空格 → 判正负 → 溢出处理 | ⬜ |
-| ⭐⭐⭐ | 186 | Reverse Words in a String II | 🟡 Medium | 整体反转 + 逐单词反转（原地，无多余空格） | ⬜ |
-| ⭐⭐⭐ | 13 | Roman to Integer | 🟢 Easy | 哈希 + 逆序遍历减法 | ⬜ |
-| ⭐⭐⭐ | 217 | Contains Duplicate | 🟢 Easy | 哈希 / 排序 | ⬜ |
-| ⭐⭐⭐ | 136 | Single Number | 🟢 Easy | 异或 | ⬜ |
-| ⭐⭐⭐ | 345 | Reverse Vowels of a String | 🟢 Easy | 双指针 + 元音判断 | ⬜ |
-| ⭐⭐⭐ | 392 | Is Subsequence | 🟢 Easy | 双指针扫描 | ⬜ |
-| ⭐⭐⭐ | 6 | Zigzag Conversion | 🟡 Medium | 行模拟 / flag 方向控制 | ⬜ |
-| ⭐⭐⭐ | 38 | Count and Say | 🟡 Medium | 递归生成，双指针统计连续相同 | ⬜ |
-| ⭐⭐⭐ | 647 | Palindromic Substrings | 🟡 Medium | 中心扩展法 | ⬜ |
-| ⭐⭐ | 12 | Integer to Roman | 🟡 Medium | 贪心匹配 | ⬜ |
-| ⭐⭐ | 168 | Excel Sheet Column Title | 🟢 Easy | 26 进制（注意从 1 开始） | ⬜ |
-| ⭐⭐ | 171 | Excel Sheet Column Number | 🟢 Easy | 26 进制转十进制 | ⬜ |
-| ⭐⭐ | 76 | Minimum Window Substring | 🔴 Hard | 滑动窗口 + 计数数组 | ⬜ |
-| ⭐⭐ | 68 | Text Justification | 🔴 Hard | 贪心分配空格 | ⬜ |
+| ★★★★★ | 151 | Reverse Words in a String | 🟡 Medium | 去多余空格 → 整体反转 → 逐单词反转 | ✅ ArrayStringOperation.java |
+| ★★★★★ | 189 | Rotate Array | 🟡 Medium | 三次翻转：整体 → 前 k → 后 n-k | ✅ ArrayStringOperation.java |
+| ★★★★★ | 415 | Add Strings | 🟢 Easy | 双指针 + carry 模拟，循环条件带 `\|\| carry > 0` | ✅ ArrayStringOperation.java |
+| ★★★★★ | 43 | Multiply Strings | 🟡 Medium | 竖式乘法，结果数组 len = m+n，从后往前累加 | ⬜ |
+| ★★★★★ | 344 | Reverse String | 🟢 Easy | 双指针交换 | ⬜ |
+| ★★★★★ | 125 | Valid Palindrome | 🟢 Easy | 双指针 + Character.isLetterOrDigit | ⬜ |
+| ★★★★★ | 20 | Valid Parentheses | 🟢 Easy | 栈匹配 | ⬜ |
+| ★★★★★ | 268 | Missing Number | 🟢 Easy | 求和 / 异或 | ⬜ |
+| ★★★★★ | 41 | First Missing Positive | 🔴 Hard | 原地置换：将数字放到正确位置 | ⬜ |
+| ★★★★★ | 5 | Longest Palindromic Substring | 🟡 Medium | 中心扩展 / DP | ⬜ |
+| ★★★★ | 448 | Find All Numbers Disappeared | 🟢 Easy | 原地标记：下标对应值 | ⬜ |
+| ★★★★ | 287 | Find the Duplicate Number | 🟡 Medium | 快慢指针（看作有环链表） | ⬜ |
+| ★★★★ | 442 | Find All Duplicates in Array | 🟡 Medium | 原地标记：值→下标取反 | ⬜ |
+| ★★★★ | 242 | Valid Anagram | 🟢 Easy | 字符计数数组 | ⬜ |
+| ★★★★ | 14 | Longest Common Prefix | 🟢 Easy | 纵向比较所有字符串 | ⬜ |
+| ★★★★ | 28 | Find the Index of First Occurrence | 🟢 Easy | KMP / 暴力 | ⬜ |
+| ★★★★ | 3 | Longest Substring Without Repeating | 🟡 Medium | 滑动窗口 + 哈希 | ⬜ |
+| ★★★★ | 49 | Group Anagrams | 🟡 Medium | 排序+哈希 / 计数+哈希 | ⬜ |
+| ★★★★ | 67 | Add Binary | 🟢 Easy | 同字符串相加，二进制 carry=sum/2 | ⬜ |
+| ★★★★ | 8 | String to Integer (atoi) | 🟡 Medium | 去空格 → 判正负 → 溢出处理 | ⬜ |
+| ★★★ | 186 | Reverse Words in a String II | 🟡 Medium | 整体反转 + 逐单词反转（原地，无多余空格） | ⬜ |
+| ★★★ | 13 | Roman to Integer | 🟢 Easy | 哈希 + 逆序遍历减法 | ⬜ |
+| ★★★ | 217 | Contains Duplicate | 🟢 Easy | 哈希 / 排序 | ⬜ |
+| ★★★ | 136 | Single Number | 🟢 Easy | 异或 | ⬜ |
+| ★★★ | 345 | Reverse Vowels of a String | 🟢 Easy | 双指针 + 元音判断 | ⬜ |
+| ★★★ | 392 | Is Subsequence | 🟢 Easy | 双指针扫描 | ⬜ |
+| ★★★ | 6 | Zigzag Conversion | 🟡 Medium | 行模拟 / flag 方向控制 | ⬜ |
+| ★★★ | 38 | Count and Say | 🟡 Medium | 递归生成，双指针统计连续相同 | ⬜ |
+| ★★★ | 647 | Palindromic Substrings | 🟡 Medium | 中心扩展法 | ⬜ |
+| ★★ | 12 | Integer to Roman | 🟡 Medium | 贪心匹配 | ⬜ |
+| ★★ | 168 | Excel Sheet Column Title | 🟢 Easy | 26 进制（注意从 1 开始） | ⬜ |
+| ★★ | 171 | Excel Sheet Column Number | 🟢 Easy | 26 进制转十进制 | ⬜ |
+| ★★ | 76 | Minimum Window Substring | 🔴 Hard | 滑动窗口 + 计数数组 | ⬜ |
+| ★★ | 68 | Text Justification | 🔴 Hard | 贪心分配空格 | ⬜ |
 
 ## 核心套路
 
@@ -57,7 +57,7 @@ atoi            → 去空格 → 判正负 → 逐位累加 → 溢出处理
 atoi 溢出处理    → result = result * 10 + digit, 用 long 或提前判断 > MAX/10
 ```
 
-### 刷题路线
+## 刷题路线
 
 ```
 第一梯队（必会）：151 → 189 → 415 → 43 → 344 → 125 → 20 → 268 → 41
