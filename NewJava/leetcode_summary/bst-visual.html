@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>BST 非递归中序遍历可视化</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'San Francisco', -apple-system, 'Segoe UI', sans-serif; background: #1a1a2e; color: #e0e0e0; display: flex; justify-content: center; padding: 20px; }
+  .container { max-width: 1000px; width: 100%; }
+  h1 { text-align: center; font-size: 24px; margin-bottom: 8px; color: #fff; }
+  .subtitle { text-align: center; color: #888; font-size: 14px; margin-bottom: 20px; }
+  h1 span { color: #7c3aed; }
+
+  .main-panel { display: flex; gap: 20px; }
+  .left-col { flex: 1; min-width: 0; }
+  .right-col { flex: 0 0 320px; }
+
+  /* Tree canvas */
+  .tree-section { background: #16213e; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+  .tree-section h2 { font-size: 14px; color: #888; margin-bottom: 8px; }
+  canvas { display: block; width: 100%; height: 300px; border-radius: 8px; background: #0f3460; }
+
+  /* Step explanation */
+  .explain { background: #16213e; border-radius: 12px; padding: 16px; min-height: 80px; }
+  .explain .phase { font-size: 12px; color: #7c3aed; font-weight: 600; margin-bottom: 4px; }
+  .explain .action { font-size: 16px; color: #fff; margin-bottom: 4px; }
+  .explain .detail { font-size: 13px; color: #aaa; }
+
+  /* Stack visualization */
+  .stack-section { background: #16213e; border-radius: 12px; padding: 16px; height: 396px; }
+  .stack-section h2 { font-size: 14px; color: #888; margin-bottom: 8px; }
+  .stack-section h2 span { color: #f59e0b; }
+  .stack-visual { display: flex; flex-direction: column-reverse; align-items: center; gap: 4px; min-height: 280px; border: 2px dashed #2a2a4a; border-radius: 8px; padding: 8px; }
+  .stack-empty-msg { color: #555; font-size: 13px; margin-top: 120px; }
+  .stack-item { width: 80px; text-align: center; padding: 6px; background: linear-gradient(135deg, #7c3aed, #6d28d9); border-radius: 6px; font-weight: 600; font-size: 14px; color: #fff; transition: all 0.3s; }
+  .stack-item.pop { animation: popAnim 0.4s; }
+  .stack-item.push { animation: pushAnim 0.4s; }
+  @keyframes popAnim { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.15); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes pushAnim { 0% { transform: translateY(-10px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+  .stack-pointer { color: #f59e0b; font-size: 11px; margin-top: 2px; font-weight: 600; }
+
+  /* Controls */
+  .controls { display: flex; gap: 10px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+  .controls button { padding: 10px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .controls button:hover { transform: translateY(-1px); }
+  .btn-prev { background: #374151; color: #e0e0e0; }
+  .btn-next { background: #7c3aed; color: #fff; }
+  .btn-reset { background: #374151; color: #e0e0e0; }
+  .btn-auto { background: #047857; color: #fff; }
+  .controls button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .step-counter { text-align: center; font-size: 13px; color: #888; margin-top: 10px; }
+
+  /* Memory template */
+  .template { background: #16213e; border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .template h2 { font-size: 14px; color: #888; margin-bottom: 8px; }
+  .template pre { background: #0f3460; padding: 12px; border-radius: 8px; font-size: 13px; line-height: 1.6; overflow-x: auto; color: #e0e0e0; }
+  .template .highlight { color: #f59e0b; }
+  .template .comment { color: #6b7280; }
+
+  .tree-legend { display: flex; gap: 16px; justify-content: center; margin: 10px 0; font-size: 12px; }
+  .tree-legend span { display: flex; align-items: center; gap: 4px; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .legend-cur { background: #f59e0b; }
+  .legend-visited { background: #10b981; }
+  .legend-stacked { background: #7c3aed; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>BST 非递归<span>中序遍历</span></h1>
+  <p class="subtitle">观察栈的变化，理解"模拟递归调用栈"的本质</p>
+
+  <div class="tree-legend">
+    <span><span class="legend-dot legend-cur"></span> 当前节点</span>
+    <span><span class="legend-dot legend-stacked"></span> 在栈中</span>
+    <span><span class="legend-dot legend-visited"></span> 已访问</span>
+  </div>
+
+  <div class="main-panel">
+    <div class="left-col">
+      <div class="tree-section">
+        <canvas id="treeCanvas" width="650" height="300"></canvas>
+      </div>
+      <div class="explain" id="explainPanel">
+        <div class="phase">准备</div>
+        <div class="action">点击"下一步"开始遍历</div>
+        <div class="detail">中序遍历顺序：左子树 → 根节点 → 右子树</div>
+      </div>
+    </div>
+    <div class="right-col">
+      <div class="stack-section">
+        <h2>栈 ⏤ 手动模拟调用栈 <span>(栈顶 ↓)</span></h2>
+        <div class="stack-visual" id="stackVisual">
+          <div class="stack-empty-msg">栈为空</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn-prev" id="prevBtn" disabled>← 上一步</button>
+    <button class="btn-next" id="nextBtn">下一步 →</button>
+    <button class="btn-auto" id="autoBtn">▶ 自动播放</button>
+    <button class="btn-reset" id="resetBtn">↺ 重置</button>
+  </div>
+  <div class="step-counter" id="stepCounter">步骤 0 / 15</div>
+
+  <div class="template">
+    <h2>🧠 记忆口诀：一路向左入栈 → 弹出访问 → 转向右</h2>
+    <pre>
+<span class="highlight">while</span> (cur != null || stack.length) {
+  <span class="highlight">while</span> (cur != null) {          <span class="comment">// ← 一路向左</span>
+    stack.push(cur);              <span class="comment">//    每走一步就存档</span>
+    cur = cur.left;
+  }
+  cur = stack.pop();              <span class="comment">// ← 弹出（回到上一层）</span>
+  visit(cur);                     <span class="comment">// ← 访问节点</span>
+  cur = cur.right;                <span class="comment">// ← 转向右子树</span>
+}</pre>
+  </div>
+</div>
+
+<script>
+// ========== BST Definition ==========
+//        5
+//       / \
+//      3   8
+//     / \   \
+//    2   4   9
+//   /
+//  1
+const tree = {
+  val: 5, x: 320, y: 40,
+  left: {
+    val: 3, x: 200, y: 100,
+    left: {
+      val: 2, x: 120, y: 160,
+      left: { val: 1, x: 60, y: 220, left: null, right: null },
+      right: null
+    },
+    right: { val: 4, x: 280, y: 160, left: null, right: null }
+  },
+  right: {
+    val: 8, x: 460, y: 100,
+    left: null,
+    right: { val: 9, x: 540, y: 160, left: null, right: null }
+  }
+};
+
+// Precompute x,y for all nodes and collect inorder sequence
+const allNodes = [];
+function collect(n) { if (!n) return; collect(n.left); allNodes.push(n); collect(n.right); }
+collect(tree);
+
+// Expected inorder: [1,2,3,4,5,8,9]
+const inorderSeq = allNodes.map(n => n.val);
+
+// ========== Step Builder ==========
+// Each step: { action, node, stackSnapshot, phase, explanation }
+function buildSteps() {
+  const steps = [];
+  const stack = [];
+  let cur = tree;
+
+  function record(action, node, phase, explanation, extra) {
+    steps.push({
+      action,
+      nodeVal: node ? node.val : null,
+      stackVals: stack.map(n => n.val),
+      phase,
+      explanation,
+      ...extra
+    });
+  }
+
+  // Initialize — before start
+  steps.push({
+    action: 'init',
+    nodeVal: 5,
+    stackVals: [],
+    phase: '准备',
+    explanation: 'cur 指向根节点 5，栈为空',
+    codeLine: 'cur = root'
+  });
+
+  while (cur !== null || stack.length > 0) {
+    // Phase 1: go left
+    while (cur !== null) {
+      stack.push(cur);
+      record('push', cur, '🔄 一路向左入栈',
+        `将节点 ${cur.val} 压入栈（存档），然后转向左子树`,
+        { codeLine: 'stack.push(cur); cur = cur.left' }
+      );
+      cur = cur.left;
+    }
+
+    // Phase 2: pop and visit
+    cur = stack.pop();
+    record('pop', cur, '✅ 弹出访问',
+      `左子树走到底了，弹出节点 ${cur.val} 访问它`,
+      { codeLine: 'cur = stack.pop(); visit(cur)' }
+    );
+    record('visit', cur, '✅ 访问节点',
+      `访问节点 ${cur.val}，此时访问顺序就是中序结果`,
+      { codeLine: 'visit(cur)' }
+    );
+
+    // Phase 3: go right
+    record('right', cur, '➡️ 转向右',
+      `转向节点 ${cur.val} 的右子树`,
+      { codeLine: 'cur = cur.right' }
+    );
+    cur = cur.right;
+  }
+
+  steps.push({
+    action: 'done',
+    nodeVal: null,
+    stackVals: [],
+    phase: '✅ 完成',
+    explanation: '遍历完成！中序结果: ' + inorderSeq.join(' → '),
+    codeLine: ''
+  });
+
+  return steps;
+}
+
+const steps = buildSteps();
+let currentStep = -1; // -1 = before any step
+
+// ========== Rendering ==========
+const canvas = document.getElementById('treeCanvas');
+const ctx = canvas.getContext('2d');
+
+function getNodeState(nodeVal) {
+  if (nodeVal === null) return 'none';
+  const step = steps[currentStep];
+  if (!step) return 'none';
+  if (step.nodeVal === nodeVal && (step.action === 'pop' || step.action === 'visit'))
+    return 'visiting';
+  if (step.stackVals && step.stackVals.includes(nodeVal))
+    return 'stacked';
+  // Check visited set (all nodes popped so far)
+  const visited = new Set();
+  for (let i = 0; i <= currentStep; i++) {
+    if (steps[i].action === 'visit' && steps[i].nodeVal !== null)
+      visited.add(steps[i].nodeVal);
+  }
+  // Also the node being currently popped/visited
+  if (step.action === 'pop' || step.action === 'visit') visited.add(step.nodeVal);
+  if (visited.has(nodeVal)) return 'visited';
+  return 'none';
+}
+
+function drawTree() {
+  ctx.clearRect(0, 0, 650, 300);
+
+  function drawNode(node) {
+    if (!node) return;
+    drawNode(node.left);
+    drawNode(node.right);
+
+    // Draw edges
+    if (node.left) {
+      ctx.beginPath();
+      ctx.moveTo(node.x, node.y + 18);
+      ctx.lineTo(node.left.x, node.left.y - 18);
+      ctx.strokeStyle = '#4a4a6a';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+    if (node.right) {
+      ctx.beginPath();
+      ctx.moveTo(node.x, node.y + 18);
+      ctx.lineTo(node.right.x, node.right.y - 18);
+      ctx.strokeStyle = '#4a4a6a';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // Draw node
+    const state = getNodeState(node.val);
+    let color;
+    switch (state) {
+      case 'visiting': color = '#f59e0b'; break;
+      case 'stacked': color = '#7c3aed'; break;
+      case 'visited': color = '#10b981'; break;
+      default: color = '#1e40af'; break;
+    }
+
+    ctx.beginPath();
+    ctx.arc(node.x, node.y, 20, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = color === '#1e40af' ? '#3b82f6' : color;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 14px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(node.val, node.x, node.y);
+  }
+
+  drawNode(tree);
+}
+
+function renderStack() {
+  const container = document.getElementById('stackVisual');
+  const step = steps[currentStep];
+
+  if (!step || step.stackVals.length === 0) {
+    container.innerHTML = '<div class="stack-empty-msg">栈为空</div>';
+    return;
+  }
+
+  const vals = step.stackVals;
+  container.innerHTML = vals.map(v =>
+    `<div class="stack-item">${v}</div>`
+  ).join('') + '<div class="stack-pointer">↑ 栈顶</div>';
+}
+
+function renderExplanation() {
+  const panel = document.getElementById('explainPanel');
+  const step = steps[currentStep];
+  if (!step) return;
+
+  const phaseLabels = {
+    'init': '准备',
+    '🔄 一路向左入栈': '阶段 ① — 一路向左入栈',
+    '✅ 弹出访问': '阶段 ② — 弹出节点',
+    '✅ 访问节点': '阶段 ② — 访问节点',
+    '➡️ 转向右': '阶段 ③ — 转向右子树',
+    '✅ 完成': '完成'
+  };
+
+  // Determine recursion mapping
+  let recursionMapping = '';
+  if (step.action === 'push') {
+    recursionMapping = '对应递归调用的 traverse(node.left) — 压入当前帧';
+  } else if (step.action === 'pop') {
+    recursionMapping = '对应递归调用返回 — 恢复上一层帧';
+  } else if (step.action === 'visit') {
+    recursionMapping = '对应递归中的 visit(root)';
+  } else if (step.action === 'right') {
+    recursionMapping = '进入右子树的递归调用';
+  }
+
+  panel.innerHTML = `
+    <div class="phase">${phaseLabels[step.phase] || step.phase}</div>
+    <div class="action">${step.explanation}</div>
+    <div class="detail" style="margin-top: 6px; color: #7c3aed; font-family: monospace; font-size: 13px;">
+      代码: ${step.codeLine || ''}
+    </div>
+    ${recursionMapping ? `<div class="detail" style="margin-top: 4px; color: #f59e0b; font-size: 13px;">🧠 ${recursionMapping}</div>` : ''}
+  `;
+}
+
+function updateStepCounter() {
+  document.getElementById('stepCounter').textContent =
+    `步骤 ${Math.max(0, currentStep)} / ${steps.length - 1}`;
+}
+
+function updateButtons() {
+  document.getElementById('prevBtn').disabled = currentStep <= 0;
+  document.getElementById('nextBtn').disabled = currentStep >= steps.length - 1;
+}
+
+function render() {
+  drawTree();
+  renderStack();
+  renderExplanation();
+  updateStepCounter();
+  updateButtons();
+}
+
+// ========== Controls ==========
+function goToStep(idx) {
+  currentStep = Math.max(0, Math.min(idx, steps.length - 1));
+  render();
+}
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+  if (currentStep < steps.length - 1) goToStep(currentStep + 1);
+});
+
+document.getElementById('prevBtn').addEventListener('click', () => {
+  if (currentStep > 0) goToStep(currentStep - 1);
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  stopAuto();
+  currentStep = -1;
+  render();
+});
+
+let autoInterval = null;
+function stopAuto() {
+  if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+  document.getElementById('autoBtn').textContent = '▶ 自动播放';
+}
+
+document.getElementById('autoBtn').addEventListener('click', () => {
+  if (autoInterval) { stopAuto(); return; }
+  if (currentStep >= steps.length - 1) { currentStep = -1; render(); }
+  document.getElementById('autoBtn').textContent = '⏸ 暂停';
+  autoInterval = setInterval(() => {
+    if (currentStep >= steps.length - 1) { stopAuto(); return; }
+    goToStep(currentStep + 1);
+  }, 1000);
+});
+
+// Init
+render();
+</script>
+</body>
+</html>
