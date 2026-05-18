@@ -15,6 +15,7 @@
 | String & Array (字符串与数组) | 反转单词、相加/相乘、旋转数组、缺失重复数、回文、括号 | [string-array.md](string-array.md) |
 | Two Pointer (双指针) | 左右指针、正反指针、快慢指针、三数之和、盛水、股票买卖、颜色排序、加油站 | [two-pointer.md](two-pointer.md) |
 | Top K (第 K 大/小) | QuickSelect、最小堆、最大堆、前 K 个高频/最近元素、数据流第 K 大 | [topk.md](topk.md) |
+| Prefix Sum (前缀和) | 子数组和为K、前缀积、二维前缀和、差分数组、前缀异或、Kadane、取模/状态压缩 | [prefix-sum.md](prefix-sum.md) |
 | Stack (栈) | 单调栈、表达式求值、Valid Parentheses、Largest Rectangle、接雨水、括号匹配 | [stack.md](stack.md) |
 | 递归 → 非递归推导 | 机械推导方法 + 6种递归模式的完整图谱 + 推导工作流 | [recursion-to-iteration.md](recursion-to-iteration.md) |
 
