@@ -104,4 +104,64 @@ public class BST {
         }
         return -1;
     }
+
+    /**
+     * https://leetcode.com/problems/insert-into-a-binary-search-tree/
+     */
+    public TreeNode insertIntoBST(TreeNode root, int val) {
+        if (root == null) {
+            TreeNode cur = new TreeNode(val);
+            return cur;
+        }
+        if (root.val > val) {
+            root.left = insertIntoBST(root.left, val);
+        } else {
+            root.right = insertIntoBST(root.right, val);
+        }
+        return root;
+    }
+
+    /**
+     * https://leetcode.com/problems/delete-node-in-a-bst/
+     * 删除的三种情况：
+     * 1. 删除节点是叶子节点，可以直接删除。
+     * 2. 删除节点只有一个子节点，就用这个子节点替代删除节点
+     * 3. 删除节点有两个子节点，需要去右子树找到替代的节点，把那个节点的值复制过来。然后相当于再在右子树删除那个替代的val.
+     *
+     * 这里关键点就是定义正确的递归语义: 了解这个递归函数的语义，才能知道怎么实现这个递归函数
+     * 返回已经调整好顺序的以root为根节点的子树
+     */
+    public TreeNode deleteNode(TreeNode root, int key) {
+        if (root == null) {
+            // 如果都走到了null路径了，说明这棵树没有这个key
+            return null;
+        }
+        if (root.val > key) {
+            root.left = deleteNode(root.left, key);
+        } else if (root.val < key) {
+            root.right = deleteNode(root.right, key);
+        } else {
+            if (root.left == null && root.right == null) {
+                // case 1
+                // 要把这个节点的父节点相应的孩子置空，所以要返回某个东西给上层
+                // 因为删除了，所以直接返回null
+                return null;
+            }
+            // case 2
+            if (root.left == null) {
+                return root.right;
+            }
+            if (root.right == null) {
+                return root.left;
+            }
+            // case 3
+            TreeNode next = root.right;
+            while (next.left != null) {
+                next = next.left;
+            }
+            root.val = next.val;
+            root.right = deleteNode(root.right, next.val);
+        }
+        return root;
+    }
 }
