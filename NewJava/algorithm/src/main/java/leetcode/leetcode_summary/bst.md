@@ -9,7 +9,7 @@
 | ★★★★★ | 98 | Validate Binary Search Tree | 🟡 Medium | ① 中序遍历检查递增 ② 区间约束 (min, max) | ✅ BST.java |
 | ★★★★★ | 230 | Kth Smallest Element in a BST | 🟡 Medium | 中序遍历到第 K 个即停止 | ✅ BST.java |
 | ★★★★ | 450 | Delete Node in a BST | 🟡 Medium | 三种情况：叶子 / 单子 / 双子（后继替换） | ✅ BST.java |
-| ★★★★ | 108 | Convert Sorted Array to BST | 🟢 Easy | 二分递归构建 | ⬜ |
+| ★★★★ | 108 | Convert Sorted Array to BST | 🟢 Easy | 二分递归构建 | ✅ BST.java |
 | ★★★★ | 235 | Lowest Common Ancestor of a BST | 🟡 Medium | 利用大小关系剪枝：p < root < q → root 就是 LCA | ✅ Tree.java |
 | ★★★★ | 96 | Unique BST | 🟡 Medium | DP / 卡特兰数 | ⬜ |
 | ★★★ | 173 | BST Iterator | 🟡 Medium | 栈模拟非递归中序遍历 | ⬜ |
