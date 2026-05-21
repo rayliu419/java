@@ -175,7 +175,27 @@ DP/计数       → 卡特兰数 / 区间 DP
 ---
 
 #### Flatten Binary Tree to Linked List（114）
-- 后序遍历，**画图辅助**理解
+- 和 701/450 同样的模式：**定义递归函数语义 → 用 `root.left/right = recursive()` 挂接结果**
+
+  递归语义：**`flattenTree(root)` — 展平以 `root` 为根的子树，并返回展平后的根（即 root 本身）**
+
+  调用完成后保证：
+  1. 子树已按**前序遍历**顺序展平成一条右斜链
+  2. 所有节点的 `left = null`
+  3. `right` 指向前序的下一个节点
+  4. 返回值永远等于入参 `root`（和 deleteNode 不同，deleteNode 可能返回新根）
+
+  ```
+  flattenTree(root):
+    root.left = flattenTree(root.left)   ← 左子树已展平，结果接回来
+    root.right = flattenTree(root.right) ← 右子树已展平，结果接回来
+    // 处理当前节点：三种情况
+    // 叶子 / 只有右子树 → 直接返回
+    // 只有左子树 → 移到右边，left 置 null
+    // 左右都有 → 左子树的最右节点接右子树，左移右，left 置 null
+  ```
+
+  > 与 deleteNode/insertIntoBST 的区别：它们的返回值可能是新根（删除/插入改变了根），而 flatten 的根不会变。但"用返回值让上层重新挂接"的手法一样。
 
 ---
 

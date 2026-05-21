@@ -2,6 +2,8 @@ package leetcode;
 
 import infra.TreeNode;
 
+import java.time.temporal.Temporal;
+
 public class BST {
 
     /**
@@ -184,6 +186,42 @@ public class BST {
         TreeNode root = new TreeNode(nums[mid]);
         root.left = buildTree(nums, low, mid - 1);
         root.right = buildTree(nums, mid + 1, high);
+        return root;
+    }
+
+    /**
+     * https://leetcode.com/problems/flatten-binary-tree-to-linked-list
+     *
+     */
+    public void flatten(TreeNode root) {
+        flattenTree(root);
+    }
+
+    private TreeNode flattenTree(TreeNode root) {
+        if (root == null) {
+            return null;
+        }
+        root.left = flattenTree(root.left);
+        root.right = flattenTree(root.right);
+        if (root.left == null && root.right == null) {
+            return root;
+        }
+        if (root.left == null) {
+            return root;
+        }
+        if (root.right == null) {
+            root.right = root.left;
+            root.left = null;
+            return root;
+        }
+        // root.left != null && root.right != null
+        TreeNode next = root.left;
+        while (next.right != null) {
+            next = next.right;
+        }
+        next.right = root.right;
+        root.right = root.left;
+        root.left = null;
         return root;
     }
 }
