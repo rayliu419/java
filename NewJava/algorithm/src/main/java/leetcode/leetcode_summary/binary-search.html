@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Binary Search (二分查找) 总结</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+    line-height: 1.7;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 32px 80px;
+    color: #1a1a2e;
+    background: #f8f9fa;
+  }
+  h1 { font-size: 2em; border-bottom: 3px solid #2563eb; padding-bottom: 10px; margin-bottom: 24px; }
+  h2 { font-size: 1.5em; color: #1e40af; margin-top: 36px; padding-left: 8px; border-left: 4px solid #3b82f6; }
+  h3 { font-size: 1.2em; color: #1e293b; margin-top: 28px; }
+  h4 { font-size: 1.05em; color: #334155; margin-top: 20px; }
+
+  /* 核心心法高亮 */
+  blockquote {
+    margin: 16px 0;
+    padding: 12px 20px;
+    background: #eef2ff;
+    border-left: 5px solid #6366f1;
+    border-radius: 0 8px 8px 0;
+    font-size: 1.05em;
+  }
+  blockquote > p { margin: 0; }
+
+  /* 表格通用样式 */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.95em;
+  }
+  th, td {
+    border: 1px solid #d1d5db;
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #2563eb;
+    color: #fff;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  tr:nth-child(even) { background: #f1f5f9; }
+  tr:hover { background: #e0e7ff; }
+
+  /* 代码块 */
+  pre {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 16px 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.9em;
+    line-height: 1.5;
+    margin: 12px 0;
+  }
+  code {
+    font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+  }
+  p > code, li > code, td > code {
+    background: #e2e8f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.92em;
+    color: #1e40af;
+  }
+
+  /* 题目列表星级 */
+  .star { color: #f59e0b; font-weight: bold; }
+
+  /* 状态标记 */
+  .done { color: #16a34a; font-weight: bold; }
+  .pending { color: #94a3b8; }
+
+  /* 分界线 */
+  hr {
+    border: none;
+    border-top: 2px dashed #cbd5e1;
+    margin: 32px 0;
+  }
+
+  /* 路线图卡片 */
+  .route {
+    background: linear-gradient(135deg, #1e3a5f, #2563eb);
+    color: #fff;
+    padding: 16px 24px;
+    border-radius: 12px;
+    margin: 16px 0;
+    line-height: 1.8;
+    font-size: 0.95em;
+  }
+  .route strong { color: #fbbf24; }
+
+  /* 对照表双栏 */
+  .comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .comparison > div {
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+  }
+  .comparison > div h4 { margin: 0 0 8px; }
+  @media (max-width: 640px) { .comparison { grid-template-columns: 1fr; } }
+
+  /* 提示框 */
+  .tip {
+    background: #fef9c3;
+    border-left: 5px solid #eab308;
+    padding: 10px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 12px 0;
+  }
+  .warn {
+    background: #fee2e2;
+    border-left: 5px solid #ef4444;
+    padding: 10px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 12px 0;
+  }
+
+  /* 频次列居中 */
+  td:first-child, th:first-child { text-align: center; white-space: nowrap; }
+  td:nth-child(2), th:nth-child(2) { text-align: center; }
+  td:nth-child(4), th:nth-child(4) { text-align: center; }
+  td:nth-child(6), th:nth-child(6) { text-align: center; }
+</style>
+</head>
+<body>
+
+<h1>Binary Search (二分查找)</h1>
+
+<!-- ─── 题目列表 ─── -->
+<h2>题目列表（按面试频次降序）</h2>
+
+<table>
+  <tr>
+    <th>频次</th><th>题号</th><th>题目</th><th>难度</th><th>核心思路</th><th>状态</th>
+  </tr>
+  <tr><td><span class="star">★★★★★</span></td><td>704</td><td>Binary Search</td><td>🟢 Easy</td><td>标准二分模板，左右指针收缩</td><td><span class="done">✅ BinarySearch.java</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>35</td><td>Search Insert Position</td><td>🟢 Easy</td><td>找第一个 ≥ target 的位置</td><td><span class="done">✅ BinarySearch.java</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>34</td><td>Find First and Last Position</td><td>🟡 Medium</td><td>左右边界分别二分查找</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>69</td><td>Sqrt(x)</td><td>🟢 Easy</td><td>数值二分，平方比较防溢出</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>33</td><td>Search in Rotated Sorted Array</td><td>🟡 Medium</td><td>先判哪半有序，再二分</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>153</td><td>Find Min in Rotated Sorted Array</td><td>🟡 Medium</td><td>比较 mid 与 high，无重复</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>162</td><td>Find Peak Element</td><td>🟡 Medium</td><td>比较 mid vs mid+1，向高侧收缩</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>74</td><td>Search a 2D Matrix</td><td>🟡 Medium</td><td>二维映射一维做二分</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>875</td><td>Koko Eating Bananas</td><td>🟡 Medium</td><td>答案二分：check 每小时能否吃完</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>1011</td><td>Ship Packages Within D Days</td><td>🟡 Medium</td><td>答案二分：check 能否 D 天内运完</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>278</td><td>First Bad Version</td><td>🟢 Easy</td><td>first occurrence 变体</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>367</td><td>Valid Perfect Square</td><td>🟢 Easy</td><td>类似 Sqrt，判断完全平方</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>81</td><td>Search in Rotated Sorted Array II</td><td>🟡 Medium</td><td>含重复 → 去重处理 (high--)</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>154</td><td>Find Min in Rotated Sorted Array II</td><td>🔴 Hard</td><td>含重复旋转数组最小值</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>540</td><td>Single Element in a Sorted Array</td><td>🟡 Medium</td><td>奇偶下标性质</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>4</td><td>Median of Two Sorted Arrays</td><td>🔴 Hard</td><td>划分数组 + 二分，O(log(m+n))</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>658</td><td>Find K Closest Elements</td><td>🟡 Medium</td><td>二分找插入点 + 双指针扩展</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>378</td><td>Kth Smallest in Sorted Matrix</td><td>🟡 Medium</td><td>二分值域 + 计数</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>410</td><td>Split Array Largest Sum</td><td>🔴 Hard</td><td>最小化最大值：答案二分经典题</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★</span></td><td>50</td><td>Pow(x, n)</td><td>🟡 Medium</td><td>快速幂：二分思想（x^n = x^(n/2)²）</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★</span></td><td>29</td><td>Divide Two Integers</td><td>🟡 Medium</td><td>倍增 + 减法实现除法</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★</span></td><td>300</td><td>Longest Increasing Subsequence</td><td>🟡 Medium</td><td>耐心排序：tails 数组二分优化 DP</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★</span></td><td>354</td><td>Russian Doll Envelopes</td><td>🔴 Hard</td><td>二维 LIS</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★</span></td><td>174</td><td>Dungeon Game</td><td>🔴 Hard</td><td>二分血量 + DP check</td><td><span class="pending">⬜</span></td></tr>
+</table>
+
+<!-- ─── 核心套路 ─── -->
+<h2>核心套路</h2>
+
+<pre>
+精确查找    → 标准二分，相等即返回
+左边界      → 找到后 high = mid - 1 继续往左
+右边界      → 找到后 low = mid + 1 继续往右
+插入位置    → lower_bound 找第一个 ≥ target
+旋转数组    → 比较 mid 与 high/low，判断哪半有序
+答案二分    → 在值域上二分，check 函数判断可行性
+数值二分    → 整数平方根/除法，注意溢出用 long
+二维二分    → 映射为一维 / 右上角 Z 字形
+矩阵第 K 小 → 二分值域 + 每行计数
+中位数      → 划分数组 + 二分，奇偶统一处理
+求峰值      → 比较 mid 与 mid+1，往上升方向收缩
+快速幂      → 分治 x^n = x^(n/2) * x^(n/2) * (n%2 ? x : 1)
+LIS         → tails[i] 表示长度为 i+1 的递增子序列的最小末尾
+</pre>
+
+<!-- ─── 刷题路线 ─── -->
+<h2>刷题路线</h2>
+
+<div class="route">
+  <strong>第一梯队（必会）：</strong>704 → 35 → 34 → 69 → 33 → 153<br>
+  <strong>第二梯队（高频）：</strong>162 → 74 → 875 → 1011 → 278 → 367<br>
+  <strong>第三梯队（进阶）：</strong>81 → 154 → 540 → 4 → 658 → 378 → 410
+</div>
+
+<!-- ─── 一、核心心法 ─── -->
+<h2>学习笔记</h2>
+<hr>
+
+<h3>一、核心心法</h3>
+
+<blockquote>二分查找的每一轮循环开始前，我们都<strong>确信答案一定在 [low, high] 范围内</strong>（如果存在的话）。这个确信的结论就是"不变量"。根据 mid 与 target 的比较结果，我们缩小区间，同时保证这个不变量仍然成立。当区间缩小到空集（或只剩一个元素）时，答案就找到了。</blockquote>
+
+<h4>概览</h4>
+
+<ul>
+  <li><strong>什么时候用二分？</strong> 只要数据是<strong>有序的，或者局部有序的</strong>，就应该适当考虑二分查找的方法。</li>
+  <li><strong>猜数法</strong>：需要猜数或者用不同的数来试某个解时，使用二分法快速试错。</li>
+</ul>
+
+<h4>解题思维顺序</h4>
+
+<p>碰到一道二分题时，按这个顺序推导：</p>
+
+<p><strong>第 1 步：看能否排除 mid → 决定 low/high 更新方式</strong></p>
+<p>核心问题：<strong>mid 有没有可能是最终答案？</strong></p>
+<ul>
+  <li><code>nums[mid]</code> 肯定不是答案（如 <code>nums[mid] &gt; target</code> 且要找 target）→ <code>low = mid + 1</code> / <code>high = mid - 1</code></li>
+  <li><code>nums[mid]</code> 可能就是答案（如找左边界，<code>nums[mid] &gt;= target</code> 时 mid 可能是第一个）→ <code>low = mid</code> / <code>high = mid</code></li>
+</ul>
+
+<p><strong>第 2 步：看更新方式 → 决定循环条件</strong></p>
+<table>
+  <tr><th>更新方式</th><th>循环条件</th><th>原因</th></tr>
+  <tr><td><code>mid &plusmn; 1</code></td><td><code>&lt;=</code></td><td>每次范围至少减 1，<code>low &gt; high</code> 自然退出</td></tr>
+  <tr><td><code>high = mid</code> 或 <code>low = mid</code></td><td><code>&lt;</code></td><td>mid 可能被保留，范围不必然减 1，<code>low == high</code> 时终止</td></tr>
+</table>
+
+<p><strong>第 3 步：看题意 → 决定 mid 取整方向</strong></p>
+<ul>
+  <li>需要<strong>靠左</strong>决策（如找左边界，<code>high = mid</code>）→ 下取整 <code>mid = low + (high - low) / 2</code></li>
+  <li>需要<strong>靠右</strong>决策（如找右边界，<code>low = mid</code>）→ <strong>必须上取整</strong> <code>mid = low + (high - low + 1) / 2</code>，否则 <code>low + 1 == high</code> 时死循环</li>
+</ul>
+
+<p>三步走完，二分查找的三个决定性因素就全部确定了。</p>
+
+<h4>三个决定性因素</h4>
+
+<table>
+  <tr><th>因素</th><th>说明</th></tr>
+  <tr><td><strong>区间定义</strong></td><td>左闭右闭 <code>[low, high]</code> vs 左闭右开 <code>[low, high)</code></td></tr>
+  <tr><td><strong>mid 取整方向</strong></td><td><code>low + (high - low) / 2</code>（下取整）vs <code>low + (high - low + 1) / 2</code>（上取整）</td></tr>
+  <tr><td><strong>收缩方式</strong></td><td><code>low = mid + 1</code> / <code>high = mid - 1</code> vs <code>low = mid</code> / <code>high = mid</code></td></tr>
+</table>
+
+<p>这三个因素必须相互匹配，否则死循环或越界。</p>
+
+
+<h4>循环条件与收缩规则的深层原理</h4>
+
+<p><code>while (low &lt;= high)</code> 和 <code>while (low &lt; high)</code> 的根本区别在于：<strong>mid 是否能被安全地排除出搜索空间。</strong></p>
+
+<p><strong>核心直觉</strong>：搜索空间是一个集合 <code>[low, high]</code>，每次循环要缩小这个集合。缩小方式由 <code>mid</code> 是否可能是最终答案来决定。</p>
+
+<p><strong>场景一：mid 可以被排除（标准二分）</strong></p>
+<p>当我们知道 <code>nums[mid] != target</code> 后，<code>mid</code> 肯定不是答案，可以大胆排除：</p>
+<pre>
+low = mid + 1    // mid 及其左侧全都排除
+high = mid - 1   // mid 及其右侧全都排除</pre>
+<p>每次范围至少缩小 1，<code>low &lt;= high</code> 作为终止条件完全安全 — 迟早 <code>low &gt; high</code> 退出。</p>
+
+<p><strong>场景二：mid 可能还是答案（边界查找 / 变体）</strong></p>
+<pre>
+// 左边界：找第一个 &gt;= target 的数
+if (nums[mid] &gt;= target)  high = mid;   // mid 可能就是答案，不能排除！</pre>
+<p>当 <code>nums[mid] &gt;= target</code> 成立时，<code>mid</code> 有可能是第一个符合条件的数，所以 <code>high = mid</code> 而不是 <code>mid - 1</code>。</p>
+<p>但问题来了：如果 <code>high = mid</code>，<code>low</code> 更新为 <code>mid + 1</code>，当 <code>low + 1 == high</code> 时：</p>
+<pre>
+low = k, high = k+1
+mid = low + (high - low) / 2 = k   // 下取整
+如果命中条件 &rarr; high = mid = k &rarr; low = k, high = k &rarr; low == high</pre>
+<p>此时如果还用 <code>low &lt;= high</code>，<code>low == high</code> 时还会进循环，而 <code>mid = low = high</code>，如果又命中条件 &rarr; <code>high = mid = low</code> &rarr; <strong>死循环</strong>！</p>
+<p>所以<strong>当出现 <code>high = mid</code> 或 <code>low = mid</code> 时，必须用 <code>low &lt; high</code></strong>。循环在 <code>low == high</code> 时终止，此时唯一剩下的元素就是答案。</p>
+
+<p><strong>场景三：low = mid 时为什么必须上取整？</strong></p>
+<pre>
+// 右边界：找最后一个 &lt;= target 的数
+if (nums[mid] &lt;= target)  low = mid;   // mid 可能就是答案</pre>
+<p>当 <code>low = mid</code> 且 <code>low + 1 == high</code> 时：</p>
+<pre>
+low = k, high = k+1
+mid = low + (high - low) / 2 = k      // 下取整！
+如果命中条件 &rarr; low = mid = k &rarr; low 没变 &rarr; 死循环！</pre>
+<p>必须改成<strong>上取整</strong>：</p>
+<pre>
+mid = low + (high - low + 1) / 2 = k+1
+如果命中条件 &rarr; low = mid = k+1 &rarr; low = high &rarr; 退出 ✅</pre>
+
+<p><strong>三段论总结：</strong></p>
+<table>
+  <tr><th>收缩方式</th><th>能否排除 mid</th><th>循环条件</th><th>取整方式</th><th>原因</th></tr>
+  <tr><td><code>low = mid+1</code>, <code>high = mid-1</code></td><td>✅ 排除 mid</td><td><code>&lt;=</code></td><td>下取整</td><td>范围每次至少减 1，不会死循环</td></tr>
+  <tr><td><code>low = mid+1</code>, <code>high = mid</code></td><td>❌ mid 可能保留</td><td><code>&lt;</code></td><td>下取整</td><td>保留 mid 意味着范围不必然减 1，<code>&lt;</code> 在 <code>low==high</code> 时终止</td></tr>
+  <tr><td><code>low = mid</code>, <code>high = mid-1</code></td><td>❌ mid 可能保留</td><td><code>&lt;</code></td><td><strong>上取整</strong></td><td><code>low = mid</code> 必须上取整，否则 <code>low+1==high</code> 时死循环</td></tr>
+</table>
+
+<hr>
+
+
+<!-- ─── 三、实现细节 ─── -->
+<h3>三、实现细节</h3>
+
+<h4>mid 取整方向</h4>
+
+<ul>
+  <li><code>mid = low + (high - low) / 2</code> — mid 总是<strong>偏向左边</strong>（偶数长度时取左中）或中间（奇数长度）。</li>
+  <li><code>mid = low + (high - low + 1) / 2</code> — mid 总是<strong>偏向右边</strong>（偶数长度时取右中）或中间（奇数长度）。</li>
+  <li><code>low = mid</code> 时 → 必须用<strong>上取整</strong>，否则死循环。</li>
+  <li><code>high = mid</code> 时 → 必须用<strong>下取整</strong>，否则死循环。</li>
+</ul>
+
+<h4>循环条件的选择</h4>
+
+<ul>
+  <li><code>while (low &lt;= high)</code> → <strong>闭区间</strong> <code>[low, high]</code>。low 和 high 都可能被检查到。
+    <ul>
+      <li>移动 low 或 high 后，最终以 <code>low &gt; high</code> 退出循环。一般最后检查 <code>low</code> 的情况。</li>
+    </ul>
+  </li>
+  <li><code>while (low &lt; high)</code> → <strong>半开区间</strong> <code>[low, high)</code>。终止时 <code>low == high</code> 即为答案。</li>
+  <li>选择 <code>&lt;=</code> 还是 <code>&lt;</code>，取决于解可能在<strong>闭区间还是半开区间</strong>。</li>
+</ul>
+
+<h4>收缩方式</h4>
+
+<ul>
+  <li>常规算法：<code>low = mid + 1</code>，<code>high = mid - 1</code>。</li>
+  <li>变体：<code>low = mid</code>，<code>high = mid</code>，主要看设置会不会把解漏掉。一般来说只会取一种，否则可能死循环。</li>
+</ul>
+
+<h4>如何写出 bug free 的二分</h4>
+
+<p>二分查找最大的问题是很难写出 bug free 的代码，策略：<strong>用 test case 驱动，很难直接思考。</strong></p>
+
+<p><strong>边界条件单独处理</strong>：</p>
+<ul>
+  <li><code>low</code> 或 <code>high</code> <strong>从未被重置过</strong>的情况。这种可能能被后面统一处理，如果比较复杂，就单独拉出来讨论。</li>
+  <li>剩下的就是 <code>low</code> 和 <code>high</code> <strong>都被重置过</strong>的。</li>
+</ul>
+
+<p><strong>插入位置 test case</strong>：</p>
+<ul>
+  <li>奇数数组：<code>[1, 3, 5]</code> 插入 <code>2</code>；<code>[1, 3, 5]</code> 插入 <code>4</code>。</li>
+  <li>偶数数组：<code>[1, 3, 5, 7]</code> 插入 <code>2</code>；<code>[1, 3, 5, 7]</code> 插入 <code>4</code>。</li>
+</ul>
+
+<h4>ans 变量的使用</h4>
+
+<p>变体题设置一个 <code>ans</code> 变量，记录最后 break 出循环的解，因为可能 break 出去以后，下次就找不到更好的解了。</p>
+
+<p><strong>某些情况下，break 出去还得检查最后的 <code>low</code> 是不是解。</strong> 变体中，最后的解是在循环中 <code>ans</code> 的解和 <code>low</code> 的解中的一个。</p>
+
+<hr>
+
+<!-- ─── 四、各题要点 ─── -->
+<h3>四、各题要点</h3>
+
+<!---------- 704 ---------->
+<h4>Binary Search（704）⭐⭐⭐⭐⭐</h4>
+<ul>
+  <li>最基础的二分模板，建议一次性写对</li>
+  <li>终止条件 <code>low &lt;= high</code>，每次更新 <code>mid &plusmn; 1</code></li>
+</ul>
+
+<hr>
+
+<!---------- 35 ---------->
+<h4>Search Insert Position（35）⭐⭐⭐⭐⭐</h4>
+<ul>
+  <li>等价于 lower_bound：找第一个 <code>≥ target</code> 的下标</li>
+  <li>如果所有数都 <code>&lt; target</code>，返回 <code>nums.length</code></li>
+  <li>可以直接用左边界写法，最终返回 <code>low</code>：</li>
+</ul>
+
+<pre>
+int searchInsert(int[] nums, int target) {
+    int low = 0, high = nums.length - 1;
+    while (low &lt;= high) {
+        int mid = low + (high - low) / 2;
+        if (nums[mid] &gt;= target)  high = mid - 1;
+        else                      low = mid + 1;
+    }
+    return low;
+}
+</pre>
+
+<hr>
+
+<!---------- 34 ---------->
+<h4>Find First and Last Position（34）⭐⭐⭐⭐⭐</h4>
+<ul>
+  <li>左右边界分解成两个独立函数，各调一次</li>
+  <li>左边界：<code>nums[mid] &gt;= target</code> → <code>high = mid - 1</code>，记录 <code>ans</code></li>
+  <li>右边界：<code>nums[mid] &lt;= target</code> → <code>low = mid + 1</code>，记录 <code>ans</code></li>
+  <li>不存在时返回 <code>[-1, -1]</code></li>
+</ul>
+
+<hr>
+
+<!---------- 69 ---------->
+<h4>Sqrt(x)（69）⭐⭐⭐⭐⭐</h4>
+<ul>
+  <li>二分范围 <code>[0, x]</code>，找最大的 <code>mid</code> 满足 <code>mid&sup2; &le; x</code></li>
+  <li>注意 <code>mid * mid</code> 可能溢出 int，用 <code>long</code> 或 <code>mid &gt; x / mid</code></li>
+</ul>
+
+<hr>
+
+<!---------- 33 ---------->
+<h4>Search in Rotated Sorted Array（33）⭐⭐⭐⭐</h4>
+<ul>
+  <li>先判断哪半有序：比较 <code>nums[mid]</code> 与 <code>nums[low]</code></li>
+  <li>左半有序：<code>nums[low] &lt;= nums[mid]</code>
+    <ul>
+      <li>target 在 <code>[low, mid)</code> 内 → <code>high = mid - 1</code></li>
+      <li>否则 → <code>low = mid + 1</code></li>
+    </ul>
+  </li>
+  <li>右半有序：<code>nums[mid] &lt; nums[low]</code>
+    <ul>
+      <li>target 在 <code>(mid, high]</code> 内 → <code>low = mid + 1</code></li>
+      <li>否则 → <code>high = mid - 1</code></li>
+    </ul>
+  </li>
+</ul>
+
+<hr>
+
+<!---------- 153 ---------->
+<h4>Find Minimum in Rotated Sorted Array（153）⭐⭐⭐⭐</h4>
+<ul>
+  <li>比较 <code>nums[mid]</code> 与 <code>nums[high]</code></li>
+  <li><code>nums[mid] &lt; nums[high]</code> → 最小值在左半，<code>high = mid</code></li>
+  <li><code>nums[mid] &gt; nums[high]</code> → 最小值在右半，<code>low = mid + 1</code></li>
+  <li>循环条件 <code>low &lt; high</code>，终止时 <code>low == high</code> 即为答案</li>
+</ul>
+
+<hr>
+
+<!---------- 875 ---------->
+<h4>Koko Eating Bananas（875）⭐⭐⭐</h4>
+<ul>
+  <li>答案二分经典题：二分 <code>k</code>（每小时吃的速度）</li>
+  <li>check 函数计算总时间 <code>&sum;⌈pile/k⌉</code>，判断是否 <code>&le; h</code></li>
+  <li>二分范围 <code>[1, max(piles)]</code></li>
+</ul>
+
+<hr>
+
+<!---------- 540 ---------->
+<h4>Single Element in a Sorted Array（540）⭐⭐</h4>
+<ul>
+  <li>核心性质：单个元素出现之前 <code>nums[2k] == nums[2k+1]</code>；之后 <code>nums[2k] != nums[2k+1]</code></li>
+  <li>二分检查 mid 的奇偶性：
+    <ul>
+      <li>mid 为偶数：比较 <code>nums[mid]</code> 与 <code>nums[mid+1]</code></li>
+      <li>mid 为奇数：比较 <code>nums[mid-1]</code> 与 <code>nums[mid]</code></li>
+    </ul>
+  </li>
+  <li>利用性质收缩区间，O(log n)</li>
+</ul>
+
+<hr>
+
+<!---------- 4 ---------->
+<h4>Median of Two Sorted Arrays（4）⭐⭐</h4>
+<ul>
+  <li>核心：在两个数组上做<strong>划分</strong>，保证 <code>len(left_part) == len(right_part)</code> 且 <code>max(left) &le; min(right)</code></li>
+  <li>对较短的数组二分划分位置，在长数组上算出对应的划分位置</li>
+  <li>复杂度 O(log(min(m, n)))</li>
+  <li>注意奇偶统一处理：中位数 = <code>(maxLeft + minRight) / 2.0</code> 或 <code>minRight</code></li>
+</ul>
+
+<hr>
+
+<!-- ─── 五、易错点总结 ─── -->
+<h3>五、易错点总结</h3>
+
+<table>
+  <tr><th>场景</th><th>易错点</th><th>正确做法</th></tr>
+  <tr><td>标准二分</td><td>忘记 <code>low &lt;= high</code></td><td>单元素数组需要等号，否则漏查</td></tr>
+  <tr><td>左边界</td><td>找到后直接返回</td><td>继续往左压缩，记录 ans</td></tr>
+  <tr><td>右边界</td><td>找到后直接返回</td><td>继续往右压缩，记录 ans</td></tr>
+  <tr><td>旋转数组</td><td>用 target 比较 mid</td><td>用 <code>nums[mid]</code> vs <code>nums[high]</code> 判断哪半有序</td></tr>
+  <tr><td>数值二分</td><td><code>mid * mid</code> 溢出</td><td>用 <code>long</code> 或 <code>mid &gt; x / mid</code></td></tr>
+  <tr><td>答案二分</td><td>二分范围没覆盖全</td><td>确保 left 和 right 包含所有合法答案</td></tr>
+  <tr><td>死循环</td><td><code>low = mid</code> 时忘记上取整</td><td>有 <code>low = mid</code> 一定要上取整</td></tr>
+</table>
+
+</body>
+</html>
