@@ -437,5 +437,153 @@ encode(leaf) = "0"
   <li>发现编码一致 → 有同构子树</li>
 </ul>
 
+<hr>
+
+<!---------- 297 ---------->
+<h3>二叉树序列化（LeetCode 297）⭐⭐⭐⭐</h3>
+
+<blockquote>序列化是将二叉树编码为字符串，反序列化是从字符串还原出原树。面试高频题。</blockquote>
+
+<h4>1. 前序遍历序列化</h4>
+
+<p><strong>序列化过程</strong>：按前序（根→左→右）递归遍历，节点值用 <code>,</code> 分隔，空节点标记为 <code>#</code>。</p>
+
+<pre>
+    30
+   /  \
+  10   20
+ /    /  \
+50   45  35
+</pre>
+<p>→ <code>"30,10,50,#,#,#,20,45,#,#,35,#,#"</code></p>
+
+<p><strong>反序列化核心</strong>：维护一个全局索引，按前序顺序消费字符串数组。</p>
+
+<table>
+  <tr><th>当前元素</th><th>操作</th></tr>
+  <tr><td><code>#</code></td><td>返回 null，索引+1（空子树）</td></tr>
+  <tr><td>数字</td><td>创建节点，索引+1，递归构建左右子树</td></tr>
+</table>
+
+<div class="tip">
+<strong>💡</strong> 关键 insight：序列化时，当前元素的下一个和下两个一定是当前节点的左孩子和右孩子（只要当前不为 #）。前序遍历的顺序天然保证了这一点。
+</div>
+
+<h4>反序列化递归语义——怎么理解才好写</h4>
+
+	<p>反序列化的递归函数定义这个<strong>契约</strong>：</p>
+
+	<pre>
+	deserialize(指针):
+	  从指针当前位置开始，恰好消费掉「一棵树」的序列化数据
+	  返回这棵树的根节点（或 null）
+	  指针停在「这棵树」之后的位置
+	</pre>
+
+	<p>它和 <code>serialize</code> 是<strong>完全对称</strong>的——序列化是先写根再递归左右，反序列化就是先读根再递归左右，<strong>代码结构一模一样</strong>：</p>
+
+	<div class="comparison">
+	  <div>
+	    <h4>序列化</h4>
+	    <pre>
+	void serialize(Node root, sb) {
+	    if (root == null) {
+	        sb.append("#,");
+	        return;
+	    }
+	    sb.append(root.val).append(",");
+	    serialize(root.left, sb);
+	    serialize(root.right, sb);
+	}
+	    </pre>
+	  </div>
+	  <div>
+	    <h4>反序列化</h4>
+	    <pre>
+	Node deserialize(arr, c) {
+	    if (arr[c.index].equals("#")) {
+	        c.index++;
+	        return null;
+	    }
+	    Node node = new Node(arr[c.index]);
+	    c.index++;
+	    node.left = deserialize(arr, c);
+	    node.right = deserialize(arr, c);
+	    return node;
+	}
+	    </pre>
+	  </div>
+	</div>
+
+	<p>理解方式——把数组看成<strong>嵌套括号</strong>，每个 <code>deserialize()</code> 调用吃掉自己的一对括号：</p>
+
+	<pre>
+	原始:  30, 10, 50, #, #, #, 20, 45, #, #, 35, #, #
+	括号:  30, [10, [50, #, #], #],  [20, [45, #, #], [35, #, #]]
+	            ├──左子树──┤            ├─────右子树────────┤
+	</pre>
+
+	<ul>
+	  <li><code>#</code> 是递归终止信号：遇到就返回 null，指针+1</li>
+	  <li>不是 <code>#</code>：当前值就是<strong>子树的根</strong>，创建节点，指针+1，递归两次——第一次<strong>自动消费左子树的所有元素</strong>，第二次<strong>自动消费右子树的所有元素</strong></li>
+	  <li><strong>不用关心递归内部怎么停的</strong>，只要相信：<code>deserialize(left)</code> 会恰好消费掉左子树的所有元素，指针停在正确位置</li>
+	</ul>
+
+	<div class="warn">
+	<strong>❓ 为什么中序不行？</strong> 前序序列化是 <code>[根, 左子树..., 右子树...]</code>，反序列化一上来就读到根，然后递归消费左右——顺序一致。中序是 <code>[左子树..., 根, 右子树...]</code>，反序列化一上来不知道哪里是根，无法唯一确定。
+	</div>
+
+	<h4>2. 层序遍历序列化</h4>
+
+<p>BFS 逐层遍历，用占位符标记空位，逐层推进直到下一层全为空。</p>
+
+<pre>
+    1
+   / \
+  2   3
+ /
+4
+</pre>
+<p>→ <code>"1,2,3,4,#,#,#"</code></p>
+
+<p><strong>反序列化</strong>：用数组索引映射，<code>globalIndex</code> 指向左右孩子位置，遇到 <code>#</code> 跳过。</p>
+
+<h4>3. 为什么中序遍历不行？</h4>
+
+<p>两种不同形态的树可能产生完全相同的中序序列：</p>
+
+<div class="comparison">
+  <div>
+    <h4>树 A</h4>
+    <pre>
+  1
+ /
+2
+    </pre>
+  </div>
+  <div>
+    <h4>树 B</h4>
+    <pre>
+2
+ \
+  1
+    </pre>
+  </div>
+</div>
+
+<p>中序遍历都是 <code>"2,1"</code>，无法确定根的位置 → <strong>反序列化不唯一</strong>。</p>
+
+<h4>4. 两种方案对比</h4>
+
+<table>
+  <tr><th>维度</th><th>前序序列化</th><th>层序序列化</th></tr>
+  <tr><td>实现难度</td><td>简单（递归）</td><td>中等（BFS + 占位符）</td></tr>
+  <tr><td>反序列化</td><td>递归消费数组</td><td>索引映射建树</td></tr>
+  <tr><td>空间</td><td>O(n) 递归栈</td><td>O(n) 队列 + 缓存</td></tr>
+  <tr><td>空节点标记</td><td><code>#</code></td><td><code>#</code> 或占位符对象</td></tr>
+  <tr><td>LeetCode 297</td><td>✅ 可解</td><td>✅ 可解</td></tr>
+  <tr><td>单节点树</td><td><code>val,#,#</code>（略冗余）</td><td><code>val</code>（更紧凑）</td></tr>
+</table>
+
 </body>
 </html>

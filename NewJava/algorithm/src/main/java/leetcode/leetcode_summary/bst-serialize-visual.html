@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>二叉树前序序列化 / 反序列化 — 动态演示</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 {
+    font-size: 1.6em;
+    margin-bottom: 6px;
+    color: #f1f5f9;
+    text-align: center;
+  }
+  .subtitle {
+    color: #94a3b8;
+    font-size: 0.9em;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  /* container */
+  .container {
+    max-width: 1000px;
+    width: 100%;
+    background: #1e293b;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  /* ─── mode toggle ─── */
+  .mode-toggle {
+    display: flex;
+    background: #0f172a;
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 18px;
+    border: 1px solid #334155;
+  }
+  .mode-btn {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 7px;
+    transition: all 0.25s;
+  }
+  .mode-btn.active {
+    background: #2563eb;
+    color: #fff;
+  }
+  .mode-btn:hover:not(.active) { color: #94a3b8; }
+
+  /* ─── tree canvas ─── */
+  .tree-area {
+    background: #0f172a;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 18px;
+    min-height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+  #treeCanvas { width: 100%; max-height: 320px; }
+
+  /* ─── data display (shared between serialize/deserialize) ─── */
+  .data-area {
+    background: #0f172a;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+    font-size: 1em;
+    min-height: 52px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px;
+    border: 1px solid #334155;
+    position: relative;
+  }
+  .data-label {
+    color: #94a3b8;
+    font-size: 0.7em;
+    margin-right: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  .char-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 32px;
+    padding: 0 5px;
+    border-radius: 4px;
+    font-weight: 600;
+    transition: all 0.3s;
+    font-size: 0.9em;
+    position: relative;
+  }
+  .char-box.value { color: #38bdf8; background: #0c4a6e33; }
+  .char-box.sep { color: #475569; min-width: 8px; font-size: 0.8em; }
+  .char-box.empty { color: #f87171; background: #7f1d1d33; }
+  .char-box.active {
+    transform: scale(1.15);
+    box-shadow: 0 0 12px rgba(56,189,248,0.5);
+    z-index: 2;
+  }
+  .char-box.empty.active {
+    box-shadow: 0 0 12px rgba(248,113,113,0.5);
+  }
+  .char-box .ptr-arrow {
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fbbf24;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  .ptr-label {
+    position: absolute;
+    top: -34px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fbbf24;
+    font-size: 0.65em;
+    white-space: nowrap;
+    background: #1e293b;
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* ─── info panel ─── */
+  .info-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .info-box, .stack-box {
+    background: #0f172a;
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid #334155;
+  }
+  .info-box .label, .stack-box .label {
+    color: #64748b;
+    font-size: 0.75em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .info-box .content {
+    font-size: 0.95em;
+    line-height: 1.5;
+    min-height: 40px;
+  }
+  .info-box .content .highlight { color: #fbbf24; font-weight: 600; }
+  .info-box .content .code {
+    font-family: "JetBrains Mono", monospace;
+    color: #38bdf8;
+    background: #0c4a6e33;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .info-box .content .null-tag { color: #f87171; font-weight: 600; }
+  .info-box .content .arrow { color: #64748b; }
+  .info-box .content .built { color: #4ade80; }
+  .stack-items {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 3px;
+    min-height: 40px;
+  }
+  .stack-item {
+    display: inline-block;
+    background: #1e3a5f;
+    color: #93c5fd;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.82em;
+    border-left: 3px solid #3b82f6;
+    transition: all 0.3s;
+    width: fit-content;
+  }
+  .stack-item.active-frame {
+    background: #1e40af;
+    color: #fff;
+    border-left-color: #fbbf24;
+  }
+  .stack-item.returned {
+    opacity: 0.4;
+    text-decoration: line-through;
+    border-left-color: #64748b;
+  }
+
+  /* ─── code preview ─── */
+  .code-preview {
+    background: #0f172a;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    border: 1px solid #334155;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.8em;
+    line-height: 1.6;
+    overflow-x: auto;
+    color: #94a3b8;
+  }
+  .code-preview .line-highlight {
+    color: #fbbf24;
+    background: #1e293b;
+    display: block;
+    margin: 0 -16px;
+    padding: 0 16px;
+    border-left: 3px solid #fbbf24;
+  }
+
+  /* ─── controls ─── */
+  .controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .controls button {
+    background: #334155;
+    color: #e2e8f0;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 0.95em;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+    min-width: 80px;
+  }
+  .controls button:hover { background: #475569; }
+  .controls button.primary { background: #2563eb; }
+  .controls button.primary:hover { background: #1d4ed8; }
+  .controls button:disabled { opacity: 0.35; cursor: not-allowed; }
+  .controls .step-counter {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 12px;
+    color: #94a3b8;
+    font-size: 0.9em;
+    font-family: "JetBrains Mono", monospace;
+  }
+
+  /* ─── progress bar ─── */
+  .progress-bar {
+    height: 4px;
+    background: #334155;
+    border-radius: 2px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #38bdf8);
+    border-radius: 2px;
+    transition: width 0.4s;
+    width: 0%;
+  }
+
+  @media (max-width: 640px) {
+    .container { padding: 16px; }
+    .info-panel { grid-template-columns: 1fr; }
+    .controls button { padding: 8px 14px; font-size: 0.85em; min-width: 60px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>🌲 前序遍历 — 序列化 / 反序列化 动态演示</h1>
+<p class="subtitle">Pre-order Serialize &amp; Deserialize — 逐步观察递归过程</p>
+
+<div class="container">
+
+  <!-- mode toggle -->
+  <div class="mode-toggle">
+    <button class="mode-btn active" data-mode="serialize" onclick="switchMode('serialize')">🔵 序列化 (Serialize)</button>
+    <button class="mode-btn" data-mode="deserialize" onclick="switchMode('deserialize')">🟢 反序列化 (Deserialize)</button>
+  </div>
+
+  <!-- progress -->
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+  <!-- tree -->
+  <div class="tree-area">
+    <canvas id="treeCanvas" width="900" height="300"></canvas>
+  </div>
+
+  <!-- data display (serialized string or input array) -->
+  <div class="data-area" id="dataArea">
+    <span class="data-label" id="dataLabel">序列化结果</span>
+    <span id="dataDisplay"></span>
+  </div>
+
+  <!-- code preview -->
+  <div class="code-preview" id="codePreview"></div>
+
+  <!-- info & stack -->
+  <div class="info-panel">
+    <div class="info-box">
+      <div class="label" id="actionLabel">当前操作</div>
+      <div class="content" id="actionDisplay">点击「▶ 播放」开始演示</div>
+    </div>
+    <div class="stack-box">
+      <div class="label">递归调用栈</div>
+      <div class="stack-items" id="stackDisplay">
+        <span style="color:#64748b;font-size:0.82em;">（空）</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- controls -->
+  <div class="controls">
+    <button id="btnReset" onclick="reset()">⟲ 重置</button>
+    <button id="btnPrev" onclick="prev()">◀ 上一步</button>
+    <button id="btnPlay" class="primary" onclick="togglePlay()">▶ 播放</button>
+    <button id="btnNext" onclick="next()">下一步 ▶</button>
+    <span class="step-counter" id="stepCounter">0 / 0</span>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════════════════════════
+const treeData = {
+  val: 30,
+  left: { val: 10, left: { val: 50, left: null, right: null }, right: null },
+  right: { val: 20, left: { val: 45, left: null, right: null }, right: { val: 35, left: null, right: null } }
+};
+const serializedStr = "30,10,50,#,#,#,20,45,#,#,35,#,#";
+
+// ══════════════════════════════════════════════════════════════════
+//  CODE SNIPPETS for code preview
+// ══════════════════════════════════════════════════════════════════
+const CODE_SNIPPETS = {
+  serialize: {
+    lines: [
+      'void serialize(Node root, StringBuilder sb) {',
+      '  if (root == null) {',
+      '    sb.append("#");              ← null 标记',
+      '    return;',
+      '  }',
+      '  sb.append(root.val).append(",");  ← 输出当前节点',
+      '  serialize(root.left, sb);         ← 递归左子树',
+      '  serialize(root.right, sb);        ← 递归右子树',
+      '}',
+    ],
+    highlight: {
+      'visit': 5,
+      'null': 2,
+      'go-left': 6,
+      'go-right': 7,
+      'back-from-left': 6,
+      'done': 7,
+    }
+  },
+  deserialize: {
+    lines: [
+      'Node deserialize(String[] arr) {',
+      '  if (arr[index].equals("#")) {',
+      '    index++;',
+      '    return null;               ← # 表示空子树',
+      '  }',
+      '  Node node = new Node(arr[index]);  ← 创建当前节点',
+      '  index++;',
+      '  node.left = deserialize(arr);      ← 反序列化左子树',
+      '  node.right = deserialize(arr);     ← 反序列化右子树',
+      '  return node;',
+      '}',
+    ],
+    highlight: {
+      'read-null': 1,
+      'return-null': 3,
+      'create-node': 5,
+      'des-left': 7,
+      'des-right': 8,
+      'return-node': 9,
+      'assign-left': 7,
+      'assign-right': 8,
+    }
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════
+//  STEP BUILDERS
+// ══════════════════════════════════════════════════════════════════
+let mode = 'serialize';
+let steps = [];
+let currentStep = -1;
+let playing = false;
+let playTimer = null;
+
+// ─── Serialize steps ──────────────────────────────────────────────
+function buildSerializeSteps() {
+  const s = [{ type: 'enter', nodeVal: treeData.val, node: treeData, depth: 0 }];
+  doSerializeStep(treeData, s);
+  s.push({ type: 'finish' });
+  return s;
+}
+function doSerializeStep(node, steps) {
+  if (!node) {
+    steps.push({ type: 'null', token: '#' });
+    return;
+  }
+  const id = steps.length;
+  steps.push({ type: 'visit', token: String(node.val) + ',', nodeVal: node.val, node: node, nodeId: id, depth: steps[id-1] ? steps[id-1].depth+1 : 0 });
+  steps.push({ type: 'go-left', nodeVal: node.val, nodeId: id, depth: node.depth || 0 });
+  doSerializeStep(node.left, steps);
+  steps.push({ type: 'back-from-left', nodeVal: node.val, nodeId: id, depth: node.depth || 0 });
+  steps.push({ type: 'go-right', nodeVal: node.val, nodeId: id, depth: node.depth || 0 });
+  doSerializeStep(node.right, steps);
+  steps.push({ type: 'done', nodeVal: node.val, nodeId: id, depth: node.depth || 0 });
+}
+
+// ─── Deserialize steps ────────────────────────────────────────────
+function buildDeserializeSteps() {
+  const arr = serializedStr.split(',');
+  const s = [{ type: 'start', arr: arr, index: 0 }];
+  doDeserializeStep(arr, 0, s, null, true);
+  s.push({ type: 'finish' });
+  return s;
+}
+function doDeserializeStep(arr, depth, steps, parentInfo, isLeft) {
+  const idx = steps.length;
+  const readIdx = (() => {
+    // count how many 'read-index' steps have been added so far to determine arr index
+    let cnt = 0;
+    for (let i = 0; i < steps.length; i++) {
+      if (steps[i].type === 'read-index') cnt++;
+    }
+    return cnt;
+  })();
+
+  const cur = readIdx < arr.length ? arr[readIdx] : null;
+  if (!cur) return null;
+
+  // step: read current index
+  steps.push({ type: 'read-index', arrIndex: readIdx, value: cur, depth, parentInfo, isLeft });
+
+  if (cur === '#') {
+    steps.push({ type: 'return-null', arrIndex: readIdx, depth, parentInfo, isLeft });
+    return null;
+  }
+
+  const nodeVal = parseInt(cur, 10);
+  const nodeId = steps.length;
+  steps.push({ type: 'create-node', nodeVal, arrIndex: readIdx, depth, parentInfo, isLeft, nodeId });
+
+  // left
+  steps.push({ type: 'des-left', nodeVal, nodeId, depth: depth+1, parentInfo: { nodeVal, nodeId, side: 'left' }, isLeft: true });
+  const leftNode = doDeserializeStep(arr, depth+1, steps, { nodeVal, nodeId, side: 'left' }, true);
+
+  // right
+  steps.push({ type: 'des-right', nodeVal, nodeId, depth: depth+1, parentInfo: { nodeVal, nodeId, side: 'right' }, isLeft: false });
+  const rightNode = doDeserializeStep(arr, depth+1, steps, { nodeVal, nodeId, side: 'right' }, false);
+
+  steps.push({ type: 'return-node', nodeVal, nodeId, depth, parentInfo, isLeft });
+
+  // Return a lightweight node ref for tree building
+  return { val: nodeVal, left: leftNode, right: rightNode, nodeId: nodeId };
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  NODE POSITIONS (shared)
+// ══════════════════════════════════════════════════════════════════
+function computeNodePositions(node, x, y, dx) {
+  if (!node) return;
+  node.visX = x; node.visY = y;
+  computeNodePositions(node.left, x - dx, y + 70, dx * 0.55);
+  computeNodePositions(node.right, x + dx, y + 70, dx * 0.55);
+}
+
+// ─── Build partial tree from deserialize steps ────────────────────
+// Uses a "pending link" stack: when we see des-left/des-right, we push
+// a pending link. When we see create-node or return-null, we pop the
+// pending link and connect parent ↔ child immediately.
+// This makes nodes appear in the tree as soon as they're created.
+function getDeserializeTreeState(steps, upToIdx) {
+  const nodes = new Map();
+  let root = null;
+  const pending = [];
+
+  for (let i = 0; i <= upToIdx && i < steps.length; i++) {
+    const s = steps[i];
+    if (!s) continue;
+
+    if (s.type === 'create-node') {
+      const n = { val: s.nodeVal, left: null, right: null };
+      nodes.set(s.nodeId, n);
+      if (!s.parentInfo) root = s.nodeId;
+      // Immediately link to parent if there's a pending direction
+      if (pending.length) {
+        const p = pending.pop();
+        const parentNode = nodes.get(p.parentId);
+        if (parentNode) parentNode[p.side] = s.nodeId;
+      }
+    }
+    else if (s.type === 'return-null') {
+      if (pending.length) {
+        const p = pending.pop();
+        const parentNode = nodes.get(p.parentId);
+        if (parentNode) parentNode[p.side] = '#';
+      }
+    }
+    else if (s.type === 'des-left') {
+      pending.push({ parentId: s.nodeId, side: 'left' });
+    }
+    else if (s.type === 'des-right') {
+      pending.push({ parentId: s.nodeId, side: 'right' });
+    }
+  }
+
+  function toRef(nodeId) {
+    if (!nodeId || !nodes.has(nodeId)) return null;
+    const n = nodes.get(nodeId);
+    return {
+      val: n.val,
+      left: n.left === '#' ? null : (typeof n.left === 'object' ? n.left : toRef(n.left)),
+      right: n.right === '#' ? null : (typeof n.right === 'object' ? n.right : toRef(n.right)),
+    };
+  }
+
+  return { tree: root ? toRef(root) : null, createdCount: nodes.size };
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  DRAWING
+// ══════════════════════════════════════════════════════════════════
+function drawTree(highlightVals, edgeHighlight, desState) {
+  const canvas = document.getElementById('treeCanvas');
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const w = Math.min(900, rect.width - 32);
+  const h = 300;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  ctx.clearRect(0, 0, w, h);
+
+  const scale = w / 900;
+  const ox = (w - 900 * scale) / 2 | 0;
+  const vx = x => x * scale + ox;
+  const vy = y => y * scale + 15;
+
+  // Determine tree to draw
+  let treeRoot;
+  if (mode === 'serialize') {
+    treeRoot = treeData;
+  } else if (desState && desState.tree) {
+    treeRoot = desState.tree;
+  } else {
+    // Show empty canvas (no nodes created yet in deserialize)
+    ctx.fillStyle = '#475569';
+    ctx.font = '16px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('等待创建节点...', w/2, h/2);
+    return;
+  }
+
+  // Compute positions for whatever tree we have
+  function calcPos(node, x, y, dx) {
+    if (!node) return;
+    node.visX = x; node.visY = y;
+    calcPos(node.left, x - dx, y + 70, dx * 0.55);
+    calcPos(node.right, x + dx, y + 70, dx * 0.55);
+  }
+  calcPos(treeRoot, 450, 50, 200);
+
+  // Collect highlight values set
+  const hlSet = new Set();
+  if (typeof highlightVals === 'number') hlSet.add(highlightVals);
+  else if (Array.isArray(highlightVals)) highlightVals.forEach(v => hlSet.add(v));
+
+  function drawNode(node) {
+    if (!node) return;
+    const x = vx(node.visX), y = vy(node.visY);
+    const isHL = hlSet.has(node.val);
+
+    // edges
+    if (node.left) {
+      const lx = vx(node.left.visX), ly = vy(node.left.visY);
+      ctx.beginPath();
+      ctx.moveTo(x, y + 18);
+      ctx.lineTo(lx, ly - 18);
+      const isEdgeHL = edgeHighlight && edgeHighlight.left === node.left.val;
+      ctx.strokeStyle = isEdgeHL ? '#fbbf24' : '#334155';
+      ctx.lineWidth = isEdgeHL ? 3 : 2;
+      if (isEdgeHL) ctx.shadowColor = '#fbbf2480', ctx.shadowBlur = 8;
+      else ctx.shadowBlur = 0;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      drawNode(node.left);
+    }
+    if (node.right) {
+      const rx = vx(node.right.visX), ry = vy(node.right.visY);
+      ctx.beginPath();
+      ctx.moveTo(x, y + 18);
+      ctx.lineTo(rx, ry - 18);
+      const isEdgeHL = edgeHighlight && edgeHighlight.right === node.right.val;
+      ctx.strokeStyle = isEdgeHL ? '#fbbf24' : '#334155';
+      ctx.lineWidth = isEdgeHL ? 3 : 2;
+      if (isEdgeHL) ctx.shadowColor = '#fbbf2480', ctx.shadowBlur = 8;
+      else ctx.shadowBlur = 0;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      drawNode(node.right);
+    }
+
+    // node circle
+    const r = isHL ? 22 : 18;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    if (isHL) {
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, 22);
+      grad.addColorStop(0, '#fbbf24');
+      grad.addColorStop(1, '#d97706');
+      ctx.fillStyle = grad;
+      ctx.shadowColor = '#fbbf2480';
+      ctx.shadowBlur = 16;
+    } else {
+      ctx.fillStyle = '#1e293b';
+      ctx.shadowBlur = 0;
+    }
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    if (isHL) {
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // new node indicator (deserialize mode)
+    if (mode === 'deserialize' && desState) {
+      // could add a "new" badge for newly created nodes
+    }
+
+    ctx.fillStyle = isHL ? '#0f172a' : '#e2e8f0';
+    ctx.font = 'bold 14px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(node.val), x, y);
+  }
+
+  drawNode(treeRoot);
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════════════════════════════
+function renderStep(idx) {
+  const step = steps[idx];
+  if (!step) return;
+
+  const dataEl = document.getElementById('dataDisplay');
+  const actionEl = document.getElementById('actionDisplay');
+  const stackEl = document.getElementById('stackDisplay');
+  const counterEl = document.getElementById('stepCounter');
+  const fillEl = document.getElementById('progressFill');
+  const codeEl = document.getElementById('codePreview');
+
+  if (mode === 'serialize') {
+    renderSerialize(idx, step, dataEl, actionEl, stackEl, counterEl, fillEl, codeEl);
+  } else {
+    renderDeserialize(idx, step, dataEl, actionEl, stackEl, counterEl, fillEl, codeEl);
+  }
+
+  document.getElementById('btnPrev').disabled = (idx <= 0);
+  document.getElementById('btnNext').disabled = (idx >= steps.length - 1);
+}
+
+// ─── Serialize render ─────────────────────────────────────────────
+function renderSerialize(idx, step, dataEl, actionEl, stackEl, counterEl, fillEl, codeEl) {
+  // Build data display
+  let html = '';
+  let built = '';
+  for (let i = 1; i <= idx; i++) {
+    const s = steps[i];
+    if (!s || !s.token) continue;
+    if (s.type === 'visit') {
+      html += `<span class="char-box value">${s.nodeVal}</span><span class="char-box sep">,</span>`;
+      built += s.nodeVal + ',';
+    } else if (s.type === 'null') {
+      html += `<span class="char-box empty">#</span><span class="char-box sep">,</span>`;
+      built += '#,';
+    }
+  }
+  if (html.endsWith('<span class="char-box sep">,</span>')) {
+    html = html.slice(0, -'<span class="char-box sep">,</span>'.length);
+  }
+  dataEl.innerHTML = html || '<span style="color:#64748b;font-size:0.85em;">（等待开始...）</span>';
+
+  // Action
+  let actionText = '';
+  let highlightVal = null;
+  let edges = null;
+  let stackItems = [];
+
+  switch (step.type) {
+    case 'enter':
+      actionText = `开始前序遍历，从根节点 <span class="highlight">${step.nodeVal}</span> 出发`;
+      highlightVal = step.nodeVal;
+      stackItems = [{ val: `serialize(${step.nodeVal})`, active: true }];
+      codeEl.innerHTML = highlightCode('serialize', 'visit');
+      break;
+    case 'visit':
+      actionText = `访问节点 <span class="highlight">${step.nodeVal}</span> → 追加 <span class="code">"${step.nodeVal},"</span>`;
+      highlightVal = step.nodeVal;
+      stackItems = buildStackGeneric(idx, 'serialize');
+      codeEl.innerHTML = highlightCode('serialize', 'visit');
+      break;
+    case 'go-left':
+      actionText = `<span class="arrow">↴</span> 从 <span class="highlight">${step.nodeVal}</span> 进入 <span class="code">左子树</span>`;
+      highlightVal = step.nodeVal;
+      edges = { left: getNodeByIdx(step.nodeVal)?.left?.val };
+      stackItems = buildStackGeneric(idx, 'serialize');
+      codeEl.innerHTML = highlightCode('serialize', 'go-left');
+      break;
+    case 'go-right':
+      actionText = `<span class="arrow">↴</span> 从 <span class="highlight">${step.nodeVal}</span> 进入 <span class="code">右子树</span>`;
+      highlightVal = step.nodeVal;
+      edges = { right: getNodeByIdx(step.nodeVal)?.right?.val };
+      stackItems = buildStackGeneric(idx, 'serialize');
+      codeEl.innerHTML = highlightCode('serialize', 'go-right');
+      break;
+    case 'null':
+      actionText = `遇到 <span class="null-tag">null</span> → 追加 <span class="code">"#"</span> 标记空子树，<span class="arrow">↵</span> 返回`;
+      stackItems = buildStackGeneric(idx, 'serialize');
+      highlightVal = findParentVal(idx);
+      codeEl.innerHTML = highlightCode('serialize', 'null');
+      break;
+    case 'back-from-left':
+      actionText = `<span class="arrow">↵</span> 左子树处理完毕，回到 <span class="highlight">${step.nodeVal}</span>`;
+      highlightVal = step.nodeVal;
+      stackItems = buildStackGeneric(idx, 'serialize');
+      codeEl.innerHTML = highlightCode('serialize', 'back-from-left');
+      break;
+    case 'done':
+      actionText = `节点 <span class="highlight">${step.nodeVal}</span> 全部处理完毕 <span class="arrow">↵</span> 返回上一层`;
+      highlightVal = step.nodeVal;
+      stackItems = buildStackGeneric(idx, 'serialize');
+      codeEl.innerHTML = highlightCode('serialize', 'done');
+      break;
+    case 'finish':
+      actionText = `✅ 序列化完成！结果：<span class="code">"${built.replace(/,$/, '')}"</span>`;
+      stackItems = [];
+      codeEl.innerHTML = '';
+      break;
+  }
+  actionEl.innerHTML = actionText;
+
+  // Stack
+  if (step.type === 'finish') {
+    stackEl.innerHTML = '<span style="color:#64748b;font-size:0.82em;">（全部完成）</span>';
+  } else if (stackItems.length) {
+    stackEl.innerHTML = stackItems.reverse().map(s =>
+      `<span class="stack-item ${s.active ? 'active-frame' : ''}">${s.val}</span>`
+    ).join('');
+  } else {
+    stackEl.innerHTML = '<span style="color:#64748b;font-size:0.82em;">（空）</span>';
+  }
+
+  // Progress
+  fillEl.style.width = ((idx / (steps.length - 1)) * 100) + '%';
+  counterEl.textContent = `${idx} / ${steps.length - 1}`;
+
+  drawTree(highlightVal, edges);
+}
+
+// ─── Deserialize render ───────────────────────────────────────────
+function renderDeserialize(idx, step, dataEl, actionEl, stackEl, counterEl, fillEl, codeEl) {
+  const arr = serializedStr.split(',');
+
+  // ── data display: show array with pointer ──
+  let html = '';
+  for (let i = 0; i < arr.length; i++) {
+    const isActive = step.type === 'read-index' && step.arrIndex === i;
+    const isPast = (() => {
+      // Check if this index has been consumed
+      for (let j = 1; j <= idx; j++) {
+        const s = steps[j];
+        if (s && (s.type === 'create-node' || s.type === 'return-null') && s.arrIndex === i) return true;
+      }
+      return false;
+    })();
+    const cls = arr[i] === '#' ? 'empty' : 'value';
+    html += `<span class="char-box ${cls}${isActive ? ' active' : ''}${isPast ? ' consumed' : ''}" style="${isPast ? 'opacity:0.4' : ''}">`;
+    if (isActive) html += `<span class="ptr-arrow">▼</span><span class="ptr-label">指针</span>`;
+    html += arr[i] + '</span>';
+    if (i < arr.length - 1) html += '<span class="char-box sep">,</span>';
+  }
+  dataEl.innerHTML = html;
+
+  // ── action text ──
+  let actionText = '';
+  let highlightVal = null;
+  let edges = null;
+  let stackItems = [];
+  let desState = null;
+
+  switch (step.type) {
+    case 'start':
+      actionText = `开始反序列化，输入数组共 <span class="highlight">${arr.length}</span> 个元素。指针指向第一个元素`;
+      desState = getDeserializeTreeState(steps, idx);
+      codeEl.innerHTML = highlightCode('deserialize', 'create-node');
+      break;
+    case 'read-index':
+      if (step.value === '#') {
+        actionText = `指针指向 <span class="null-tag">arr[${step.arrIndex}] = "#"</span> → 表示空子树`;
+      } else {
+        actionText = `指针指向 <span class="highlight">arr[${step.arrIndex}] = "${step.value}"</span> → 创建节点`;
+      }
+      desState = getDeserializeTreeState(steps, idx);
+      if (step.parentInfo) highlightVal = step.parentInfo.nodeVal;
+      codeEl.innerHTML = step.value === '#' ? highlightCode('deserialize', 'read-null') : highlightCode('deserialize', 'create-node');
+      break;
+    case 'create-node':
+      highlightVal = step.nodeVal;
+      actionText = `✅ 创建节点 <span class="highlight">${step.nodeVal}</span>，指针前进到下一个元素`;
+      if (step.parentInfo) {
+        actionText += `<br><span class="arrow">↩</span> 作为 <span class="highlight">${step.parentInfo.nodeVal}</span> 的 ${step.parentInfo.side === 'left' ? '左' : '右'}孩子`;
+      } else {
+        actionText += `<br><span class="arrow">↩</span> 根节点`;
+      }
+      desState = getDeserializeTreeState(steps, idx);
+      stackItems = buildDesStack(idx);
+      codeEl.innerHTML = highlightCode('deserialize', 'create-node');
+      break;
+    case 'return-null':
+      actionText = `<span class="null-tag"># → null</span>，指针前进。<span class="arrow">↵</span> 返回上一层`;
+      if (step.parentInfo) {
+        actionText += `（<span class="highlight">${step.parentInfo.nodeVal}</span> 的 ${step.parentInfo.side === 'left' ? '左' : '右'}子节点 = null）`;
+      }
+      desState = getDeserializeTreeState(steps, idx);
+      stackItems = buildDesStack(idx);
+      if (step.parentInfo) highlightVal = step.parentInfo.nodeVal;
+      codeEl.innerHTML = highlightCode('deserialize', 'return-null');
+      break;
+    case 'des-left':
+      actionText = `<span class="arrow">↴</span> 开始反序列化 <span class="highlight">${step.nodeVal}</span> 的 <span class="code">左子树</span>`;
+      highlightVal = step.nodeVal;
+      edges = { left: getNodeValById(step.nodeId, 'left') };
+      desState = getDeserializeTreeState(steps, idx);
+      stackItems = buildDesStack(idx);
+      codeEl.innerHTML = highlightCode('deserialize', 'des-left');
+      break;
+    case 'des-right':
+      actionText = `<span class="arrow">↴</span> 开始反序列化 <span class="highlight">${step.nodeVal}</span> 的 <span class="code">右子树</span>`;
+      highlightVal = step.nodeVal;
+      edges = { right: getNodeValById(step.nodeId, 'right') };
+      desState = getDeserializeTreeState(steps, idx);
+      stackItems = buildDesStack(idx);
+      codeEl.innerHTML = highlightCode('deserialize', 'des-right');
+      break;
+    case 'return-node':
+      actionText = `节点 <span class="highlight">${step.nodeVal}</span> 构建完成 <span class="arrow">↵</span> 返回父节点`;
+      highlightVal = step.nodeVal;
+      desState = getDeserializeTreeState(steps, idx);
+      stackItems = buildDesStack(idx);
+      codeEl.innerHTML = highlightCode('deserialize', 'return-node');
+      break;
+    case 'finish':
+      actionText = `✅ 反序列化完成！重构出完整的二叉树，根节点 <span class="highlight">${treeData.val}</span>`;
+      desState = getDeserializeTreeState(steps, idx);
+      codeEl.innerHTML = '';
+      break;
+  }
+  actionEl.innerHTML = actionText;
+
+  // Stack
+  if (step.type === 'finish') {
+    stackEl.innerHTML = '<span style="color:#64748b;font-size:0.82em;">（全部完成）</span>';
+  } else if (step.type === 'start') {
+    stackEl.innerHTML = '<span style="color:#64748b;font-size:0.82em;">（即将开始）</span>';
+  } else if (stackItems.length) {
+    stackEl.innerHTML = stackItems.reverse().map(s =>
+      `<span class="stack-item ${s.active ? 'active-frame' : ''}">${s.val}</span>`
+    ).join('');
+  } else {
+    stackEl.innerHTML = '<span style="color:#64748b;font-size:0.82em;">（空）</span>';
+  }
+
+  // Progress
+  fillEl.style.width = ((idx / (steps.length - 1)) * 100) + '%';
+  counterEl.textContent = `${idx} / ${steps.length - 1}`;
+
+  if (mode === 'deserialize' && desState && desState.tree) {
+    // fix positions for the partial tree
+    computeNodePositions(desState.tree, 450, 50, 200);
+    drawTree(highlightVal, edges, desState);
+  } else {
+    drawTree(highlightVal, edges, desState);
+  }
+}
+
+// ─── helpers ──────────────────────────────────────────────────────
+function getNodeByIdx(val) {
+  function find(n) {
+    if (!n) return null;
+    if (n.val === val) return n;
+    return find(n.left) || find(n.right);
+  }
+  return find(treeData);
+}
+function getNodeValById(nodeId, side) {
+  // Not needed for deserialize since we don't have refs
+  return undefined;
+}
+function findParentVal(idx) {
+  for (let i = idx; i >= 0; i--) {
+    const s = steps[i];
+    if (s && (s.type === 'visit' || s.type === 'back-from-left' || s.type === 'go-right') && s.nodeVal !== undefined && steps[idx]?.parentId === s.nodeId) {
+      return s.nodeVal;
+    }
+  }
+  return null;
+}
+function buildStackGeneric(idx, mode) {
+  const items = [];
+  let foundActive = false;
+  const keyTypes = mode === 'serialize' ? ['visit', 'enter'] : ['create-node', 'start'];
+  // Actually for serialize, we use 'visit' and 'enter' types
+  for (let i = idx; i >= 0; i--) {
+    const s = steps[i];
+    if (!s) continue;
+    let label = null;
+    if (mode === 'serialize' && (s.type === 'visit' || s.type === 'enter')) {
+      label = `serialize(${s.nodeVal})`;
+    } else if (mode === 'deserialize' && s.type === 'create-node') {
+      label = `deserialize(${s.nodeVal})`;
+    } else if (mode === 'deserialize' && s.type === 'start') {
+      label = 'deserialize(root)';
+    }
+    if (label) {
+      items.push({ val: label, active: !foundActive });
+      if (!foundActive) foundActive = true;
+    }
+  }
+  return items;
+}
+function buildDesStack(idx) {
+  const items = [];
+  let foundActive = false;
+  for (let i = idx; i >= 0; i--) {
+    const s = steps[i];
+    if (!s) continue;
+    let label = null;
+    if (s.type === 'create-node') {
+      label = `deserialize(${s.nodeVal})`;
+    }
+    if (label) {
+      items.push({ val: label, active: !foundActive });
+      if (!foundActive) foundActive = true;
+    }
+  }
+  return items;
+}
+
+function highlightCode(modeName, lineKey) {
+  const snippet = CODE_SNIPPETS[modeName];
+  if (!snippet) return '';
+  const hlLine = snippet.highlight[lineKey];
+  return snippet.lines.map((line, i) => {
+    const n = i + 1;
+    const isHL = hlLine !== undefined && n === hlLine;
+    // find the line content with proper formatting
+    let display = line;
+    // Remove extra markers
+    const arrowMatch = line.match(/← (.+)/);
+    const displayLine = arrowMatch ? line : line;
+    return `<span${isHL ? ' class="line-highlight"' : ''}>${String(n).padStart(2)}  ${displayLine}</span>`;
+  }).join('\n');
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  MODE SWITCHING
+// ══════════════════════════════════════════════════════════════════
+function switchMode(newMode) {
+  stopPlay();
+  mode = newMode;
+  document.querySelectorAll('.mode-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === newMode);
+  });
+  document.getElementById('dataLabel').textContent =
+    newMode === 'serialize' ? '序列化结果' : '输入数组';
+
+  // Rebuild steps
+  if (newMode === 'serialize') {
+    steps = buildSerializeSteps();
+  } else {
+    steps = buildDeserializeSteps();
+  }
+  currentStep = 0;
+  renderStep(0);
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  CONTROLS
+// ══════════════════════════════════════════════════════════════════
+function next() {
+  if (currentStep < steps.length - 1) { currentStep++; renderStep(currentStep); }
+  else stopPlay();
+}
+function prev() {
+  if (currentStep > 0) { currentStep--; renderStep(currentStep); }
+}
+function reset() {
+  stopPlay();
+  currentStep = 0;
+  renderStep(0);
+}
+function togglePlay() {
+  playing ? stopPlay() : startPlay();
+}
+function startPlay() {
+  if (currentStep >= steps.length - 1) { currentStep = 0; renderStep(0); }
+  playing = true;
+  document.getElementById('btnPlay').textContent = '⏸ 暂停';
+  doPlay();
+}
+function stopPlay() {
+  playing = false;
+  clearTimeout(playTimer);
+  document.getElementById('btnPlay').textContent = '▶ 播放';
+}
+function doPlay() {
+  if (!playing) return;
+  if (currentStep < steps.length - 1) {
+    currentStep++;
+    renderStep(currentStep);
+    const delay = (steps[currentStep] && ['null','return-null','back-from-left','read-index'].includes(steps[currentStep].type)) ? 600 : 900;
+    playTimer = setTimeout(doPlay, delay);
+  } else stopPlay();
+}
+
+// keyboard
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'ArrowRight') next();
+  else if (e.key === 'ArrowLeft') prev();
+  else if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+  else if (e.key === 'r' || e.key === 'R') reset();
+});
+
+// ══════════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════════
+computeNodePositions(treeData, 450, 50, 200);
+switchMode('serialize');
+</script>
+</body>
+</html>
