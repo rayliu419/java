@@ -18,44 +18,6 @@ public class Tree {
     }
 
     /**
-     * 将二叉树打成一个链表
-     *
-     * @param root
-     */
-    public void flatten(TreeNode root) {
-        if (root == null) {
-            return;
-        }
-        doFlatten(root);
-    }
-
-    private TreeNode doFlatten(TreeNode node) {
-        if (node == null) {
-            return null;
-        }
-        TreeNode leftChild = null;
-        TreeNode rightChild = null;
-        if (node.left != null) {
-            leftChild = doFlatten(node.left);
-        }
-        if (node.right != null) {
-            rightChild = doFlatten(node.right);
-        }
-        if (leftChild != null) {
-            TreeNode temp = leftChild;
-            while (temp.right != null) {
-                temp = temp.right;
-            }
-            temp.right = rightChild;
-            node.left = null;
-            node.right = leftChild;
-        } else {
-            node.right = rightChild;
-        }
-        return node;
-    }
-
-    /**
      * https://leetcode.cn/problems/diameter-of-binary-tree/
      *
      * @return
@@ -94,112 +56,6 @@ public class Tree {
         }
         return Math.max(leftHeight, rightHeight) + 1;
     }
-
-    public static void testDiameterOfBinaryTree() {
-        TreeNode root = new TreeNode(1,
-                new TreeNode(2,
-                        new TreeNode(4, null, null),
-                        new TreeNode(5, null, null)
-                ),
-                new TreeNode(3, null, null)
-        );
-        System.out.println(new Tree().diameterOfBinaryTree(root));
-
-        TreeNode root2 = new TreeNode(1, null, null);
-        System.out.println(new Tree().diameterOfBinaryTree(root2));
-    }
-
-    /**
-     *
-     * https://leetcode.cn/problems/lowest-common-ancestor-of-a-binary-tree/
-     *
-     * 这个核心的解法是：存储临时计算的结果，假设n1和n2一定存在，则找到n1或者n2直接返回。
-     * 如果后续在上层做了调整，说明发现了一个更好的结果，如果没有，则以前那个就是解。
-     * 这比我原始的发现了一个节点，然后在以此根为节点的树下查找另外一个节点的性能要高的多，避免了
-     * 不必要的递归调用。
-     * 这个修正解的思路非常值的学习。
-     *
-     * 此函数只有在根返回时才能保证解是对的，跟一般函数的语义定义还不一样。
-     */
-    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
-        if (root == null) {
-            return null;
-        }
-        if (root.val == p.val) {
-            return root;
-        }
-        if (root.val == q.val) {
-            return root;
-        }
-        TreeNode findLeft = lowestCommonAncestor(root.left, p, q);
-        TreeNode findRight = lowestCommonAncestor(root.right, p, q);
-        if (findLeft != null && findRight != null) {
-            // 修正解，左右都找到了，当前节点才是最后的解
-            return root;
-        }
-        if (findLeft != null && findRight == null) {
-            // 往上传递当前找到的解
-            return findLeft;
-        }
-        if (findRight != null && findLeft == null) {
-            return findRight;
-        }
-        return null;
-    }
-
-
-    /**
-     *  二叉树中查找LCA。
-     *  这里的核心是比普通二叉树减少搜索路径。
-     *
-     * @param root
-     * @param p
-     * @param q
-     * @return
-     */
-    public TreeNode lowestCommonAncestorBST(TreeNode root, TreeNode p, TreeNode q) {
-        // 前面的逻辑跟普通二叉树一样
-        if (root == null) {
-            return null;
-        }
-        if (root.val == p.val) {
-            return root;
-        }
-        if (root.val == q.val) {
-            return root;
-        }
-        int maxValue = Math.max(p.val, q.val);
-        int minValue = Math.min(p.val, q.val);
-        if (root.val < minValue) {
-            // 两个待查找都小于curNode，结果在左子树中
-            return lowestCommonAncestor(root.right, p, q);
-        }
-        if (root.val > maxValue) {
-            // 两个待查找都大于curNode，结果在右子树中
-            return lowestCommonAncestor(root.left, p, q);
-        }
-        // 一个大于，一个小于。直接返回，这里返回的实际上由于是后序遍历，返回的是底层第一次分开两个待查节点的祖先，直接作为结果返回即可。
-        return root;
-    }
-
-    public static void testLowestCommonAncestor() {
-        TreeNode root = new TreeNode(3,
-                new TreeNode(5,
-                        new TreeNode(6, null, null),
-                        new TreeNode(2,
-                                new TreeNode(7, null, null),
-                                new TreeNode(4, null, null))
-                ),
-                new TreeNode(1,
-                        new TreeNode(0, null, null),
-                        new TreeNode(8, null, null)
-                )
-        );
-
-        System.out.println(new Tree().lowestCommonAncestor(root, new TreeNode(0, null, null), new TreeNode(8, null, null)));
-
-    }
-
 
     /**
      *
@@ -275,30 +131,4 @@ public class Tree {
         distanceFromRoot(root.left, k - 1, result);
         distanceFromRoot(root.right, k - 1, result);
     }
-
-    public static void main(String[] args) {
-//        TreeNode root = new TreeNode(3,
-//                new TreeNode(5,
-//                        new TreeNode(6, null, null),
-//                        new TreeNode(2,
-//                                new TreeNode(7, null, null),
-//                                new TreeNode(4, null, null)
-//                        )),
-//                new TreeNode(1,
-//                        new TreeNode(0, null, null),
-//                        new TreeNode(8, null, null)
-//                )
-//        );
-//        List<Integer> result = new Tree().distanceK(root, new TreeNode(5, null, null), 2);
-//        System.out.println("pause");
-
-        TreeNode root2 = new TreeNode(0,
-                new TreeNode(1,
-                        new TreeNode(3, null, null),
-                        new TreeNode(2, null, null)),
-                null);
-        List<Integer> result2 = new Tree().distanceK(root2, new TreeNode(2, null, null), 1);
-        System.out.println("pause");
-    }
-
 }

@@ -159,7 +159,7 @@
   <tr><td><span class="star">★★★★★</span></td><td>230</td><td>Kth Smallest Element in a BST</td><td>🟡 Medium</td><td>中序遍历到第 K 个即停止</td><td><span class="done">✅ BST.java</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>450</td><td>Delete Node in a BST</td><td>🟡 Medium</td><td>三种情况：叶子 / 单子 / 双子（后继替换）</td><td><span class="done">✅ BST.java</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>108</td><td>Convert Sorted Array to BST</td><td>🟢 Easy</td><td>二分递归构建</td><td><span class="done">✅ BST.java</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>235</td><td>Lowest Common Ancestor of a BST</td><td>🟡 Medium</td><td>利用大小关系剪枝：p &lt; root &lt; q → root 就是 LCA</td><td><span class="done">✅ Tree.java</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>235</td><td>Lowest Common Ancestor of a BST</td><td>🟡 Medium</td><td>利用大小关系剪枝：p &lt; root &lt; q → root 就是 LCA</td><td><span class="done">✅ BST.java</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>96</td><td>Unique BST</td><td>🟡 Medium</td><td>DP / 卡特兰数</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>297</td><td>Serialize and Deserialize Binary Tree</td><td>🔴 Hard</td><td>前序序列化 + # 空标记递归反序列化</td><td><span class="done">✅ BST.java</span></td></tr>
   <tr><td><span class="star">★★★</span></td><td>173</td><td>BST Iterator</td><td>🟡 Medium</td><td>栈模拟非递归中序遍历</td><td><span class="pending">⬜</span></td></tr>
@@ -438,6 +438,87 @@ encode(leaf) = "0"
   <li>先对小树编码，再对大树后序遍历编码</li>
   <li>发现编码一致 → 有同构子树</li>
 </ul>
+
+<hr>
+
+<!---------- LCA ---------->
+<h3>LCA（Lowest Common Ancestor）— 两种实现对比</h3>
+
+<blockquote>BST 中的 LCA 很简单（利用大小关系剪枝），但<strong>普通二叉树的 LCA</strong> 有两种不同的实现思路，理解其差异有助于掌握递归语义的设计。</blockquote>
+
+<p>两个实现都在 <code>BST.java</code> 中：</p>
+
+<div class="comparison">
+  <div>
+    <h4>版本一：result 包装器 + 剪枝</h4>
+    <pre>
+TreeNode lowestCommonAncestor(root, p, q) {
+    TreeNode[] result = new TreeNode[1];
+    LCA(root, p, q, result);
+    return result[0];
+}
+
+TreeNode LCA(root, p, q, result) {
+    if (root == null || result[0] != null)
+        return null;
+    TreeNode left = LCA(root.left, p, q, result);
+    TreeNode right = LCA(root.right, p, q, result);
+    boolean foundSelf = root.val==p.val
+                     || root.val==q.val;
+    if (foundSelf && (left!=null||right!=null))
+      { result[0]=root; return root; }
+    if (left!=null && right!=null)
+      { result[0]=root; return root; }
+    if (foundSelf) return root;
+    return left != null ? left : right;
+}
+    </pre>
+    <ul>
+      <li>递归语义纯粹：返回值 = "是否找到 p/q"</li>
+      <li><code>result[0]</code> 独立存 LCA</li>
+      <li>p/q 缺失时 result[0] 保持 null</li>
+      <li><code>result[0] != null</code> 后整树剪枝</li>
+    </ul>
+  </div>
+  <div>
+    <h4>版本二：直接返回 + 混合语义</h4>
+    <pre>
+TreeNode lowestCommonAncestor2(root, p, q) {
+    if (root == null) return null;
+    if (root.val == p.val) return root;
+    if (root.val == q.val) return root;
+
+    TreeNode left = lowestCommonAncestor2(
+        root.left, p, q);
+    TreeNode right = lowestCommonAncestor2(
+        root.right, p, q);
+    if (left!=null && right!=null) return root;
+    if (left != null) return left;
+    if (right != null) return right;
+    return null;
+}
+    </pre>
+    <ul>
+      <li>返回值混合：可能是 p/q 也可能是 LCA</li>
+      <li>依赖 p/q 一定存在</li>
+      <li>找到 p/q 后只剪下方，兄弟仍需遍历</li>
+      <li>代码简洁，适合竞赛/刷题场景</li>
+    </ul>
+  </div>
+</div>
+
+<h4>核心对比</h4>
+
+<table>
+  <tr><th>维度</th><th>result 包装器版</th><th>直接返回版</th></tr>
+  <tr><td>递归语义</td><td>单一：返回值 = 是否找到 p/q</td><td>混合：可能是 p/q 也可能是 LCA</td></tr>
+  <tr><td>结果存取</td><td><code>result[0]</code> 独立存储</td><td>直接用返回值传递</td></tr>
+  <tr><td>p/q 缺失</td><td><span style="color:#16a34a;font-weight:bold;">正确</span>（result[0] = null）</td><td><span style="color:#dc2626;font-weight:bold;">错误</span>（返回已找到的节点）</td></tr>
+  <tr><td>剪枝时机</td><td><span style="color:#16a34a;font-weight:bold;">result[0] 赋值后整树剪枝</span></td><td><span style="color:#d97706;">找到 p/q 后只剪下方子树</span></td></tr>
+  <tr><td>遍历范围</td><td>找到 LCA 后立即停止</td><td>找到 p/q 后仍需遍历兄弟子树</td></tr>
+  <tr><td>代码复杂度</td><td>稍高（需要包装器）</td><td>简洁</td></tr>
+  <tr><td>适用场景</td><td>安全性优先，需处理异常情况</td><td>竞赛/刷题，假设 p/q 一定存在</td></tr>
+</table>
 
 <hr>
 

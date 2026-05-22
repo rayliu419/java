@@ -10,7 +10,7 @@
 | ★★★★★ | 230 | Kth Smallest Element in a BST | 🟡 Medium | 中序遍历到第 K 个即停止 | ✅ BST.java |
 | ★★★★ | 450 | Delete Node in a BST | 🟡 Medium | 三种情况：叶子 / 单子 / 双子（后继替换） | ✅ BST.java |
 | ★★★★ | 108 | Convert Sorted Array to BST | 🟢 Easy | 二分递归构建 | ✅ BST.java |
-| ★★★★ | 235 | Lowest Common Ancestor of a BST | 🟡 Medium | 利用大小关系剪枝：p < root < q → root 就是 LCA | ✅ Tree.java |
+| ★★★★ | 235 | Lowest Common Ancestor of a BST | 🟡 Medium | 利用大小关系剪枝：p < root < q → root 就是 LCA | ✅ BST.java |
 | ★★★★ | 96 | Unique BST | 🟡 Medium | DP / 卡特兰数 | ⬜ |
 | ★★★★ | 297 | Serialize and Deserialize Binary Tree | 🔴 Hard | 前序序列化 + # 空标记递归反序列化 | ✅ BST.java |
 | ★★★ | 173 | BST Iterator | 🟡 Medium | 栈模拟非递归中序遍历 | ⬜ |
@@ -31,7 +31,8 @@
 第 K 小       → 中序遍历到第 K 个
 删除          → 找到节点 → 三种情况处理
 构建 BST      → 有序数组二分递归
-LCA           → 利用 BST 大小关系直接判断
+LCA(BST)      → 利用 BST 大小关系直接判断
+LCA(普通树)    → result 包装器 / 直接返回混合语义（见下方对比）
 DP/计数       → 卡特兰数 / 区间 DP
 迭代器        → 栈模拟中序遍历
 搜索/插入     → 比较大小决定方向
@@ -239,6 +240,75 @@ encode(leaf) = "0"
 
 - 先对小树编码，再对大树后序遍历编码
 - 发现编码一致 → 有同构子树
+
+---
+
+#### LCA（Lowest Common Ancestor）— 两种实现对比
+
+> BST 中的 LCA 很简单（利用大小关系剪枝），但**普通二叉树的 LCA** 有两种不同的实现思路，理解其差异有助于掌握递归语义的设计。
+
+两个实现都在 `BST.java` 中：
+
+**版本一：`lowestCommonAncestor`（result 包装器 + 剪枝）**
+
+```java
+public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+    TreeNode[] result = new TreeNode[1];
+    LCA(root, p, q, result);
+    return result[0];
+}
+
+private TreeNode LCA(TreeNode root, TreeNode p, TreeNode q, TreeNode[] result) {
+    if (root == null || result[0] != null) return null;  // 已找到解，剪枝
+
+    TreeNode left = LCA(root.left, p, q, result);
+    TreeNode right = LCA(root.right, p, q, result);
+    boolean foundSelf = root.val == p.val || root.val == q.val;
+
+    if (foundSelf && (left != null || right != null)) { result[0] = root; return root; }
+    if (left != null && right != null)                { result[0] = root; return root; }
+    if (foundSelf) return root;
+    return left != null ? left : right;
+}
+```
+
+- 递归语义纯粹：返回值 = "子树中是否找到了 p 或 q"
+- 结果分离：LCA 存到 `result[0]`，不依赖返回值语义判断
+- 可处理节点缺失：p 或 q 不在树中时，`result[0]` 保持 null
+- 剪枝优化：`result[0] != null` 后直接返回，不再递归
+
+**版本二：`lowestCommonAncestor2`（直接返回 + 混合语义）**
+
+```java
+public TreeNode lowestCommonAncestor2(TreeNode root, TreeNode p, TreeNode q) {
+    if (root == null) return null;
+    if (root.val == p.val) return root;  // 找到就返回
+    if (root.val == q.val) return root;
+
+    TreeNode left = lowestCommonAncestor2(root.left, p, q);
+    TreeNode right = lowestCommonAncestor2(root.right, p, q);
+    if (left != null && right != null) return root;
+    if (left != null) return left;
+    if (right != null) return right;
+    return null;
+}
+```
+
+- 递归语义混合：返回值可能是"找到了 p/q"，也可能是"找到了 LCA"，调用方无法区分
+- 依赖 p/q 存在：如果只有一个节点存在，会错误地返回那个节点
+- 剪枝有限：找到 p/q 后只剪下方子树，兄弟子树仍需遍历
+
+**核心对比**
+
+| 维度 | result 包装器版 | 直接返回版 |
+|---|---|---|
+| 递归语义 | 单一：返回值 = 是否找到 p/q | 混合：返回值可能是 p/q 也可能是 LCA |
+| 结果存取 | `result[0]` 独立存储 | 直接用返回值传递 |
+| p/q 缺失 | 正确（result[0] = null） | 错误（返回已找到的节点） |
+| 剪枝时机 | `result[0]` 赋值后整树剪枝 | 找到 p/q 后只剪下方子树 |
+| 遍历范围 | 找到 LCA 后立即剪枝 | 找到 p/q 后仍需遍历兄弟子树 |
+| 代码复杂度 | 稍高（需要包装器） | 简洁 |
+| 适用场景 | 安全性优先，需处理异常情况 | 竞赛/刷题，假设 p/q 一定存在 |
 
 ---
 

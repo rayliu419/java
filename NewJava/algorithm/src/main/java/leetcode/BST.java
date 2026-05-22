@@ -266,4 +266,115 @@ public class BST {
         root.right = deserialize(data, index);
         return root;
     }
+
+    /**
+     * https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree
+     */
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        TreeNode[] treeNodes = new TreeNode[1];
+        LCA(root, p, q, treeNodes);
+        return treeNodes[0];
+    }
+
+    private TreeNode LCA(TreeNode root, TreeNode p, TreeNode q, TreeNode[] result) {
+        if (root == null || result[0] != null) {
+            return null;
+        }
+
+        TreeNode left = LCA(root.left, p, q, result);
+        TreeNode right = LCA(root.right, p, q, result);
+
+        boolean foundSelf = root.val == p.val || root.val == q.val;
+
+        // 当前节点是 p/q，另一个在子树中 → 当前节点就是 LCA
+        if (foundSelf && (left != null || right != null)) {
+            result[0] = root;
+            return root;
+        }
+
+        // p 和 q 分布在左右子树 → 当前节点就是 LCA
+        if (left != null && right != null) {
+            result[0] = root;
+            return root;
+        }
+
+        // 当前节点是 p 或 q → 向上传递
+        if (foundSelf) {
+            return root;
+        }
+
+        // 向上传递找到的节点
+        return left != null ? left : right;
+    }
+
+    /**
+     *
+     * https://leetcode.cn/problems/lowest-common-ancestor-of-a-binary-tree/
+     *
+     * 这个核心的解法是：存储临时计算的结果，假设n1和n2一定存在，则找到n1或者n2直接返回。
+     * 如果后续在上层做了调整，说明发现了一个更好的结果，如果没有，则以前那个就是解。
+     * 这个修正解的思路非常值的学习。
+     *
+     * 此函数只有在根返回时才能保证解是对的，跟一般函数的语义定义还不一样。
+     */
+    public TreeNode lowestCommonAncestor2(TreeNode root, TreeNode p, TreeNode q) {
+        if (root == null) {
+            return null;
+        }
+        if (root.val == p.val) {
+            return root;
+        }
+        if (root.val == q.val) {
+            return root;
+        }
+        TreeNode findLeft = lowestCommonAncestor2(root.left, p, q);
+        TreeNode findRight = lowestCommonAncestor2(root.right, p, q);
+        if (findLeft != null && findRight != null) {
+            // 修正解，左右都找到了，当前节点才是最后的解
+            return root;
+        }
+        if (findLeft != null && findRight == null) {
+            // 往上传递当前找到的解
+            return findLeft;
+        }
+        if (findRight != null && findLeft == null) {
+            return findRight;
+        }
+        return null;
+    }
+
+
+    /**
+     *  有序 二叉树中查找LCA。
+     *  这里的核心是比普通二叉树减少搜索路径。
+     *
+     * @param root
+     * @param p
+     * @param q
+     * @return
+     */
+    public TreeNode lowestCommonAncestorBST(TreeNode root, TreeNode p, TreeNode q) {
+        // 前面的逻辑跟普通二叉树一样
+        if (root == null) {
+            return null;
+        }
+        if (root.val == p.val) {
+            return root;
+        }
+        if (root.val == q.val) {
+            return root;
+        }
+        int maxValue = Math.max(p.val, q.val);
+        int minValue = Math.min(p.val, q.val);
+        if (root.val < minValue) {
+            // 两个待查找都小于curNode，结果在左子树中
+            return lowestCommonAncestor(root.right, p, q);
+        }
+        if (root.val > maxValue) {
+            // 两个待查找都大于curNode，结果在右子树中
+            return lowestCommonAncestor(root.left, p, q);
+        }
+        // 一个大于，一个小于。直接返回，这里返回的实际上由于是后序遍历，返回的是底层第一次分开两个待查节点的祖先，直接作为结果返回即可。
+        return root;
+    }
 }
