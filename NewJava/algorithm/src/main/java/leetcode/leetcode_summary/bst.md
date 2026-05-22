@@ -12,6 +12,7 @@
 | ★★★★ | 108 | Convert Sorted Array to BST | 🟢 Easy | 二分递归构建 | ✅ BST.java |
 | ★★★★ | 235 | Lowest Common Ancestor of a BST | 🟡 Medium | 利用大小关系剪枝：p < root < q → root 就是 LCA | ✅ Tree.java |
 | ★★★★ | 96 | Unique BST | 🟡 Medium | DP / 卡特兰数 | ⬜ |
+| ★★★★ | 297 | Serialize and Deserialize Binary Tree | 🔴 Hard | 前序序列化 + # 空标记递归反序列化 | ✅ BST.java |
 | ★★★ | 173 | BST Iterator | 🟡 Medium | 栈模拟非递归中序遍历 | ⬜ |
 | ★★★ | 700 | Search in a BST | 🟢 Easy | 递归/迭代比较 val 决定左右方向 | ⬜ |
 | ★★★ | 701 | Insert into a BST | 🟡 Medium | 搜索到空位插入，返回值挂接 | ✅ BST.java |
@@ -38,13 +39,14 @@ DP/计数       → 卡特兰数 / 区间 DP
 恢复          → 中序遍历找逆序对
 修剪          → 区间递归裁剪
 累加树        → 逆中序遍历累加
+序列化/反序列化 → 前序递归序 + # 空标记
 ```
 
 ## 刷题路线
 
 ```
 第一梯队（必会）：98 → 230 → 108 → 235 → 450
-第二梯队（高频）：96 → 173 → 530 → 501 → 700/701
+第二梯队（高频）：96 → 173 → 297 → 530 → 501 → 700/701
 第三梯队（进阶）：99 → 95 → 938 → 669 → 538
 ```
 

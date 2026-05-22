@@ -161,6 +161,7 @@
   <tr><td><span class="star">★★★★</span></td><td>108</td><td>Convert Sorted Array to BST</td><td>🟢 Easy</td><td>二分递归构建</td><td><span class="done">✅ BST.java</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>235</td><td>Lowest Common Ancestor of a BST</td><td>🟡 Medium</td><td>利用大小关系剪枝：p &lt; root &lt; q → root 就是 LCA</td><td><span class="done">✅ Tree.java</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>96</td><td>Unique BST</td><td>🟡 Medium</td><td>DP / 卡特兰数</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>297</td><td>Serialize and Deserialize Binary Tree</td><td>🔴 Hard</td><td>前序序列化 + # 空标记递归反序列化</td><td><span class="done">✅ BST.java</span></td></tr>
   <tr><td><span class="star">★★★</span></td><td>173</td><td>BST Iterator</td><td>🟡 Medium</td><td>栈模拟非递归中序遍历</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★</span></td><td>700</td><td>Search in a BST</td><td>🟢 Easy</td><td>递归/迭代比较 val 决定左右方向</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★</span></td><td>701</td><td>Insert into a BST</td><td>🟡 Medium</td><td>搜索到空位插入，返回值挂接</td><td><span class="done">✅ BST.java</span></td></tr>
@@ -189,6 +190,7 @@ DP/计数       → 卡特兰数 / 区间 DP
 恢复          → 中序遍历找逆序对
 修剪          → 区间递归裁剪
 累加树        → 逆中序遍历累加
+	序列化/反序列化 → 前序递归序 + # 空标记
 </pre>
 
 <!-- ─── 刷题路线 ─── -->
@@ -196,7 +198,7 @@ DP/计数       → 卡特兰数 / 区间 DP
 
 <div class="route">
   <strong>第一梯队（必会）：</strong>98 → 230 → 108 → 235 → 450<br>
-  <strong>第二梯队（高频）：</strong>96 → 173 → 530 → 501 → 700/701<br>
+  <strong>第二梯队（高频）：</strong>96 → 173 → 297 → 530 → 501 → 700/701<br>
   <strong>第三梯队（进阶）：</strong>99 → 95 → 938 → 669 → 538
 </div>
 

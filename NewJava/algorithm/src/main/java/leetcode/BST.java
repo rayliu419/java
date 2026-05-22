@@ -224,4 +224,46 @@ public class BST {
         root.left = null;
         return root;
     }
+
+    /**
+     * https://leetcode.com/problems/serialize-and-deserialize-binary-tree/
+     */
+    // Encodes a tree to a single string.
+    public String serialize(TreeNode root) {
+        StringBuilder sb = new StringBuilder();
+        serialize(root, sb);
+        return sb.toString();
+    }
+
+    private void serialize(TreeNode root, StringBuilder sb) {
+        if (root == null) {
+            sb.append("#").append(" ");
+            return;
+        }
+        sb.append(root.val).append(" ");
+        serialize(root.left, sb);
+        serialize(root.right, sb);
+    }
+
+    // Decodes your encoded data to tree.
+    public TreeNode deserialize(String data) {
+        // index[0] = 0
+        int[] index = new int[1];
+        String[] array = data.split("\\s+");
+        return deserialize(array, index);
+    }
+
+    private TreeNode deserialize(String[] data, int[] index) {
+        String cur = data[index[0]];
+        if (cur.equals("#")) {
+            // 消耗一个
+            index[0]++;
+            return null;
+        }
+        TreeNode root = new TreeNode(Integer.parseInt(cur));
+        index[0]++;
+        root.left = deserialize(data, index);
+        root.right = deserialize(data, index);
+        return root;
+    }
 }
