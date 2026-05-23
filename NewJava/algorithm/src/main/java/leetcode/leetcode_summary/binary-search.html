@@ -153,7 +153,7 @@
   <tr><td><span class="star">★★★★★</span></td><td>704</td><td>Binary Search</td><td>🟢 Easy</td><td>标准二分模板，左右指针收缩</td><td><span class="done">✅ BinarySearch.java</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>35</td><td>Search Insert Position</td><td>🟢 Easy</td><td>找第一个 ≥ target 的位置</td><td><span class="done">✅ BinarySearch.java</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>34</td><td>Find First and Last Position</td><td>🟡 Medium</td><td>左右边界分别二分查找</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>69</td><td>Sqrt(x)</td><td>🟢 Easy</td><td>数值二分，平方比较防溢出</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>69</td><td>Sqrt(x)</td><td>🟢 Easy</td><td>数值二分，平方比较防溢出<br><span style="font-size:0.85em;color:#64748b;">⚠ 看似简单，极容易写错 — 详见下方分析</span></td><td><span class="done">✅ 已分析</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>33</td><td>Search in Rotated Sorted Array</td><td>🟡 Medium</td><td>先判哪半有序，再二分</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>153</td><td>Find Min in Rotated Sorted Array</td><td>🟡 Medium</td><td>比较 mid 与 high，无重复</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>162</td><td>Find Peak Element</td><td>🟡 Medium</td><td>比较 mid vs mid+1，向高侧收缩</td><td><span class="pending">⬜</span></td></tr>
@@ -410,9 +410,104 @@ int searchInsert(int[] nums, int target) {
 
 <!---------- 69 ---------->
 <h4>Sqrt(x)（69）⭐⭐⭐⭐⭐</h4>
+
+<blockquote>看似简单的二分，但极容易写错。因为 <code>mid&sup2; &le; x</code> 时 <code>mid</code> <strong>本身可能就是最终答案</strong>，但你往往会在 <code>low = mid + 1</code> 时把它跳过去。这道题是验证自己对二分「不变量」理解深度的试金石。</blockquote>
+
+<div class="comparison">
+<div>
+<h4>❌ 常见错误写法</h4>
+<pre>
+int mySqrt(int x) {
+    int low = 1, high = x;
+    while (low &lt; high) {
+        int mid = low + (high - low) / 2;
+        if (mid &lt; x / mid) {
+            low = mid + 1;   // ← mid 可能是答案，但被跳过了
+        } else if (mid &gt; x / mid) {
+            high = mid - 1;
+        } else {
+            return mid;
+        }
+    }
+    return low;
+}
+</pre>
+<strong>问题</strong>：当 <code>mid&sup2; &lt; x</code> 时，<code>mid</code> 可能就是 floor sqrt（如 <code>x=8, mid=2</code>），但 <code>low = mid + 1</code> 直接跳过了它，最终返回 <code>3</code>。
+</div>
+
+<div>
+<h4>✅ 正确写法</h4>
+<pre>
+int mySqrt(int x) {
+    if (x &lt; 2) return x;
+    int low = 1, high = x / 2;
+    int ans = -1;
+    while (low &lt;= high) {
+        int mid = low + (high - low) / 2;
+        if (mid &lt; x / mid) {          // mid&sup2; &lt; x
+            ans = mid;                 // 记录候选
+            low = mid + 1;             // 尝试更大的
+        } else if (mid &gt; x / mid) {
+            high = mid - 1;
+        } else {
+            return mid;                // 精确匹配
+        }
+    }
+    return ans;
+}
+</pre>
+<strong>要点</strong>：用 <code>ans</code> 变量记录最后一个可行的 <code>mid</code>，循环条件用 <code>&lt;=</code>。
+</div>
+</div>
+
+<h4>逐版 bug 分析</h4>
+
+<table>
+  <tr><th>版本</th><th>代码</th><th>Bug</th><th>失败例子</th></tr>
+  <tr>
+    <td>V1</td>
+    <td><code>mid * mid</code> 直接相乘</td>
+    <td>整数溢出，<code>mid * mid</code> 变成负数</td>
+    <td><code>x = Integer.MAX_VALUE</code></td>
+  </tr>
+  <tr>
+    <td>V2</td>
+    <td><code>while (low &lt; high)</code> + <code>low = mid + 1</code></td>
+    <td>漏掉最后一个有效 mid，因为 mid 是答案但被跳过且循环没机会检查</td>
+    <td><code>x = 8</code></td>
+  </tr>
+  <tr>
+    <td>V3</td>
+    <td><code>while (low &lt; high)</code> + <code>ans</code> 变量</td>
+    <td><code>low == high</code> 时循环不进，可能跳过唯一的解</td>
+    <td><code>x = 2</code></td>
+  </tr>
+  <tr>
+    <td>V4 ✅</td>
+    <td><code>while (low &lt;= high)</code> + <code>ans</code> 变量 + <code>if (x &lt; 2)</code></td>
+    <td>无 bug</td>
+    <td>—</td>
+  </tr>
+</table>
+
+<h4>正确的边界分析</h4>
+
+<table>
+  <tr><th>x</th><th>过程</th><th>ans</th><th>结果</th></tr>
+  <tr><td>0</td><td>早期返回</td><td>—</td><td>0</td></tr>
+  <tr><td>1</td><td>早期返回</td><td>—</td><td>1</td></tr>
+  <tr><td>2</td><td>low=1, high=2 → mid=1, 1&lt;2/1 → ans=1, low=2 → mid=2, 2&gt;2/2 → high=1 → 退出</td><td>1</td><td>1</td></tr>
+  <tr><td>3</td><td>low=1, high=3 → mid=2, 2&gt;3/2 → high=1 → mid=1, 1&lt;3/1 → ans=1, low=2 → 退出</td><td>1</td><td>1</td></tr>
+  <tr><td>8</td><td>low=1, high=8 → mid=4, 4&gt;8/4 → high=3 → mid=2, 2&lt;8/2 → ans=2, low=3 → mid=3, 3&gt;8/3 → high=2 → 退出</td><td>2</td><td>2</td></tr>
+  <tr><td>Integer.MAX_VALUE</td><td>收敛到 46340</td><td>46340</td><td>46340</td></tr>
+</table>
+
+<h4>核心教训</h4>
 <ul>
-  <li>二分范围 <code>[0, x]</code>，找最大的 <code>mid</code> 满足 <code>mid&sup2; &le; x</code></li>
-  <li>注意 <code>mid * mid</code> 可能溢出 int，用 <code>long</code> 或 <code>mid &gt; x / mid</code></li>
+  <li>数值二分的溢出陷阱：永远用 <code>mid &gt; x / mid</code> 代替 <code>mid * mid &gt; x</code></li>
+  <li><code>mid&sup2; &lt; x</code> 时 <code>mid</code> 可能是最终答案 → 不能简单 <code>low = mid + 1</code>，要用 <code>ans</code> 变量记录</li>
+  <li>带 <code>ans</code> 变量的写法必须用 <code>while (low &lt;= high)</code>，否则 <code>low == high</code> 时的解会被漏掉</li>
+  <li>二分范围可以优化为 <code>[1, x/2]</code>（除 0、1 外），因为 <code>&radic;x &le; x/2</code> 对所有 <code>x &ge; 4</code> 成立</li>
 </ul>
 
 <hr>
