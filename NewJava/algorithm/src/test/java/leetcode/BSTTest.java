@@ -1,7 +1,11 @@
 package leetcode;
 
+import infra.KTreeNode;
 import infra.TreeNode;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -186,5 +190,137 @@ public class BSTTest {
         );
         assertFalse(bst.isValidBSTInorderRecursive(root));
         assertFalse(bst.isValidBSTInterval(root));
+    }
+
+    // ─── K-ary Tree LCA Tests ──────────────────────────────────
+
+    @Test
+    public void testKaryLCA_BothInSameSubtree() {
+        //        1
+        //      / | \
+        //     2  3  4
+        //        |
+        //        5
+        KTreeNode n1 = new KTreeNode(1);
+        KTreeNode n2 = new KTreeNode(2);
+        KTreeNode n3 = new KTreeNode(3);
+        KTreeNode n4 = new KTreeNode(4);
+        KTreeNode n5 = new KTreeNode(5);
+        n1.children = Arrays.asList(n2, n3, n4);
+        n3.children = Arrays.asList(n5);
+
+        assertEquals(n3, bst.lowestCommonAncestor(n1, n3, n5));
+    }
+
+    @Test
+    public void testKaryLCA_DifferentSubtrees() {
+        //        1
+        //      / | \
+        //     2  3  4
+        //    /      /
+        //   5      6
+        KTreeNode n1 = new KTreeNode(1);
+        KTreeNode n2 = new KTreeNode(2);
+        KTreeNode n3 = new KTreeNode(3);
+        KTreeNode n4 = new KTreeNode(4);
+        KTreeNode n5 = new KTreeNode(5);
+        KTreeNode n6 = new KTreeNode(6);
+        n1.children = Arrays.asList(n2, n3, n4);
+        n2.children = Arrays.asList(n5);
+        n4.children = Arrays.asList(n6);
+
+        assertEquals(n1, bst.lowestCommonAncestor(n1, n5, n6));
+    }
+
+    @Test
+    public void testKaryLCA_NodeItselfIsLCA() {
+        //        1
+        //      / | \
+        //     2  3  4
+        //        |
+        //        5
+        KTreeNode n1 = new KTreeNode(1);
+        KTreeNode n2 = new KTreeNode(2);
+        KTreeNode n3 = new KTreeNode(3);
+        KTreeNode n4 = new KTreeNode(4);
+        KTreeNode n5 = new KTreeNode(5);
+        n1.children = Arrays.asList(n2, n3, n4);
+        n3.children = Arrays.asList(n5);
+
+        assertEquals(n3, bst.lowestCommonAncestor(n1, n3, n5));
+    }
+
+    @Test
+    public void testKaryLCA_RootIsLCA() {
+        //        1
+        //      / | \
+        //     2  3  4
+        KTreeNode n1 = new KTreeNode(1);
+        KTreeNode n2 = new KTreeNode(2);
+        KTreeNode n3 = new KTreeNode(3);
+        KTreeNode n4 = new KTreeNode(4);
+        n1.children = Arrays.asList(n2, n3, n4);
+
+        assertEquals(n1, bst.lowestCommonAncestor(n1, n2, n4));
+    }
+
+    @Test
+    public void testKaryLCA_SameNode() {
+        KTreeNode n1 = new KTreeNode(1);
+        KTreeNode n2 = new KTreeNode(2);
+        n1.children = Arrays.asList(n2);
+
+        assertEquals(n2, bst.lowestCommonAncestor(n1, n2, n2));
+    }
+
+    @Test
+    public void testKaryLCA_NullRoot() {
+        assertNull(bst.lowestCommonAncestor(null, new KTreeNode(1), new KTreeNode(2)));
+    }
+
+    // ─── K-ary Tree LCA 解法二：路径比较法 ─────────────────────
+
+    @Test
+    public void testKaryLCA2_BothInSameSubtree() {
+        KTreeNode n1 = new KTreeNode(1);
+        KTreeNode n2 = new KTreeNode(2);
+        KTreeNode n3 = new KTreeNode(3);
+        KTreeNode n4 = new KTreeNode(4);
+        KTreeNode n5 = new KTreeNode(5);
+        n1.children = Arrays.asList(n2, n3, n4);
+        n3.children = Arrays.asList(n5);
+
+        assertEquals(n3, bst.lowestCommonAncestor2(n1, n3, n5));
+    }
+
+    @Test
+    public void testKaryLCA2_DifferentSubtrees() {
+        KTreeNode n1 = new KTreeNode(1);
+        KTreeNode n2 = new KTreeNode(2);
+        KTreeNode n3 = new KTreeNode(3);
+        KTreeNode n4 = new KTreeNode(4);
+        KTreeNode n5 = new KTreeNode(5);
+        KTreeNode n6 = new KTreeNode(6);
+        n1.children = Arrays.asList(n2, n3, n4);
+        n2.children = Arrays.asList(n5);
+        n4.children = Arrays.asList(n6);
+
+        assertEquals(n1, bst.lowestCommonAncestor2(n1, n5, n6));
+    }
+
+    @Test
+    public void testKaryLCA2_RootIsLCA() {
+        KTreeNode n1 = new KTreeNode(1);
+        KTreeNode n2 = new KTreeNode(2);
+        KTreeNode n3 = new KTreeNode(3);
+        KTreeNode n4 = new KTreeNode(4);
+        n1.children = Arrays.asList(n2, n3, n4);
+
+        assertEquals(n1, bst.lowestCommonAncestor2(n1, n2, n4));
+    }
+
+    @Test
+    public void testKaryLCA2_NullRoot() {
+        assertNull(bst.lowestCommonAncestor2(null, new KTreeNode(1), new KTreeNode(2)));
     }
 }

@@ -446,6 +446,10 @@ encode(leaf) = "0"
 
 <blockquote>BST 中的 LCA 很简单（利用大小关系剪枝），但<strong>普通二叉树的 LCA</strong> 有两种不同的实现思路，理解其差异有助于掌握递归语义的设计。</blockquote>
 
+<div class="warn">
+<strong>⚠️ 重要前提：</strong>如果不是确定 p、q 一定在树中，需要先遍历一次确认它们存在，再执行 LCA 算法。否则「直接返回 + 混合语义」的 <strong>修正解思路</strong>（版本二）可能返回错误的 LCA（例如 q 不存在却返回了 p）。这个前提对 <strong>二叉树</strong> 和 <strong>K-ary 树</strong> 的修正解都适用。
+</div>
+
 <p>两个实现都在 <code>BST.java</code> 中：</p>
 
 <div class="comparison">
@@ -518,6 +522,113 @@ TreeNode lowestCommonAncestor2(root, p, q) {
   <tr><td>遍历范围</td><td>找到 LCA 后立即停止</td><td>找到 p/q 后仍需遍历兄弟子树</td></tr>
   <tr><td>代码复杂度</td><td>稍高（需要包装器）</td><td>简洁</td></tr>
   <tr><td>适用场景</td><td>安全性优先，需处理异常情况</td><td>竞赛/刷题，假设 p/q 一定存在</td></tr>
+</table>
+
+<hr>
+
+<!---------- K-ary Tree LCA ---------->
+<h3>K-ary Tree LCA（多叉树最近公共祖先）</h3>
+
+<blockquote>BST 和二叉树的 LCA 思路推广到多叉树：每个节点有 <code>List&lt;KTreeNode&gt; children</code>，本质是"在 N 个分支中寻找 p 和 q"。</blockquote>
+
+<p>多叉树的 LCA 是二叉树 LCA 的直接推广。二叉树只有两个分支（left / right），多叉树则有 N 个分支（children）。</p>
+
+<h4>节点定义</h4>
+
+<pre>
+class KTreeNode {
+    int val;
+    List&lt;KTreeNode&gt; children;
+    KTreeNode(int val) { this.val = val; this.children = new ArrayList&lt;&gt;(); }
+}</pre>
+
+<h4>代码实现</h4>
+
+<pre>
+KTreeNode lowestCommonAncestor(KTreeNode root, KTreeNode p, KTreeNode q) {
+    if (root == null) return null;
+    if (root.val == p.val || root.val == q.val) return root;
+
+    List&lt;KTreeNode&gt; candidates = new ArrayList&lt;&gt;();
+    for (KTreeNode child : root.children) {
+        KTreeNode result = lowestCommonAncestor(child, p, q);
+        if (result != null) candidates.add(result);
+    }
+
+    if (candidates.size() &gt;= 2) return root;        // p 和 q 在不同子树
+    if (candidates.size() == 1) return candidates.get(0);  // 单侧返回
+    return null;  // 没找到
+}</pre>
+
+<h4>算法逻辑</h4>
+
+<ol>
+  <li><strong>递归语义</strong>：返回值 = 在该子树中找到的 p/q/LCA。与二叉树 LCA 版二（直接返回版）完全一致。</li>
+  <li><strong>当前节点就是 p 或 q</strong> → 直接返回自己，它是潜在的 LCA。</li>
+  <li><strong>遍历所有孩子</strong>：统计所有孩子返回的非 null 结果。</li>
+  <li><strong>≥ 2 个非 null</strong>：p 和 q 分布在不同的孩子子树中 → 当前节点就是 LCA。</li>
+  <li><strong>恰好 1 个非 null</strong>：把该孩子的结果往上传递。</li>
+  <li><strong>全为 null</strong>：该子树不存在 p 或 q，返回 null。</li>
+</ol>
+
+<h4>与二叉树 LCA 的对比</h4>
+
+<table>
+  <tr><th>维度</th><th>二叉树 LCA</th><th>K-ary 树 LCA</th></tr>
+  <tr><td>分支数量</td><td>固定 2（left / right）</td><td>N（children 列表）</td></tr>
+  <tr><td>判断条件</td><td>left != null &amp;&amp; right != null → 当前是 LCA</td><td>candidates.size() &gt;= 2 → 当前是 LCA</td></tr>
+  <tr><td>返回值逻辑</td><td>三目运算符 / if-else 链</td><td>收集 candidates 列表统一判断</td></tr>
+  <tr><td>复杂度</td><td>O(n)</td><td>O(n)（每个节点仍只访问一次）</td></tr>
+</table>
+
+<div class="tip">
+<strong>💡</strong> 核心洞察：二叉树 LCA 的 <code>left != null &amp;&amp; right != null → return root</code> 本质是"在两个分支中各找到了目标"。在多叉树中推广为"在至少两个孩子子树中各找到了目标"。
+</div>
+
+<h4>解法二：路径比较法</h4>
+
+<blockquote>另一种思路：分别找出 root → p 和 root → q 的路径，两条路径最后一个相同节点即为 LCA。</blockquote>
+
+<pre>
+KTreeNode lowestCommonAncestor2(KTreeNode root, KTreeNode p, KTreeNode q) {
+    List&lt;KTreeNode&gt; pathP = new ArrayList&lt;&gt;();
+    List&lt;KTreeNode&gt; pathQ = new ArrayList&lt;&gt;();
+    if (!findPath(root, p, pathP) || !findPath(root, q, pathQ)) {
+        return null;
+    }
+    int i = 0;
+    while (i &lt; pathP.size() &amp;&amp; i &lt; pathQ.size()
+           &amp;&amp; pathP.get(i) == pathQ.get(i)) {
+        i++;
+    }
+    return pathP.get(i - 1);
+}
+
+boolean findPath(KTreeNode root, KTreeNode target, List&lt;KTreeNode&gt; path) {
+    if (root == null) return false;
+    path.add(root);
+    if (root.val == target.val) return true;
+    for (KTreeNode child : root.children) {
+        if (findPath(child, target, path)) return true;
+    }
+    path.remove(path.size() - 1);
+    return false;
+}</pre>
+
+<p><strong>算法步骤</strong>：</p>
+<ol>
+  <li><code>findPath</code> 做 DFS 查找 target，用 path 记录沿途节点，找到后返回 true</li>
+  <li>没找到时回溯：<code>path.remove(path.size() - 1)</code> 移除当前节点</li>
+  <li>得到两条路径后，从头遍历直到遇到第一个不同节点，其前一个就是 LCA</li>
+</ol>
+
+<table>
+  <tr><th>维度</th><th>解法一（递归搜索）</th><th>解法二（路径比较）</th></tr>
+  <tr><td>时间复杂度</td><td>O(n)</td><td>O(n)</td></tr>
+  <tr><td>空间复杂度</td><td>O(h)（递归栈深度）</td><td>O(n)（两条路径，最差 O(n)）</td></tr>
+  <tr><td>第一次遍历找到 p/q 后</td><td>直接返回，不再往下递归</td><td>DFS 仍在回溯，但已找到 target 时兄弟子树不遍历</td></tr>
+  <tr><td>代码可读性</td><td>高度抽象，递归语义需理解</td><td>直观，路径比较易于理解</td></tr>
+  <tr><td>适用场景</td><td>只需 LCA，无需路径信息</td><td>额外需要路径信息的场景</td></tr>
 </table>
 
 <hr>

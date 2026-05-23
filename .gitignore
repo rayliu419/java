@@ -5,3 +5,5 @@
 *.settings
 *.project
 *.factorypath
+.DS_Store
+.idea/

@@ -152,7 +152,7 @@
   </tr>
   <tr><td><span class="star">★★★★★</span></td><td>704</td><td>Binary Search</td><td>🟢 Easy</td><td>标准二分模板，左右指针收缩</td><td><span class="done">✅ BinarySearch.java</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>35</td><td>Search Insert Position</td><td>🟢 Easy</td><td>找第一个 ≥ target 的位置</td><td><span class="done">✅ BinarySearch.java</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>34</td><td>Find First and Last Position</td><td>🟡 Medium</td><td>左右边界分别二分查找</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>34</td><td>Find First and Last Position</td><td>🟡 Medium</td><td>左右边界分别二分查找</td><td><span class="done">✅ BinarySearch.java</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>69</td><td>Sqrt(x)</td><td>🟢 Easy</td><td>数值二分，平方比较防溢出<br><span style="font-size:0.85em;color:#64748b;">⚠ 看似简单，极容易写错 — 详见下方分析</span></td><td><span class="done">✅ 已分析</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>33</td><td>Search in Rotated Sorted Array</td><td>🟡 Medium</td><td>先判哪半有序，再二分</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>153</td><td>Find Min in Rotated Sorted Array</td><td>🟡 Medium</td><td>比较 mid 与 high，无重复</td><td><span class="pending">⬜</span></td></tr>
@@ -514,21 +514,166 @@ int mySqrt(int x) {
 
 <!---------- 33 ---------->
 <h4>Search in Rotated Sorted Array（33）⭐⭐⭐⭐</h4>
+
+<blockquote>
+<p><strong>核心设计思维：从「无序」中找「有序」，利用有序判定方向。</strong></p>
+<p>旋转数组有一个关键性质：<strong>从中点一切，至少有一半是有序的</strong>。这个性质是必然成立的不变量——<code>nums[low..mid]</code> 和 <code>nums[mid..high]</code> 不可能同时无序。</p>
+</blockquote>
+
+<h4>算法思路</h4>
+
+<p>不变量：每一轮二分，总能找到一个<strong>完全有序的区间</strong>。</p>
+
+<p>基于这个有序区间，做标准二分判断——检查 target 是否落在它的值域内：</p>
+
+<pre>
+if (左边有序) {
+    if (target 在 [nums[low], nums[mid]) 范围内) → 缩到左边
+    else → 去右边
+} else {
+    // 右边一定有序
+    if (target 在 (nums[mid], nums[high]] 范围内) → 缩到右边
+    else → 去左边
+}
+</pre>
+
+<h4>为什么这么设计是正确且完备的</h4>
+
+<p>普通二分的核心前提是「数组整体有序」，但旋转数组<strong>整体无序</strong>。所以不能直接用 <code>nums[mid] &gt; target</code> 来决定方向。</p>
+
+<p>这个算法的核心是把问题做了<strong>归约</strong>：从整体无序中找到一个<strong>局部有序区间</strong>，在这个区间上应用标准二分的判定逻辑。目标要么在这个有序区间里（直接用大小比较判定），要么在另一半——而另一半被排除后，剩下的子数组<strong>仍然是旋转数组</strong>（只是规模更小），"至少半边有序"这个性质递归成立。</p>
+
+<p>这个过程之所以成立，依赖的是<strong>排中律</strong>：</p>
 <ul>
-  <li>先判断哪半有序：比较 <code>nums[mid]</code> 与 <code>nums[low]</code></li>
-  <li>左半有序：<code>nums[low] &lt;= nums[mid]</code>
-    <ul>
-      <li>target 在 <code>[low, mid)</code> 内 → <code>high = mid - 1</code></li>
-      <li>否则 → <code>low = mid + 1</code></li>
-    </ul>
-  </li>
-  <li>右半有序：<code>nums[mid] &lt; nums[low]</code>
-    <ul>
-      <li>target 在 <code>(mid, high]</code> 内 → <code>low = mid + 1</code></li>
-      <li>否则 → <code>high = mid - 1</code></li>
-    </ul>
-  </li>
+  <li><code>if</code> 分支：检查 target 是否在<strong>已知有序</strong>的半边——纯数学的区间包含关系，一次 <code>O(1)</code> 的大小比较即可判定，<strong>没有歧义</strong></li>
+  <li><code>else</code> 分支：target <strong>不在</strong>有序的半边 → 那<strong>只能</strong>在另一半（哪怕它无序）。这不需要额外的判断，而是逻辑推导的结果</li>
 </ul>
+
+<p>算法在每一轮只做一件简单确定的事——利用已知的有序区间做判定，而把看似复杂的情况交给「取反后递归」。这是一个典型的<strong>「复杂问题 → 拆解出可计算的局部 → 其余部分递归处理」</strong>的思维模式。</p>
+
+<h4>边界条件：nums[low] == nums[mid]</h4>
+
+<p>如果用 <code>nums[low] &lt;= nums[mid]</code> 来判断左半边有序（而非 <code>&lt;</code>），当 <code>nums[low] == nums[mid]</code> 时说明区间长度 ≤ 2。此时有两个元素相等意味着 low 和 mid 是同一个位置（或数组长度 2 且两元素不等时，<code>==</code> 的情况反而没出现），所以用 <code>&lt;=</code> 是安全的——它只是把少元素的情况归入左半边有序分支，实际不会产生歧义。</p>
+
+<h4>错误写法分析</h4>
+
+<pre>
+// ❌ 错误一：只比较大小，忘了结合区间值域判断
+if (nums[low] &lt; nums[mid]) {
+    if (nums[mid] &gt; target) {
+        high = mid - 1;  // 直接认为在左边 —— 错误！
+    } else {
+        low = mid + 1;
+    }
+}
+</pre>
+
+<p>反例：<code>nums = [4,5,6,7,0,1,2], target = 0</code></p>
+<ul>
+  <li>low=0, high=6, mid=3, nums[mid]=7</li>
+  <li><code>nums[low]=4 &lt; nums[mid]=7</code> → 认为左边有序</li>
+  <li><code>nums[mid]=7 &gt; target=0</code> → 错误地走左边（<code>high = mid - 1</code>），但 0 在右边</li>
+  <li>原因：<strong>只比了 <code>mid</code> 和 <code>target</code> 的大小，没检查 target 是否落在 <code>[nums[low], nums[mid])</code> 范围内</strong></li>
+</ul>
+
+<p>正确写法必须同时满足两个条件：<strong>有序区间的左边界 ≤ target &lt; 有序区间的右边界</strong>（左闭右开）。</p>
+
+<h4>逐版 bug 分析</h4>
+
+<table>
+  <tr><th>版本</th><th>代码特征</th><th>Bug</th><th>失败例子</th></tr>
+  <tr>
+    <td>V1</td>
+    <td><code>nums[low] &lt; nums[mid]</code> 判断有序（缺等号）</td>
+    <td>数组长度为 2 时 <code>low == mid</code>，<code>&lt;</code> 返回 false，错误进入右侧分支，但左侧只有一个元素且 target 在右侧时被跳过</td>
+    <td><code>[2,1], target=1</code><br><code>[3,1], target=1</code></td>
+  </tr>
+  <tr>
+    <td>V2</td>
+    <td>只比较 <code>nums[mid] &gt; target</code>，未加值域判断</td>
+    <td>旋转数组中间元素大于 target 时，target 可能在无序的另一半</td>
+    <td><code>[4,5,6,7,0,1,2], target=0</code></td>
+  </tr>
+  <tr>
+    <td>V3</td>
+    <td><code>nums[low] &lt; target</code>（左闭区间写成开区间）</td>
+    <td>target 等于左边界（即数组第一个元素）时被漏掉</td>
+    <td><code>[4,5,6,7,0,1,2], target=4</code></td>
+  </tr>
+  <tr>
+    <td>V4 ✅</td>
+    <td><code>nums[low] &lt;= nums[mid]</code> + 完整值域 <code>[nums[low], nums[mid])</code> / <code>(nums[mid], nums[high]]</code></td>
+    <td>无 bug</td>
+    <td>—</td>
+  </tr>
+</table>
+
+<h4>边界走查：<code>[2,1], target=1</code>（V1 vs V4）</h4>
+
+<p>这个极简 case 是判断有序条件用 <code>&lt;</code> 还是 <code>&lt;=</code> 的试金石：</p>
+
+<table>
+  <tr><th>版本</th><th>步骤</th><th>结论</th></tr>
+  <tr>
+    <td>V1 (<code>&lt;</code>)</td>
+    <td>mid=0, nums[0]=2≠1<br><code>2 &lt; 2</code> → false → 进入「右边有序」分支<br><code>2 &lt; 1 &amp;&amp; 1 &gt;= 1</code> → false → high=-1 → 退出 → return -1</td>
+    <td><strong>❌ 漏解</strong></td>
+  </tr>
+  <tr>
+    <td>V4 (<code>&lt;=</code>)</td>
+    <td>mid=0, nums[0]=2≠1<br><code>2 &lt;= 2</code> → true → 进入「左边有序」分支<br><code>2 &lt;= 1 &amp;&amp; 2 &gt; 1</code> → false → low=1<br>mid=1, nums[1]=1==1 → return 1</td>
+    <td><strong>✅ 正确</strong></td>
+  </tr>
+</table>
+
+<p><strong>直觉理解</strong>：<code>nums[low] &lt;= nums[mid]</code> 等价于「low 到 mid 之间没有旋转点」。当 <code>low == mid</code> 时，区间只有一个元素，自然没有旋转点，所以应该归入有序分支。</p>
+
+<h4>三种操作符的直觉对照</h4>
+
+<table>
+  <tr><th>判断有序</th><th>值域左边界</th><th>值域右边界</th><th>设计原则</th></tr>
+  <tr><td><code>nums[low] &lt;= nums[mid]</code></td><td><code>nums[low] &lt;= target</code></td><td><code>target &lt; nums[mid]</code></td><td>mid 已被排除（== 已返回），所以右侧取开区间 <code>&lt;</code></td></tr>
+  <tr><td>—</td><td><code>target &gt; nums[mid]</code></td><td><code>target &lt;= nums[high]</code></td><td>mid 已被排除，所以左侧取开区间 <code>&gt;</code></td></tr>
+</table>
+
+<p>关键规律：<strong>「排除 mid」这个动作天然决定了值域判断中 mid 侧必须是开区间</strong>。因为 <code>nums[mid] == target</code> 已经提前返回，剩下的判断中 <code>mid</code> 一定不是答案，所以 <code>target &lt; nums[mid]</code>（不是 <code>&lt;=</code>）和 <code>target &gt; nums[mid]</code>（不是 <code>&gt;=</code>）。</p>
+
+<h4>边界测试走查</h4>
+
+<table>
+  <tr><th>数组</th><th>target</th><th>过程</th><th>结果</th></tr>
+  <tr><td><code>[4,5,6,7,0,1,2]</code></td><td>0</td><td>mid=3(7)→右有序, 0∈(7,2]→low=4 → mid=5(1)→左有序, 0∈[0,1)→high=4 → mid=4(0)→找到</td><td>4</td></tr>
+  <tr><td><code>[4,5,6,7,0,1,2]</code></td><td>5</td><td>mid=3(7)→左有序, 5∈[4,7)→high=2 → mid=1(5)→找到</td><td>1</td></tr>
+  <tr><td><code>[4,5,6,7,0,1,2]</code></td><td>3</td><td>mid=3(7)→左有序, 3∉[4,7)→low=4 → mid=5(1)→左有序, 3∉[0,1)→low=6 → mid=6(2)→左有序, 3∉[2,2)→low=7 → 退出</td><td>-1</td></tr>
+  <tr><td><code>[2,1]</code></td><td>1</td><td>mid=0(2)→左有序, 1∉[2,2)→low=1 → mid=1(1)→找到</td><td>1</td></tr>
+  <tr><td><code>[1]</code></td><td>0</td><td>mid=0(1)→左有序, 0∉[1,1)→low=1 → 退出</td><td>-1</td></tr>
+  <tr><td><code>[1]</code></td><td>1</td><td>mid=0(1)→找到</td><td>0</td></tr>
+</table>
+
+<h4>最终模板</h4>
+
+<pre>
+int search(int[] nums, int target) {
+    int low = 0, high = nums.length - 1;
+    while (low &lt;= high) {
+        int mid = low + (high - low) / 2;
+        if (nums[mid] == target) return mid;
+
+        if (nums[low] &lt;= nums[mid]) {         // 左半边有序
+            if (target &gt;= nums[low] &amp;&amp; target &lt; nums[mid])
+                high = mid - 1;               // target 在左半边
+            else
+                low = mid + 1;                // target 在右半边
+        } else {                               // 右半边有序
+            if (target &gt; nums[mid] &amp;&amp; target &lt;= nums[high])
+                low = mid + 1;                // target 在右半边
+            else
+                high = mid - 1;               // target 在左半边
+        }
+    }
+    return -1;
+}
+</pre>
 
 <hr>
 

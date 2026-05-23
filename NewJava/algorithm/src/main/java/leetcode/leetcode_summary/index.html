@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>LeetCode Summary</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; line-height: 1.6; max-width: 960px; margin: 0 auto; padding: 20px; color: #333; }
+h1 { border-bottom: 1px solid #eee; padding-bottom: 10px; }
+h2 { margin-top: 28px; }
+table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+th { background: #f6f8fa; font-weight: 600; }
+tr:nth-child(even) { background: #fafbfc; }
+a { color: #0366d6; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+blockquote { border-left: 4px solid #dfe2e5; margin: 0; padding: 0 16px; color: #6a737d; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; }
+</style>
+</head>
+<body>
+
+<h1>LeetCode Summary</h1>
+
+<blockquote>
+  分类记录面试高频题型，包含题目信息、核心思路和实现状态。
+</blockquote>
+
+<h2>专题目录</h2>
+
+<table>
+<thead>
+<tr>
+  <th>专题</th>
+  <th>核心内容</th>
+  <th>文件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>BST (二叉搜索树)</td>
+  <td>中序性质、增删查改、中序相关题型</td>
+  <td><a href="bst.html">bst.html</a></td>
+</tr>
+<tr>
+  <td>Linked List (链表)</td>
+  <td>dummy 节点、快慢指针、反转、合并、环检测、相交、排序</td>
+  <td><a href="linklist.md">linklist.md</a></td>
+</tr>
+<tr>
+  <td>K-Way Merge (K个有序列表合并)</td>
+  <td>最小堆合并 K 个有序序列、有序矩阵第 K 小、K个最小 Pair 和、最小区间覆盖、Ugly Number</td>
+  <td><a href="k-sorted-merge.md">k-sorted-merge.md</a></td>
+</tr>
+<tr>
+  <td>BFS (广度优先搜索)</td>
+  <td>二叉树层次遍历、多源BFS、图BFS、拓扑排序、矩阵BFS、Word Ladder</td>
+  <td><a href="bfs.md">bfs.md</a></td>
+</tr>
+<tr>
+  <td>Intervals (区间)</td>
+  <td>Merge、Insert、Non-overlapping、Meeting Rooms II、扫描线/最小堆</td>
+  <td><a href="intervals.md">intervals.md</a></td>
+</tr>
+<tr>
+  <td>Matrix (矩阵)</td>
+  <td>旋转、转置、螺旋遍历、置零、二维搜索、DFS/BFS</td>
+  <td><a href="matrix-visit.md">matrix-visit.md</a></td>
+</tr>
+<tr>
+  <td>String &amp; Array (字符串与数组)</td>
+  <td>反转单词、相加/相乘、旋转数组、缺失重复数、回文、括号</td>
+  <td><a href="string-array.md">string-array.md</a></td>
+</tr>
+<tr>
+  <td>Two Pointer (双指针)</td>
+  <td>左右指针、正反指针、快慢指针、三数之和、盛水、股票买卖、颜色排序、加油站</td>
+  <td><a href="two-pointer.md">two-pointer.md</a></td>
+</tr>
+<tr>
+  <td>Top K (第 K 大/小)</td>
+  <td>QuickSelect、最小堆、最大堆、前 K 个高频/最近元素、数据流第 K 大</td>
+  <td><a href="topk.md">topk.md</a></td>
+</tr>
+<tr>
+  <td>Prefix Sum (前缀和)</td>
+  <td>子数组和为K、前缀积、二维前缀和、差分数组、前缀异或、Kadane、取模/状态压缩</td>
+  <td><a href="prefix-sum.md">prefix-sum.md</a></td>
+</tr>
+<tr>
+  <td>Stack (栈)</td>
+  <td>单调栈、表达式求值、Valid Parentheses、Largest Rectangle、接雨水、括号匹配</td>
+  <td><a href="stack.md">stack.md</a></td>
+</tr>
+<tr>
+  <td>递归 → 非递归推导</td>
+  <td>机械推导方法 + 6种递归模式的完整图谱 + 推导工作流</td>
+  <td><a href="recursion-to-iteration.md">recursion-to-iteration.md</a></td>
+</tr>
+</tbody>
+</table>
+
+<h2>通用实现文件</h2>
+
+<ul>
+  <li><code>algorithm/src/main/java/leetcode/</code> — 主实现</li>
+  <li><code>algorithm/src/test/java/leetcode/</code> — 测试</li>
+</ul>
+
+<hr>
+
+<h2>总体经验</h2>
+
+<ol>
+  <li><strong>按类别刷题。</strong> 不熟悉的多个题目一起刷，有利于找出规律。</li>
+  <li><strong>The ability to map a new problem to an already known problem.</strong> 不在于一定要多，但是要能具有能将新问题映射到已知问题的能力。</li>
+</ol>
+
+<h2>算法复杂度</h2>
+
+<p>常见 loop 的复杂度。</p>
+
+<p><strong>O(1)</strong></p>
+<pre>for (int i = 0; i &lt;= c; i++) {
+    // O(1) operation
+}</pre>
+
+<p><strong>O(n)</strong></p>
+<pre>for (int i = 0; i &lt;= n; i += c) {
+    // O(1) operation
+}
+
+for (int i = n; i &gt; 0; i -= c) {
+    // O(1) operation
+}</pre>
+
+<p><strong>O(n<sup>c</sup>)</strong></p>
+<pre>for (int i = 0; i &lt;= n; i += c) {
+    for (int j = 1; j &lt; n; j += c) {
+        // O(1) operation
+    }
+}</pre>
+
+<p><strong>O(lg n)</strong></p>
+<pre>for (int i = 0; i &lt;= n; i *= c) {
+    // O(1) operation
+}</pre>
+
+<p><strong>O(lg lg n)</strong></p>
+<pre>for (int i = 0; i &lt;= n; i = pow(i, c)) {
+    // O(1) operation
+}</pre>
+
+<h3>n 个含 m 个元素的有序表合并</h3>
+
+<p><strong>1. 两两归并的时间复杂度</strong></p>
+<ul>
+  <li>第一层：n/2 次，每次 2 个表，每个表长度 m → n/2 × (m + m) = mn</li>
+  <li>第二层：n/4 次，每次 2 个表，每个表长 2m → n/4 × (2m + 2m) = mn</li>
+  <li>一共 lg n 层</li>
+</ul>
+<p><strong>时间复杂度：O(mn lg n)</strong></p>
+
+<p><strong>2. 借助一个堆</strong></p>
+<ul>
+  <li>建堆 — O(n)</li>
+  <li>一共要 pop mn 次，每次调整耗费 O(lg n)</li>
+  <li>O(n) + O(mn lg n) = <strong>O(mn lg n)</strong></li>
+</ul>
+<p>可以看出，上面两个的计算方式都是直接计算 count 来做的。</p>
+
+<h3>复杂度分析要点</h3>
+<ul>
+  <li>如果含有很多 if-else 语句，通常用 worst case 来估计时间复杂度。</li>
+  <li>如果是递归的方法，递归树是最靠谱的方法。</li>
+  <li>如果太复杂，就计算一个算法复杂度上限。</li>
+</ul>
+
+<h2>不熟悉题目 / 需重点复习</h2>
+
+<table>
+<thead>
+<tr>
+  <th>题目</th>
+  <th>要点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Implement Trie (Prefix Tree) / Add and Search Word</td>
+  <td>Trie 树的实现</td>
+</tr>
+<tr>
+  <td>Minimum Size Subarray Sum (O(n lg n) 方法)</td>
+  <td>二分查找 + cumulative sum 结合使用，提供了一种新思路</td>
+</tr>
+<tr>
+  <td>Recurring Decimal</td>
+  <td>思路有误，注意 string insert 函数对 pos 和 iterator 参数行为不同，且是插在 pos 之前</td>
+</tr>
+<tr>
+  <td>Unique Binary Search Trees II</td>
+  <td>递归建立的过程</td>
+</tr>
+<tr>
+  <td>Largest Rectangle in Histogram</td>
+  <td>比较难，想明白单调栈的核心逻辑</td>
+</tr>
+<tr>
+  <td>Permutation 系列</td>
+  <td>全排列相关题型的规律</td>
+</tr>
+<tr>
+  <td>Text Justification</td>
+  <td>这种字符串排版处理是不熟练的，需要多练习</td>
+</tr>
+<tr>
+  <td>Max Points on a Line</td>
+  <td>不能用 map&lt;float&gt;，要存经过 gcd 化简后的 pair</td>
+</tr>
+<tr>
+  <td>Best Time to Buy and Sell Stock IV</td>
+  <td>股票系列第 4 题，状态机 DP</td>
+</tr>
+<tr>
+  <td>较难的二叉树题目</td>
+  <td>递归和最优化问题的综合</td>
+</tr>
+</tbody>
+</table>
+
+</body>
+</html>

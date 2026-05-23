@@ -164,4 +164,36 @@ public class BinarySearch {
         }
         return ans;
     }
+
+    /**
+     * https://leetcode.com/problems/search-in-rotated-sorted-array/
+     */
+    public int search(int[] nums, int target) {
+        int low = 0;
+        int high = nums.length - 1;
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (nums[mid] == target) {
+                return mid;
+            }
+            if (nums[low] <= nums[mid]) {
+                // 左边有序
+                if (nums[low] <= target && nums[mid] > target) {
+                    // target也落在了左边
+                    high = mid - 1;
+                } else {
+                    low = mid + 1;
+                }
+            } else {
+                // 右边有序
+                if (nums[mid] < target && nums[high] >= target) {
+                    // target也落在了右边
+                    low = mid + 1;
+                } else {
+                    high = mid - 1;
+                }
+            }
+        }
+        return -1;
+    }
 }

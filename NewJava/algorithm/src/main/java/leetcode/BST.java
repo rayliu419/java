@@ -1,8 +1,10 @@
 package leetcode;
 
+import infra.KTreeNode;
 import infra.TreeNode;
 
-import java.time.temporal.Temporal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BST {
 
@@ -376,5 +378,60 @@ public class BST {
         }
         // 一个大于，一个小于。直接返回，这里返回的实际上由于是后序遍历，返回的是底层第一次分开两个待查节点的祖先，直接作为结果返回即可。
         return root;
+    }
+
+    // ──────────────────────────────────────────────
+    //  K-ary Tree LCA（多叉树最近公共祖先）
+    // ──────────────────────────────────────────────
+
+    /**
+     * K-ary Tree（多叉树）的最近公共祖先。
+     *
+     * 二叉树 LCA 的推广：每个节点有 N 个孩子，而非固定的 left/right。
+     * 统计所有孩子子树的搜索结果，如果 ≥ 2 个非 null 则当前节点是 LCA。
+     */
+    public KTreeNode lowestCommonAncestor(KTreeNode root, KTreeNode p, KTreeNode q) {
+        if (root == null) return null;
+        if (root.val == p.val || root.val == q.val) return root;
+
+        java.util.List<KTreeNode> candidates = new java.util.ArrayList<>();
+        for (KTreeNode child : root.children) {
+            KTreeNode result = lowestCommonAncestor(child, p, q);
+            if (result != null) candidates.add(result);
+        }
+
+        if (candidates.size() >= 2) return root;
+        if (candidates.size() == 1) return candidates.get(0);
+        return null;
+    }
+
+    /**
+     * K-ary Tree LCA 解法二：路径比较法。
+     *
+     * 1. 分别找到 root → p 和 root → q 的路径
+     * 2. 比较两条路径，最后一个相同节点即为 LCA
+     */
+    public KTreeNode lowestCommonAncestor2(KTreeNode root, KTreeNode p, KTreeNode q) {
+        List<KTreeNode> pathP = new ArrayList<>();
+        List<KTreeNode> pathQ = new ArrayList<>();
+        if (!findPath(root, p, pathP) || !findPath(root, q, pathQ)) {
+            return null;
+        }
+        int i = 0;
+        while (i < pathP.size() && i < pathQ.size() && pathP.get(i) == pathQ.get(i)) {
+            i++;
+        }
+        return pathP.get(i - 1);
+    }
+
+    private boolean findPath(KTreeNode root, KTreeNode target, java.util.List<KTreeNode> path) {
+        if (root == null) return false;
+        path.add(root);
+        if (root.val == target.val) return true;
+        for (KTreeNode child : root.children) {
+            if (findPath(child, target, path)) return true;
+        }
+        path.remove(path.size() - 1);
+        return false;
     }
 }
