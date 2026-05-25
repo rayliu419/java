@@ -154,9 +154,9 @@
   <tr><td><span class="star">★★★★★</span></td><td>35</td><td>Search Insert Position</td><td>🟢 Easy</td><td>找第一个 ≥ target 的位置</td><td><span class="done">✅ BinarySearch.java</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>34</td><td>Find First and Last Position</td><td>🟡 Medium</td><td>左右边界分别二分查找</td><td><span class="done">✅ BinarySearch.java</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>69</td><td>Sqrt(x)</td><td>🟢 Easy</td><td>数值二分，平方比较防溢出<br><span style="font-size:0.85em;color:#64748b;">⚠ 看似简单，极容易写错 — 详见下方分析</span></td><td><span class="done">✅ 已分析</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>33</td><td>Search in Rotated Sorted Array</td><td>🟡 Medium</td><td>先判哪半有序，再二分</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>153</td><td>Find Min in Rotated Sorted Array</td><td>🟡 Medium</td><td>比较 mid 与 high，无重复</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>162</td><td>Find Peak Element</td><td>🟡 Medium</td><td>比较 mid vs mid+1，向高侧收缩</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>33</td><td>Search in Rotated Sorted Array</td><td>🟡 Medium</td><td>先判哪半有序，再二分</td><td><span class="done">✅ BinarySearch.java</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>153</td><td>Find Min in Rotated Sorted Array</td><td>🟡 Medium</td><td>比较 mid 与 high，无重复</td><td><span class="done">✅ BinarySearch.java</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>162</td><td>Find Peak Element</td><td>🟡 Medium</td><td>比较 mid vs mid+1，向高侧收缩</td><td><span class="done">✅ BinarySearch.java</span></td></tr>
   <tr><td><span class="star">★★★</span></td><td>74</td><td>Search a 2D Matrix</td><td>🟡 Medium</td><td>二维映射一维做二分</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★</span></td><td>875</td><td>Koko Eating Bananas</td><td>🟡 Medium</td><td>答案二分：check 每小时能否吃完</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★</span></td><td>1011</td><td>Ship Packages Within D Days</td><td>🟡 Medium</td><td>答案二分：check 能否 D 天内运完</td><td><span class="pending">⬜</span></td></tr>
@@ -685,6 +685,55 @@ int search(int[] nums, int target) {
   <li><code>nums[mid] &gt; nums[high]</code> → 最小值在右半，<code>low = mid + 1</code></li>
   <li>循环条件 <code>low &lt; high</code>，终止时 <code>low == high</code> 即为答案</li>
 </ul>
+
+<hr>
+
+<!---------- 162 ---------->
+<h4>Find Peak Element（162）⭐⭐⭐⭐</h4>
+
+<blockquote>
+<p><strong>不是在有序数组中找目标值，而是在「无序」数组中利用局部有序性找峰值。核心直觉：永远往更高的方向走，一定能找到峰值。</strong></p>
+<p>如果 <code>nums[mid] &gt; nums[mid+1]</code>，说明左侧存在峰值（因为 <code>nums[-1] = -∞</code>，左侧是下降趋势，必有峰在 mid 或之前）；反之 <code>nums[mid] &lt; nums[mid+1]</code>，右侧存在峰值。</p>
+</blockquote>
+
+<h4>算法思路</h4>
+
+<p>二分比较 <code>nums[mid]</code> 与 <code>nums[mid+1]</code>：</p>
+
+<pre>
+if (nums[mid] &gt; nums[mid + 1]) {
+    right = mid;         // 峰值在左侧（含 mid）
+} else {
+    left = mid + 1;      // 峰值在右侧
+}</pre>
+
+<h4>为什么不比较 nums[mid-1]？</h4>
+
+<ul>
+  <li>只比较 <code>mid</code> 和 <code>mid+1</code> 就足够了，因为 <code>mid+1</code> 一定在 <code>[left, right]</code> 范围内（循环条件 <code>left &lt; right</code> 保证 <code>mid &lt; right</code>）</li>
+  <li>比较 <code>mid-1</code> 需要额外处理 <code>mid == 0</code> 的边界</li>
+  <li>这道题 <code>mid == 0</code> 是合法的，所以即使比较 <code>mid-1</code> 只要处理边界也没问题，但用 <code>mid+1</code> 更简洁统一</li>
+</ul>
+
+<h4>时间复杂度</h4>
+
+<table>
+  <tr><th>指标</th><th>值</th></tr>
+  <tr><td>时间复杂度</td><td>O(log n)</td></tr>
+  <tr><td>空间复杂度</td><td>O(1)</td></tr>
+  <tr><td>循环条件</td><td><code>left &lt; right</code>（因为 <code>right = mid</code>，不能排除 mid）</td></tr>
+  <tr><td>取整方式</td><td>下取整 <code>mid = left + (right - left) / 2</code>（因为 <code>right = mid</code>）</td></tr>
+</table>
+
+<h4>与其他二分题的区别</h4>
+
+<table>
+  <tr><th>普通二分</th><th>求峰值</th></tr>
+  <tr><td>数组全局有序</td><td>数组无序，但局部有单调性</td></tr>
+  <tr><td>拿 target 作为比较基准</td><td>拿相邻元素 <code>nums[mid+1]</code> 作为比较基准</td></tr>
+  <tr><td>排除 mid（<code>mid &plusmn; 1</code>）</td><td>保留 mid（<code>right = mid</code>）</td></tr>
+  <tr><td>找到 target 即返回</td><td>收缩到唯一元素即为峰值</td></tr>
+</table>
 
 <hr>
 

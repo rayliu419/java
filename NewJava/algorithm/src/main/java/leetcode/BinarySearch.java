@@ -196,4 +196,41 @@ public class BinarySearch {
         }
         return -1;
     }
+
+    /**
+     * https://leetcode.com/problems/find-peak-element/
+     * 找到peak中的一个
+     */
+    public int findPeakElement(int[] nums) {
+        int left = 0, right = nums.length - 1;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] > nums[mid + 1]) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return left;
+    }
+
+    /**
+     * https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/
+     */
+    public int findMin(int[] nums) {
+        int low = 0;
+        int high = nums.length - 1;
+        while (low < high) {
+            int mid = low + (high - low) / 2;
+            if (nums[mid] < nums[high]) {
+                // 右边有序，意味着min不在右边
+                high = mid;
+            } else {
+                // 为什么是 + 1，因为最小值一定落在右段。
+                // 这里mid在左段，肯定不是最小值区间
+                low = mid + 1;
+            }
+        }
+        return nums[low];
+    }
 }
