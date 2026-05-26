@@ -3,8 +3,10 @@ package leetcode;
 import infra.KTreeNode;
 import infra.TreeNode;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 
 public class BST {
 
@@ -268,6 +270,68 @@ public class BST {
         root.right = deserialize(data, index);
         return root;
     }
+
+    /**
+     * https://leetcode.com/problems/serialize-and-deserialize-binary-tree/
+     *
+     * BFS 层序序列化。非 null 节点出队时输出值并将左右孩子（可能 null）入队，
+     * null 节点出队时输出 "#" 并跳过。
+     */
+    public String levelSerialize(TreeNode root) {
+        if (root == null) return "";
+        StringBuilder sb = new StringBuilder();
+        Queue<TreeNode> queue = new ArrayDeque<>();
+        queue.offer(root);
+        while (!queue.isEmpty()) {
+            TreeNode cur = queue.poll();
+            if (cur == null) {
+                sb.append("# ");
+            } else {
+                sb.append(cur.val).append(" ");
+                queue.offer(cur.left);
+                queue.offer(cur.right);
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * BFS 层序反序列化。
+     *
+     * 利用队列按层重建：出队一个父节点，依次从序列中读两个孩子（可能 "#"）挂上，
+     * 非 null 的孩子入队成为后续的父节点。
+     */
+    public TreeNode levelDeserialize(String data) {
+        if (data == null || data.isEmpty()) return null;
+        String[] vals = data.split("\\s+");
+        if (vals[0].equals("#")) {
+            return null;
+        }
+
+        TreeNode root = new TreeNode(Integer.parseInt(vals[0]));
+        Queue<TreeNode> queue = new ArrayDeque<>();
+        queue.offer(root);
+        int i = 1;
+
+        while (!queue.isEmpty() && i < vals.length) {
+            TreeNode parent = queue.poll();
+
+            if (!vals[i].equals("#")) {
+                parent.left = new TreeNode(Integer.parseInt(vals[i]));
+                queue.offer(parent.left);
+            }
+            i++;
+
+            if (i < vals.length && !vals[i].equals("#")) {
+                parent.right = new TreeNode(Integer.parseInt(vals[i]));
+                queue.offer(parent.right);
+            }
+            i++;
+        }
+        return root;
+    }
+
+
 
     /**
      * https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree
