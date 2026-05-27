@@ -6,14 +6,70 @@ import java.util.*;
 
 public class DFS {
 
+    /**
+     * https://leetcode.cn/problems/permutations/ - 无重复的数
+     *
+     * @param root
+     * @return
+     */
+    // 标准模版法解题
+    public List<List<Integer>> permute(int[] nums) {
+        boolean[] used = new boolean[nums.length];
+        List<List<Integer>> finalResult = new ArrayList<>();
+        List<Integer> cur = new ArrayList<>();
+        int count = nums.length;
+        permute(finalResult, cur, nums, used, count);
+        return finalResult;
+    }
+
+    private void permute(List<List<Integer>> finalResult, List<Integer> cur, int[] nums, boolean[] used, int count) {
+        if (count == 0) {
+            // 很重要，Java的语义需要完整copy，否则可能会报错
+            finalResult.add(new ArrayList<>(cur));
+            return;
+        }
+        for (int i = 0; i < nums.length; i++) {
+            if (used[i]) continue;
+            cur.add(nums[i]);
+            used[i] = true;
+            permute(finalResult, cur, nums, used, count - 1);
+            cur.remove(cur.size() - 1);
+            used[i] = false;
+        }
+    }
+
+    /**
+     * https://leetcode.com/problems/subsets/
+     * @param root
+     * @return
+     */
+    public List<List<Integer>> subsets(int[] nums) {
+        List<List<Integer>> finalResult = new ArrayList<>();
+        List<Integer> cur = new ArrayList<>();
+        subsets(finalResult, cur, nums, 0);
+        return finalResult;
+    }
+
+    private void subsets(List<List<Integer>> finalResult, List<Integer> cur, int[] nums, int index) {
+        if (index == nums.length) {
+            List<Integer> temp = new LinkedList<>(cur);
+            finalResult.add(temp);
+            return;
+        }
+        subsets(finalResult, cur, nums, index + 1);
+        cur.add(nums[index]);
+        subsets(finalResult, cur, nums, index + 1);
+        cur.remove(cur.size() - 1);
+    }
+
     public int rob(TreeNode root) {
         Map<TreeNode, Integer> cache = new HashMap<>();
         return doRob(root, cache);
     }
 
     /**
-     *
      * 返回的是以node为根，canRob为某个flag的最大可抢价值
+     *
      * @param node
      * @return
      */
@@ -47,6 +103,7 @@ public class DFS {
 
     /**
      * https://leetcode.cn/problems/word-search/
+     *
      * @param board
      * @param word
      * @return
@@ -64,7 +121,7 @@ public class DFS {
     }
 
     private boolean doExist(char[][] board, int x, int y, String word, int pos) {
-        int[][] directions = new int[][] {
+        int[][] directions = new int[][]{
                 {-1, 0},
                 {1, 0},
                 {0, -1},
@@ -93,7 +150,7 @@ public class DFS {
         return false;
     }
 
-    private boolean isValidPos(int x, int y, int m, int n){
+    private boolean isValidPos(int x, int y, int m, int n) {
         if (x < 0 || y < 0 || x > m || y > n) {
             return false;
         }
@@ -131,16 +188,4 @@ public class DFS {
         }
         return dp[s.length()];
     }
-
-    public static void main(String[] args) {
-//        String s = "leetcode";
-//        List<String> list = List.of("leet", "code");
-//        System.out.println(new DFS().wordBreak(s, list));
-
-        Map<String, Integer> map = new HashMap<>();
-        map.put("test", 2);
-        map.replace("test", 1);
-        System.out.println("here");
-    }
-
 }

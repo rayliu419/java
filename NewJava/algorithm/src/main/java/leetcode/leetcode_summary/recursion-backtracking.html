@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>递归 &amp; 回溯 总结</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+    line-height: 1.7;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 24px 32px 80px;
+    color: #1a1a2e;
+    background: #f8f9fa;
+  }
+  h1 { font-size: 2em; border-bottom: 3px solid #7c3aed; padding-bottom: 10px; margin-bottom: 24px; }
+  h2 { font-size: 1.5em; color: #6d28d9; margin-top: 36px; padding-left: 8px; border-left: 4px solid #8b5cf6; }
+  h3 { font-size: 1.2em; color: #1e293b; margin-top: 28px; }
+  h4 { font-size: 1.05em; color: #334155; margin-top: 20px; }
+
+  /* 核心心法高亮 */
+  blockquote {
+    margin: 16px 0;
+    padding: 12px 20px;
+    background: #f5f3ff;
+    border-left: 5px solid #8b5cf6;
+    border-radius: 0 8px 8px 0;
+    font-size: 1.05em;
+  }
+  blockquote > p { margin: 0; }
+
+  /* 表格通用样式 */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.95em;
+  }
+  th, td {
+    border: 1px solid #d1d5db;
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #7c3aed;
+    color: #fff;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  tr:nth-child(even) { background: #f1f5f9; }
+  tr:hover { background: #ede9fe; }
+
+  /* 代码块 */
+  pre {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 16px 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.9em;
+    line-height: 1.5;
+    margin: 12px 0;
+  }
+  code {
+    font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+  }
+  p > code, li > code, td > code {
+    background: #e2e8f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.92em;
+    color: #6d28d9;
+  }
+
+  /* 星级 */
+  .star { color: #f59e0b; font-weight: bold; }
+
+  /* 状态标记 */
+  .done { color: #16a34a; font-weight: bold; }
+  .pending { color: #94a3b8; }
+
+  hr {
+    border: none;
+    border-top: 2px dashed #cbd5e1;
+    margin: 32px 0;
+  }
+
+  /* 路线图卡片 */
+  .route {
+    background: linear-gradient(135deg, #4c1d95, #7c3aed);
+    color: #fff;
+    padding: 16px 24px;
+    border-radius: 12px;
+    margin: 16px 0;
+    line-height: 1.8;
+    font-size: 0.95em;
+  }
+  .route strong { color: #fbbf24; }
+
+  /* 对照表双栏 */
+  .comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .comparison > div {
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+  }
+  .comparison > div h4 { margin: 0 0 8px; }
+  @media (max-width: 640px) { .comparison { grid-template-columns: 1fr; } }
+
+  /* 提示框 */
+  .tip {
+    background: #fef9c3;
+    border-left: 5px solid #eab308;
+    padding: 10px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 12px 0;
+  }
+  .warn {
+    background: #fee2e2;
+    border-left: 5px solid #ef4444;
+    padding: 10px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 12px 0;
+  }
+
+  /* 频次列居中 */
+  td:first-child, th:first-child { text-align: center; white-space: nowrap; }
+  td:nth-child(2), th:nth-child(2) { text-align: center; }
+  td:nth-child(4), th:nth-child(4) { text-align: center; }
+  td:nth-child(6), th:nth-child(6) { text-align: center; }
+
+  /* 复杂度标签 */
+  .complexity { font-size: 0.85em; color: #64748b; }
+
+  /* 模式总结卡片 */
+  .pattern-card {
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 12px 0;
+  }
+  .pattern-card h4 { margin-top: 0; color: #6d28d9; }
+
+  /* 步骤编号 */
+  .step-list { counter-reset: step; }
+  .step-list li { list-style: none; margin-bottom: 6px; }
+  .step-list li::before {
+    counter-increment: step;
+    content: counter(step);
+    background: #7c3aed;
+    color: #fff;
+    font-weight: bold;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: inline-block;
+    text-align: center;
+    line-height: 22px;
+    font-size: 0.8em;
+    margin-right: 8px;
+  }
+</style>
+</head>
+<body>
+
+<h1>递归 &amp; 回溯</h1>
+
+<blockquote><strong>回溯 = 递归 + 状态重置 · 核心模式：做选择 → 递归 → 撤销选择</strong></blockquote>
+
+<!-- ─── 题目列表 ─── -->
+<h2>题目列表（按面试频次降序）</h2>
+
+<table>
+  <tr>
+    <th>频次</th><th>题号</th><th>题目</th><th>难度</th><th>核心思路</th><th>状态</th>
+  </tr>
+  <tr><td><span class="star">★★★★★</span></td><td>46</td><td>Permutations</td><td>🟡 Medium</td><td>used[] 标记已选，回溯全排列</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>78</td><td>Subsets</td><td>🟡 Medium</td><td>选/不选 或 startIndex 控制分支</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>39</td><td>Combination Sum</td><td>🟡 Medium</td><td>startIndex 同层去重，可复用同一元素</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>22</td><td>Generate Parentheses</td><td>🟡 Medium</td><td>left &lt; n 加左，right &lt; left 加右</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>17</td><td>Letter Combinations of a Phone Number</td><td>🟡 Medium</td><td>数字→字母映射，DFS 逐位构建</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>79</td><td>Word Search</td><td>🟡 Medium</td><td>DFS + 回溯标记，四方向探索</td><td><span class="done">✅ DFS.java</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>131</td><td>Palindrome Partitioning</td><td>🟡 Medium</td><td>startIndex 逐段检查回文，切割回溯</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>51</td><td>N-Queens</td><td>🔴 Hard</td><td>逐行放置，列/对角线冲突检查回溯</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>40</td><td>Combination Sum II</td><td>🟡 Medium</td><td>排序 + i &gt; startIndex 同层剪枝去重</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>90</td><td>Subsets II</td><td>🟡 Medium</td><td>排序 + i &gt; startIndex 同层去重</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>47</td><td>Permutations II</td><td>🟡 Medium</td><td>排序 + !used[i-1] 同值剪枝</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>93</td><td>Restore IP Addresses</td><td>🟡 Medium</td><td>分 4 段每段 1-3 位，验证范围 0-255</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>77</td><td>Combinations</td><td>🟡 Medium</td><td>startIndex 控制组合，选够 k 个停止</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>216</td><td>Combination Sum III</td><td>🟡 Medium</td><td>同 77，额外约束 sum == n</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>784</td><td>Letter Case Permutation</td><td>🟡 Medium</td><td>字符位分大小写两路递归</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>60</td><td>Permutation Sequence</td><td>🔴 Hard</td><td>阶乘数系统（康托展开）直接定位</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>37</td><td>Sudoku Solver</td><td>🔴 Hard</td><td>行列宫三组 used[] + 试数回溯</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>52</td><td>N-Queens II</td><td>🔴 Hard</td><td>同 51，只计数不画棋盘</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>526</td><td>Beautiful Arrangement</td><td>🟡 Medium</td><td>used[] + 整除/被整除条件剪枝</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>89</td><td>Gray Code</td><td>🟡 Medium</td><td>对称生成：G(n) = 0G(n-1) + 1反转G(n-1)</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>282</td><td>Expression Add Operators</td><td>🔴 Hard</td><td>维护 prev 处理乘号优先级回溯</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>320</td><td>Generalized Abbreviation</td><td>🟡 Medium</td><td>缩写计数累加 vs 直接输出字符两路</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>842</td><td>Split Array into Fibonacci Sequence</td><td>🟡 Medium</td><td>前两数定序列，后续验证斐波那契递推</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>95</td><td>Unique BST II</td><td>🟡 Medium</td><td>区间递归构造所有可能的 BST</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>980</td><td>Unique Paths III</td><td>🔴 Hard</td><td>DFS + 回溯，需经过所有空格恰好一次</td><td><span class="pending">⬜</span></td></tr>
+</table>
+
+<p class="complexity">共 25 题 · 其中 ⭐⭐⭐⭐⭐ 5 题（必会）· ⭐⭐⭐⭐ 8 题（高频）· ⭐⭐⭐ 6 题（进阶）· ⭐⭐ 6 题（扩展）</p>
+
+<!-- ─── 刷题路线 ─── -->
+<h2>刷题路线</h2>
+
+<div class="route">
+  <strong>第一梯队（必会 · 5 题）：</strong>46 Permutations → 78 Subsets → 39 Combination Sum → 22 Generate Parentheses → 17 Letter Combinations<br>
+  <strong>第二梯队（高频 · 8 题）：</strong>79 Word Search → 131 Palindrome Partitioning → 51 N-Queens → 40/90/47 有重复版三件套 → 93 Restore IP<br>
+  <strong>第三梯队（进阶 · 6 题）：</strong>77 Combinations → 216 Combination Sum III → 37 Sudoku Solver → 60 Permutation Sequence → 784 Letter Case Permutation → 526 Beautiful Arrangement<br>
+  <strong>第四梯队（扩展 · 6 题）：</strong>89 Gray Code → 282 Expression Add Operators → 980 Unique Paths III
+</div>
+
+<!-- ─── 一、核心心法 ─── -->
+<h2>学习笔记</h2>
+<hr>
+
+<h3>一、核心心法</h3>
+
+<blockquote>回溯的本质是 <strong>DFS + 状态重置</strong>。所有回溯题共用同一个模板，区别只在剪枝条件。</blockquote>
+
+<h4>回溯三要素</h4>
+
+<ol class="step-list">
+  <li><strong>路径</strong>（path）：已做的选择</li>
+  <li><strong>选择列表</strong>（startIndex / used[]）：当前可以做的选择</li>
+  <li><strong>结束条件</strong>：到达决策树底层时记录结果</li>
+</ol>
+
+<h4>统一模板</h4>
+
+<pre>
+void backtrack(路径, 选择列表) {
+    if (满足结束条件) {
+        result.add(路径);
+        return;
+    }
+    for (选择 in 选择列表) {
+        if (不合法) continue;         // 剪枝
+        做选择;                       // 路径.add / used标记
+        backtrack(新路径, 新选择列表);
+        撤销选择;                     // 路径.remove / used还原
+    }
+}</pre>
+
+<h4>何时需要撤销选择？</h4>
+
+<blockquote>核心判断：分支之间是否<strong>共享同一个可变对象</strong>。是 → 需要撤销。否 → 不需要。</blockquote>
+
+<div class="comparison">
+  <div>
+    <h4>✅ 共享引用 → 需要撤销</h4>
+    <pre>
+subsets(cur, nums, index) {
+    // 不选：cur 原样传给兄弟
+    subsets(cur, nums, index + 1);
+
+    cur.add(nums[index]);
+    // 选：cur 已被修改，兄弟分支看到的是被污染的数据
+    subsets(cur, nums, index + 1);
+
+    cur.remove(...);  // ⭐ 必须撤销！
+}</pre>
+    <p>整个递归树共享同一个 <code>cur</code> 对象，不撤销则兄弟分支读到的是残留的 choice。</p>
+  </div>
+  <div>
+    <h4>✅ 每层独立 copy → 不需要撤销</h4>
+    <pre>
+subsets(cur, nums, index) {
+    // 不选：cur 原样传
+    subsets(cur, nums, index + 1);
+
+    List&lt;Integer&gt; picked = new ArrayList&lt;&gt;(cur);
+    picked.add(nums[index]);
+    // 选：picked 是独立对象，兄弟不可见
+    subsets(picked, nums, index + 1);
+                              // ⭐ 无需 remove！
+}</pre>
+    <p>每次递归都 copy 一份新 list，分支之间天然隔离。</p>
+  </div>
+</div>
+
+<p>代价权衡：撤销法只用 1 个 <code>cur</code> 对象反复利用，内存分配少；copy 法每层都 new 对象，总分配 O(n × 2ⁿ)。<strong>推荐用撤销法</strong>，更贴近回溯模板的统一风格。</p>
+
+<h4>三种基本题型 — 选/不选 vs 排列 vs 组合</h4>
+
+<table>
+  <tr><th>题型</th><th>元素顺序</th><th>状态传递</th><th>去重方式</th><th>代表题</th></tr>
+  <tr><td><strong>子集 / 组合</strong></td><td>无关（{1,2} = {2,1}）</td><td>startIndex（下次从 i+1 开始）</td><td>排序 + 同层跳过</td><td>78 Subsets, 39 Combination Sum</td></tr>
+  <tr><td><strong>排列</strong></td><td>有关（{1,2} ≠ {2,1}）</td><td>used[] 标记已选</td><td>排序 + 同值剪枝</td><td>46 Permutations</td></tr>
+  <tr><td><strong>选/不选</strong></td><td>按位决策</td><td>pos + 1 推进</td><td>天然无重</td><td>78 Subsets（另一种解法）</td></tr>
+</table>
+
+<div class="tip">
+<strong>💡</strong> 为什么子集用 startIndex 而排列用 used[]？子集/组合关心"选哪些"不关心顺序，startIndex 保证每次只从下一个位置往后选，天然避免 {1,2} 和 {2,1} 同时出现。排列关心顺序，每个位置都可以从全集里选，所以用 used[] 标记哪些已经用过。
+</div>
+
+<!-- ─── 二、去重套路 ─── -->
+<hr>
+<h3>二、去重的核心套路</h3>
+
+<blockquote>有重复元素的回溯题，去重是最大的考点。</blockquote>
+
+<h4>关键区分：同层去重 vs 同枝去重</h4>
+
+<table>
+  <tr><th>维度</th><th>同层去重</th><th>同枝去重</th></tr>
+  <tr><td>含义</td><td>同一层 for 循环中跳过相同值</td><td>递归路径中允许相同值重复出现</td></tr>
+  <tr><td>条件</td><td><code>i &gt; startIndex &amp;&amp; nums[i] == nums[i-1]</code></td><td><code>used[i-1] == false &amp;&amp; nums[i] == nums[i-1]</code></td></tr>
+  <tr><td>适用</td><td>子集/组合类去重</td><td>排列类去重</td></tr>
+  <tr><td>代表题</td><td>40 Combination Sum II, 90 Subsets II</td><td>47 Permutations II</td></tr>
+</table>
+
+<div class="comparison">
+  <div>
+    <h4>✅ 子集/组合去重</h4>
+    <pre>
+sort(nums);
+backtrack(startIndex) {
+    for (int i = startIndex; i &lt; n; i++) {
+        // 同层跳过重复值
+        if (i > startIndex && nums[i] == nums[i-1])
+            continue;
+        path.add(nums[i]);
+        backtrack(i + 1);
+        path.remove();
+    }
+}</pre>
+  </div>
+  <div>
+    <h4>✅ 排列去重</h4>
+    <pre>
+sort(nums);
+backtrack(path) {
+    for (int i = 0; i &lt; n; i++) {
+        if (used[i]) continue;
+        // 前一个相同值没用过 → 这层不必再试
+        if (i > 0 && nums[i] == nums[i-1] && !used[i-1])
+            continue;
+        used[i] = true;
+        path.add(nums[i]);
+        backtrack(path);
+        path.remove();
+        used[i] = false;
+    }
+}</pre>
+  </div>
+</div>
+
+<div class="tip">
+<strong>💡</strong> 判断方法：如果去重条件用 <code>i &gt; startIndex</code>，是组合去重（横向）；如果用到 <code>!used[i-1]</code>，是排列去重（纵向+横向）。前者只关心"这一层的起点"，后者关心"前一个同值是否在本路径用过"。
+</div>
+
+<!-- ─── 三、解题模式 ─── -->
+<hr>
+<h3>三、题型分类与模式演进</h3>
+
+<h4>模式 1：入门回溯 —— 选或不选</h4>
+
+<p>最简单的回溯形式，每个位置做二选一。适合作为思维的起点。</p>
+
+<table>
+  <tr><th>题目</th><th>决策方式</th><th>特殊之处</th></tr>
+  <tr><td><strong>78 Subsets</strong>（选/不选版）</td><td>每个元素选/不选</td><td>入门模板，两种写法等价</td></tr>
+  <tr><td><strong>22 Generate Parentheses</strong></td><td>加左括号 / 加右括号</td><td>用 left&right 计数器做合法性剪枝</td></tr>
+  <tr><td><strong>784 Letter Case Permutation</strong></td><td>字母大小写 / 数字跳过</td><td>Character.isDigit / isLetter 分流</td></tr>
+</table>
+
+<hr>
+
+<h4>模式 2：startIndex 控制 —— 子集/组合类</h4>
+
+<blockquote>关键！startIndex 保证组合不重复（{1,2} 和 {2,1} 不会同时出现）。需要掌握两种写法：for 循环版 vs 选/不选版。</blockquote>
+
+<table>
+  <tr><th>题目</th><th>startIndex 含义</th><th>去重</th><th>可复用同一元素</th></tr>
+  <tr><td><strong>78 Subsets</strong></td><td>i+1（不回头）</td><td>—</td><td>否</td></tr>
+  <tr><td><strong>77 Combinations</strong></td><td>i+1</td><td>—</td><td>否</td></tr>
+  <tr><td><strong>39 Combination Sum</strong></td><td>i（可复用当前）</td><td>—</td><td><strong>是</strong></td></tr>
+  <tr><td><strong>90 Subsets II</strong></td><td>i+1</td><td>排序 + i &gt; startIndex</td><td>否</td></tr>
+  <tr><td><strong>40 Combination Sum II</strong></td><td>i+1</td><td>排序 + i &gt; startIndex</td><td>否</td></tr>
+  <tr><td><strong>216 Combination Sum III</strong></td><td>i+1</td><td>—</td><td>否</td></tr>
+</table>
+
+<pre>
+// 模板：组合/子集通用
+void backtrack(int startIndex, 其他参数) {
+    if (满足条件) {
+        result.add(new ArrayList<>(path));
+        return;
+    }
+    for (int i = startIndex; i &lt; n; i++) {
+        // 剪枝（可复用元素时去掉）
+        // 去重（有重复元素时加上）
+        path.add(nums[i]);
+        backtrack(可复用 ? i : i + 1, 其他参数);
+        path.remove(path.size() - 1);
+    }
+}</pre>
+
+<hr>
+
+<h4>模式 3：used[] 标记 —— 排列类</h4>
+
+<blockquote>排列和组合的根本区别：排列的每个位置都可以从全集中选（只要没被用过），组合的每个位置只能从当前及之后选。</blockquote>
+
+<table>
+  <tr><th>题目</th><th>used[] 作用</th><th>去重</th><th>特点</th></tr>
+  <tr><td><strong>46 Permutations</strong></td><td>标记已选</td><td>—</td><td>无重复元素，基础版</td></tr>
+  <tr><td><strong>47 Permutations II</strong></td><td>标记已选</td><td>排序 + !used[i-1]</td><td>有重复元素</td></tr>
+  <tr><td><strong>60 Permutation Sequence</strong></td><td>计数定位</td><td>—</td><td>数学解法，非回溯（康托展开）</td></tr>
+  <tr><td><strong>526 Beautiful Arrangement</strong></td><td>标记已用数字</td><td>条件剪枝</td><td>排列 + 整除条件</td></tr>
+</table>
+
+<div class="warn">
+<strong>⚠️ 排列去重条件：</strong><code>if (i &gt; 0 &amp;&amp; nums[i] == nums[i-1] &amp;&amp; !used[i-1]) continue;</code><br>
+为什么是 <code>!used[i-1]</code>？因为如果前一个相同值在当前路径已经用过了（used[i-1] == true），说明是"同一条枝上的重复值"，应当允许；如果前一个没用过，说明是"同一层的重复值"，应当跳过。这个条件等价于"只保留第一个出现的重复值的分支"。
+</div>
+
+<hr>
+
+<h4>模式 4：分割类回溯</h4>
+
+<blockquote>将输入字符串/序列切割成若干有效片段，每个切割点是一次选择。</blockquote>
+
+<table>
+  <tr><th>题目</th><th>切割方式</th><th>有效性验证</th></tr>
+  <tr><td><strong>131 Palindrome Partitioning</strong></td><td>按长度切子串</td><td>是否是回文（双指针或预计算）</td></tr>
+  <tr><td><strong>93 Restore IP Addresses</strong></td><td>分 4 段每段 1-3 位</td><td>0-255 且无前导零</td></tr>
+  <tr><td><strong>842 Split into Fibonacci</strong></td><td>前两个数定序列</td><td>fib 递推 + 无前导零 + 不超 int</td></tr>
+</table>
+
+<pre>
+// 模板：分割类回溯
+void backtrack(int startIndex, 其他参数) {
+    if (startIndex == s.length()) {
+        // 已切割完整个字符串
+        if (满足条件) result.add(new ArrayList<>(path));
+        return;
+    }
+    for (int len = 1; startIndex + len &lt;= s.length(); len++) {
+        String seg = s.substring(startIndex, startIndex + len);
+        if (!isValid(seg)) continue;  // 剪枝
+        path.add(seg);
+        backtrack(startIndex + len, 其他参数);
+        path.remove(path.size() - 1);
+    }
+}</pre>
+
+<hr>
+
+<h4>模式 5：棋盘/网格类回溯</h4>
+
+<blockquote>在二维网格上做 DFS + 回溯，路径探索和状态重置同时进行。</blockquote>
+
+<table>
+  <tr><th>题目</th><th>探索方式</th><th>回溯内容</th><th>特殊约束</th></tr>
+  <tr><td><strong>79 Word Search</strong></td><td>四方向</td><td>board[x][y] 还原</td><td>不能重复使用格子</td></tr>
+  <tr><td><strong>51 N-Queens</strong></td><td>逐行，每列/对角线检查</td><td>棋盘还原</td><td>列/对角/反对角线不冲突</td></tr>
+  <tr><td><strong>37 Sudoku Solver</strong></td><td>逐格试数</td><td>board 还原</td><td>行列宫三条检查</td></tr>
+  <tr><td><strong>980 Unique Paths III</strong></td><td>四方向</td><td>visited 还原</td><td>需走完所有空格恰好一次</td></tr>
+</table>
+
+<div class="tip">
+<strong>💡</strong> 坐标类回溯的"状态重置"就是恢复 board 上的标记字符。Word Search 把 board[x][y] 设为 '#' 表示已访问，回溯时再改回来。N-Queens 把 board[row][col] = 'Q' 再回溯改回 '.'。
+</div>
+
+<hr>
+
+<h4>模式 6：数学构造类回溯</h4>
+
+<table>
+  <tr><th>题目</th><th>构造方式</th><th>难度点</th></tr>
+  <tr><td><strong>89 Gray Code</strong></td><td>对称递归：0G(n-1) ∪ 1反转G(n-1)</td><td>发现数学规律</td></tr>
+  <tr><td><strong>282 Expression Add Operators</strong></td><td>数字间插 + / - / *</td><td>乘号优先级（需维护 prev）</td></tr>
+  <tr><td><strong>320 Generalized Abbreviation</strong></td><td>每个字符选缩写计数/直接输出</td><td>计数器的累积与归零</td></tr>
+  <tr><td><strong>95 Unique BST II</strong></td><td>区间选根，左右子树笛卡尔积</td><td>树结构的递归构建</td></tr>
+</table>
+
+<!-- ─── 四、各题要点 ─── -->
+<hr>
+<h3>四、各题要点</h3>
+
+<!---------- 46 ---------->
+<h4>Permutations（46）⭐⭐⭐⭐⭐</h4>
+<blockquote>三种等价写法，从最直观到最高效</blockquote>
+
+<div class="comparison">
+  <div>
+    <h4>① used[] 回溯模版</h4>
+    <pre>
+void backtrack(path, used[]) {
+    if (path.size() == n) {
+        res.add(copy(path)); return;
+    }
+    for (int i = 0; i &lt; n; i++) {
+        if (used[i]) continue;
+        used[i] = true;  path.add(nums[i]);
+        backtrack(path, used);
+        used[i] = false; path.remove();
+    }
+}</pre>
+    <ul>
+      <li>最符合回溯模板</li>
+      <li>每层遍历 n 次（n × n × ... = nⁿ 迭代，剪枝到 n!）</li>
+      <li>关键：path 必须 copy</li>
+    </ul>
+  </div>
+  <div>
+    <h4>② swap 交换法</h4>
+    <pre>
+void backtrack(int start) {
+    if (start == n) {
+        result.add(copyToList(nums));
+        return;
+    }
+    for (int i = start; i &lt; n; i++) {
+        swap(nums, start, i);
+        backtrack(start + 1);
+        swap(nums, start, i);
+    }
+}</pre>
+    <ul>
+      <li>循环规模逐层递减：n, n-1, ..., 1</li>
+      <li>总递归调 <strong>n!</strong>（理论最优下界）</li>
+      <li>无需 used[] 额外空间</li>
+      <li>注意 copy 的是整个数组</li>
+    </ul>
+  </div>
+  <div>
+    <h4>③ 增量构造（自底向上递推）</h4>
+    <pre>
+dp[k] = 在 dp[k-1] 的每个排列的
+        每个空隙插入 nums[k]
+
+result = [[nums[0]]];
+for (int k = 1; k &lt; n; k++) {
+    next = [];
+    for (perm : result)
+        for (i = 0..perm.size())
+            next.add(insert(perm, i, nums[k]));
+    result = next;
+}</pre>
+    <ul>
+      <li>自底向上，不回溯</li>
+      <li>中间结果逐层膨胀</li>
+      <li>每次插入需要 copy 列表 O(n)</li>
+      <li>同 O(n × n!)，常数略大</li>
+    </ul>
+  </div>
+</div>
+
+<h4>复杂度分析详解</h4>
+
+<blockquote>三种方法的下界都是 Ω(n!) — 必须输出 n! 个排列。区别在于<strong>递归节点数</strong>和<strong>每次节点的操作成本</strong>。</blockquote>
+
+<p><strong>① used[] 回溯</strong></p>
+
+<pre>
+递归树节点数 = 1 + n + n×(n-1) + n×(n-1)×(n-2) + ... + n!
+            = Σ_{k=0}^{n} P(n, k)    （P：排列数）
+            = ⌊n! × e⌋
+            验证：0! + 1! + 2! + ... + n! = ⌊n! × e⌋
+
+每个非叶子节点：遍历 n 次（其中 k 次被 continue，n-k 次有效递归）
+每个叶子节点（n! 个）：copy path O(n)
+总时间 ≈ Σ_{k=0}^{n} P(n,k) × n  ≈  n × n! × e  =  O(n × n!)
+</pre>
+
+<p><strong>② swap 交换法</strong></p>
+
+<pre>
+递归节点数 = 叶子数（每个叶子就是一个无遗漏的排列）
+递归树结构（n=3）：
+    level 0: 1 个节点, 循环 3 次
+    level 1: 3 个节点, 各循环 2 次
+    level 2: 6 个节点, 各循环 1 次
+    level 3: 6 个叶子, 各 copy O(n)
+
+总节点数 = 1 + 3 + 6 + 6 = 16  →  一般情况下 = Σ_{k=0}^{n} n!/k!
+
+每次操作：swap O(1) + 递归调用
+总递归调用次数 = Σ_{k=0}^{n-1} n!/k!  ≈  n! × (1 + 1/1! + 1/2! + ... + 1/(n-1)!)  ≈  n! × (e - 1)
+
+其中：
+  - 进入递归（非叶子节点调用下层）: n!/0! + n!/1! + ... + n!/(n-1)!
+  - 到达叶子（停止递归）: n! / n! = 1, 即 n! 次
+因此: 总时间 = O(n × n!) — copy 占主导
+</pre>
+
+<p><strong>③ 增量构造</strong></p>
+
+<pre>
+递推过程：
+  k=1: 1 个排列
+  k=2: 对 1 个排列的 2 个空隙插入 → 2 个排列
+  k=3: 对 2 个排列的 3 个空隙插入 → 6 个排列
+  ...
+
+第 k 轮：有 (k-1)! 个排列，每个有 k 个插入位置，每次插入需要 copy O(k)
+第 k 轮时间 = (k-1)! × k × O(k) = O(k × k!)
+
+总时间 = Σ_{k=1}^{n} O(k × k!) = O(n × n!)
+（积分近似：∫ x × x! dx ≈ n! × (n-1) 的主导项）
+</pre>
+
+<table>
+  <tr><th>写法</th><th>递归节点数</th><th>每次操作</th><th>总时间</th><th>空间（不含结果）</th></tr>
+  <tr><td>① used[] 回溯</td><td>⌊n! × e⌋</td><td>O(1) 增删 + 叶子 O(n) copy</td><td>O(n × n!)</td><td>O(n) used[] + path</td></tr>
+  <tr><td>② swap 交换</td><td>Σ n!/k! ≈ n! × (e-1)</td><td>swap O(1) + 叶子 O(n) copy</td><td>O(n × n!)</td><td>O(n) 递归栈</td></tr>
+  <tr><td>③ 增量构造</td><td>无递归，k 轮迭代</td><td>插入 + copy O(k)</td><td>O(n × n!)</td><td>O(n²) 中间缓存</td></tr>
+</table>
+
+<hr>
+
+<!---------- 78 ---------->
+<h4>Subsets（78）⭐⭐⭐⭐⭐</h4>
+<blockquote>两种解法都得会，理解"组合"和"选/不选"等价</blockquote>
+
+<div class="comparison">
+  <div>
+    <h4>✅ startIndex 法（推荐）</h4>
+    <pre>
+void backtrack(int start, List&lt;Integer&gt; path) {
+    res.add(new ArrayList<>(path));
+    for (int i = start; i &lt; nums.length; i++) {
+        path.add(nums[i]);
+        backtrack(i + 1, path);
+        path.remove(path.size() - 1);
+    }
+}</pre>
+    <p>每次进入递归先存 path，顺序遍历避免重复。</p>
+  </div>
+  <div>
+    <h4>✅ 选/不选法</h4>
+    <pre>
+void backtrack(int pos, List&lt;Integer&gt; path) {
+    if (pos == nums.length) {
+        res.add(new ArrayList<>(path));
+        return;
+    }
+    // 不选
+    backtrack(pos + 1, path);
+    // 选
+    path.add(nums[pos]);
+    backtrack(pos + 1, path);
+    path.remove(path.size() - 1);
+}</pre>
+    <p>因为是选/不选，每个元素只走两路。</p>
+  </div>
+</div>
+
+<hr>
+
+<!---------- 39 ---------->
+<h4>Combination Sum（39）⭐⭐⭐⭐⭐</h4>
+<blockquote>关键区别：<code>backtrack(i, ...)</code> 而不是 <code>backtrack(i+1, ...)</code></blockquote>
+
+<pre>
+void backtrack(int start, int remain, List&lt;Integer&gt; path) {
+    if (remain == 0) { res.add(new ArrayList<>(path)); return; }
+    if (remain &lt; 0) return;
+    for (int i = start; i &lt; candidates.length; i++) {
+        path.add(candidates[i]);
+        backtrack(i, remain - candidates[i], path);  // 注意是 i 不是 i+1
+        path.remove(path.size() - 1);
+    }
+}</pre>
+
+<p>为什么是 <code>i</code> 而不是 <code>i+1</code>？因为题目允许<strong>重复使用同一个元素</strong>。传 <code>i</code> 意味着下一轮仍然可以从当前位置开始选。</p>
+
+<hr>
+
+<!---------- 22 ---------->
+<h4>Generate Parentheses（22）⭐⭐⭐⭐⭐</h4>
+<blockquote>只用两个计数器就能剪枝，不需要 used[] 或 startIndex</blockquote>
+
+<pre>
+void backtrack(StringBuilder path, int left, int right) {
+    if (left == n && right == n) {
+        res.add(path.toString());
+        return;
+    }
+    if (left &lt; n) {
+        path.append('(');
+        backtrack(path, left + 1, right);
+        path.deleteCharAt(path.length() - 1);
+    }
+    if (right &lt; left) {
+        path.append(')');
+        backtrack(path, left, right + 1);
+        path.deleteCharAt(path.length() - 1);
+    }
+}</pre>
+
+<p>合法性：任何时候右括号数不能超过左括号数 → 在递归中保证 <code>right &lt; left</code> 才加右括号。</p>
+
+<hr>
+
+<!---------- 17 ---------->
+<h4>Letter Combinations of a Phone Number（17）⭐⭐⭐⭐⭐</h4>
+<blockquote>数字→字母映射 + 逐位回溯，最直观的入门回溯题之一</blockquote>
+
+<ul>
+  <li>建立 <code>Map&lt;Character, String&gt;</code> 数字到字母的映射</li>
+  <li>递归参数：<code>digits</code> 字符串 + <code>index</code> 当前处理到第几位</li>
+  <li>每次取 <code>digits.charAt(index)</code> 对应的字母串，遍历每个字母做选择</li>
+  <li>剪枝：<code>digits == null || digits.isEmpty()</code> 返回空列表</li>
+</ul>
+
+<hr>
+
+<!---------- 79 ---------->
+<h4>Word Search（79）⭐⭐⭐⭐ — ✅ 已实现 DFS.java</h4>
+<blockquote>网格 DFS + 回溯标记</blockquote>
+
+<ul>
+  <li>从每个格子出发尝试匹配 word 的第一个字符</li>
+  <li>匹配后标记 board[x][y] = '#'，四方向递归</li>
+  <li>回溯时还原 board[x][y]</li>
+  <li>剪枝：越界检查 + 字符不匹配提前返回</li>
+</ul>
+
+<hr>
+
+<!---------- 131 ---------->
+<h4>Palindrome Partitioning（131）⭐⭐⭐⭐</h4>
+<blockquote>切割类回溯的代表题</blockquote>
+
+<ul>
+  <li>startIndex 控制当前切割起点</li>
+  <li>从 startIndex 开始，逐段取子串判断是否回文</li>
+  <li>是回文 → 加入 path，递归处理剩下部分</li>
+  <li>可预计算 <code>dp[i][j]</code> 回文表优化 O(n²) 预处理替代 O(n) 判断</li>
+</ul>
+
+<hr>
+
+<!---------- 51 ---------->
+<h4>N-Queens（51）⭐⭐⭐⭐</h4>
+<blockquote>回溯的经典应用，难点在对角线冲突检查</blockquote>
+
+<p>冲突检查三个条件：</p>
+
+<pre>
+boolean isValid(char[][] board, int row, int col) {
+    // 列检查
+    for (int i = 0; i &lt; row; i++)
+        if (board[i][col] == 'Q') return false;
+    // 主对角线 (\)
+    for (int i = row-1, j = col-1; i >= 0 && j >= 0; i--, j--)
+        if (board[i][j] == 'Q') return false;
+    // 副对角线 (/)
+    for (int i = row-1, j = col+1; i >= 0 && j < n; i--, j++)
+        if (board[i][j] == 'Q') return false;
+    return true;
+}</pre>
+
+<div class="tip">
+<strong>💡</strong> 优化版：用 <code>boolean[] cols</code>、<code>boolean[] diag1</code>（row-col 为定值）、<code>boolean[] diag2</code>（row+col 为定值）将检查降到 O(1)。其中 diag1 的下标注意加偏移量 n-1 避免负数。
+</div>
+
+<hr>
+
+<!---------- 37 ---------->
+<h4>Sudoku Solver（37）⭐⭐⭐</h4>
+<blockquote>N-Queens 的推广——多约束回溯</blockquote>
+
+<ul>
+  <li>需要维护 3 组 used[]：行、列、宫</li>
+  <li><code>boxIndex = (row/3)*3 + col/3</code> 将 9×9 映射到 9 个 3×3 宫</li>
+  <li>对空格从 1-9 试数，三组 used[] 都不冲突才放下</li>
+  <li>找到一个解就返回 true（不需要所有解）</li>
+  <li>无空格的格子直接跳过（找下一个空格）</li>
+</ul>
+
+<pre>
+boolean backtrack(char[][] board) {
+    for (int r = 0; r &lt; 9; r++)
+        for (int c = 0; c &lt; 9; c++) {
+            if (board[r][c] != '.') continue;
+            for (char ch = '1'; ch &lt;= '9'; ch++) {
+                if (!isValid(board, r, c, ch)) continue;
+                board[r][c] = ch;
+                if (backtrack(board)) return true;
+                board[r][c] = '.';
+            }
+            return false;  // 1-9 都不行 → 无解
+        }
+    return true;  // 没有空格 → 填完了
+}</pre>
+
+<hr>
+
+<!---------- 60 ---------->
+<h4>Permutation Sequence（60）⭐⭐⭐</h4>
+<blockquote>数学解法：阶乘数系统（康托展开），不需要回溯</blockquote>
+
+<p>思路：</p>
+<ol>
+  <li>计算 <code>factorial[i]</code>（0! ~ n-1!）</li>
+  <li>k-- 转为 0-based</li>
+  <li>第 i 位的选择 = k / factorial[n-1-i]</li>
+  <li>k %= factorial[n-1-i] 进入下一轮</li>
+  <li>从未使用的数字列表中移除所选数字</li>
+</ol>
+
+<div class="warn">
+<strong>⚠️</strong> 用回溯做会超时（n=9 时 9! = 362880 种排列），必须用数学解法。
+</div>
+
+<hr>
+
+<!---------- 282 ---------->
+<h4>Expression Add Operators（282）⭐⭐</h4>
+<blockquote>回溯 + 乘号优先级处理，需要维护 prev</blockquote>
+
+<pre>
+void backtrack(String num, int pos, long cur, long prev, StringBuilder path) {
+    if (pos == num.length() && cur == target) {
+        res.add(path.toString());
+        return;
+    }
+    for (int i = pos; i &lt; num.length(); i++) {
+        if (i != pos && num.charAt(pos) == '0') break;  // 前导零
+        long val = Long.parseLong(num.substring(pos, i + 1));
+        if (path.length() == 0) {  // 第一个数
+            path.append(num.substring(pos, i + 1));
+            backtrack(num, i + 1, val, val, path);
+        } else {
+            // + val
+            path.append("+" + val);
+            backtrack(num, i + 1, cur + val, val, path);
+            path.setLength(path.length() - (1 + String.valueOf(val).length()));
+            // - val
+            path.append("-" + val);
+            backtrack(num, i + 1, cur - val, -val, path);
+            path.setLength(path.length() - (1 + String.valueOf(val).length()));
+            // * val
+            path.append("*" + val);
+            backtrack(num, i + 1, cur - prev + prev * val, prev * val, path);
+            path.setLength(path.length() - (1 + String.valueOf(val).length()));
+        }
+    }
+}</pre>
+
+<p>为什么 * 需要 prev？因为乘法的优先级高于加减，<code>cur - prev + prev * val</code> 等价于把上一次加的 prev 撤销，乘完再加回去。</p>
+
+<hr>
+
+<!---------- 95 ---------->
+<h4>Unique BST II（95）⭐⭐</h4>
+<p>与回溯无关，是"区间递归构造所有可能 BST"，属于树的递归构造。详见 <a href="bst.html">bst.html</a>。</p>
+
+<hr>
+
+<!---------- 980 ---------->
+<h4>Unique Paths III（980）⭐⭐</h4>
+<blockquote>需要经过所有空格恰好一次</blockquote>
+
+<ul>
+  <li>统计空格总数（可走的格子数）</li>
+  <li>DFS + 回溯标记 visited</li>
+  <li>到达终点时检查是否已走完所有空格</li>
+  <li>剪枝：越界、障碍物、已访问</li>
+</ul>
+
+<!-- ─── 五、复杂度分析 ─── -->
+<hr>
+<h3>五、复杂度分析</h3>
+
+<table>
+  <tr><th>题目</th><th>时间复杂度</th><th>空间复杂度</th><th>说明</th></tr>
+  <tr><td>46 Permutations</td><td>O(n×n!)</td><td>O(n)</td><td>n! 个叶子，每叶子 O(n) 复制</td></tr>
+  <tr><td>78 Subsets</td><td>O(n×2ⁿ)</td><td>O(n)</td><td>2ⁿ 个子集，每子集 O(n) 复制</td></tr>
+  <tr><td>39 Combination Sum</td><td>O(2ⁿ) ~ O(n!)</td><td>O(target/min)</td><td>取决于剪枝，最差指数级</td></tr>
+  <tr><td>22 Generate Parentheses</td><td>O(4ⁿ/√n) — 卡特兰数</td><td>O(n)</td><td>C(2n,n)/(n+1) 个合法括号</td></tr>
+  <tr><td>51 N-Queens</td><td>O(n!)</td><td>O(n²)</td><td>剪枝后远小于 nⁿ</td></tr>
+  <tr><td>79 Word Search</td><td>O(m×n×4ᴸ)</td><td>O(L)</td><td>L=单词长度，4 方向递归</td></tr>
+  <tr><td>37 Sudoku Solver</td><td>O(9ᵐ) — m 为空格数</td><td>O(1)</td><td>棋盘固定 9×9，常数空间</td></tr>
+</table>
+
+<!-- ─── 六、常见错误 ─── -->
+<hr>
+<h3>六、常见错误</h3>
+
+<div class="warn">
+<strong>🚫 1. 忘记 copy 路径</strong>
+<pre>
+// 错误 — result 中存的引用会被后续回溯清空
+if (满足条件) result.add(path);
+// 正确
+if (满足条件) result.add(new ArrayList<>(path));
+</pre>
+</div>
+
+<div class="warn">
+<strong>🚫 2. 排列去重条件写错</strong>
+<pre>
+// 错误 — 同层去重条件写成 i > 0
+if (nums[i] == nums[i-1] && !used[i-1]) continue;
+// 上面的问题是：i=0 时不会检查，但如果 nums[0]==nums[1] 就会漏去重
+//
+// 正确还要加 i > 0
+if (i > 0 && nums[i] == nums[i-1] && !used[i-1]) continue;
+</pre>
+</div>
+
+<div class="warn">
+<strong>🚫 3. Combination Sum 忘记传 i 不是 i+1</strong>
+<p>39 题允许重复使用同一元素，传 <code>backtrack(i)</code> 而不是 <code>backtrack(i+1)</code>。</p>
+</div>
+
+<div class="warn">
+<strong>🚫 4. 前导零处理遗漏</strong>
+<pre>
+// 切割类题目（93 Restore IP / 842 Split Fib）
+if (numStr.length() > 1 && numStr.charAt(0) == '0') break;
+</pre>
+</div>
+
+<!-- ─── 七、递归与回溯的关系 ─── -->
+<hr>
+<h3>七、递归与回溯的关系</h3>
+
+<blockquote>回溯 = 递归 + 状态重置。不是所有递归都是回溯，但所有回溯都基于递归。</blockquote>
+
+<table>
+  <tr><th>维度</th><th>纯递归</th><th>回溯</th></tr>
+  <tr><td>目的</td><td>分治 / 遍历 / 计算</td><td>枚举所有解 / 找到可行解</td></tr>
+  <tr><td>状态变化</td><td>传值（不可变）</td><td>传引用 + 手动撤销</td></tr>
+  <tr><td>典型应用</td><td>树的遍历、二分、归并、Fibonacci</td><td>排列/组合/子集、约束满足</td></tr>
+  <tr><td>剪枝</td><td>无需剪枝</td><td>核心优化手段</td></tr>
+  <tr><td>代表题</td><td>BST 验证、二叉树直径、归并排序</td><td>Permutations、N-Queens</td></tr>
+</table>
+
+<div class="tip">
+<strong>💡</strong> 递归 → 非递归推导见 <a href="recursion-to-iteration.md">recursion-to-iteration.md</a>。其中第4种"回溯枚举"是唯一一种用栈无法完全自动转换的模式，因为状态重置在递归返回时隐式发生，非递归需要手动维护 context。
+</div>
+
+</body>
+</html>
