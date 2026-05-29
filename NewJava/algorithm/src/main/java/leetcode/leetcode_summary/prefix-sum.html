@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prefix Sum (前缀和) 总结</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif; line-height: 1.45; max-width: 960px; margin: 0 auto; padding: 16px 24px 60px; color: #2d3a31; background: #f5faf6; font-size: 13px; }
+  h1 { font-size: 1.35em; border-bottom: 3px solid #4a7c3f; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
+  h2 { font-size: 1.2em; color: #3d6b35; margin-top: 20px; padding-left: 8px; border-left: 4px solid #5a8f4c; }
+  h3 { font-size: 1.02em; color: #2d3a31; margin-top: 16px; }
+  h4 { font-size: 0.95em; color: #3a5235; margin-top: 12px; }
+  p { margin: 6px 0; } li { margin: 2px 0; } ol, ul { padding-left: 20px; }
+  blockquote { margin: 10px 0; padding: 12px 20px; background: #e8f5ec; border-left: 5px solid #5a8f4c; border-radius: 0 8px 8px 0; }
+  blockquote > p { margin: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9em; }
+  th, td { border: 1px solid #c3dbcc; padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: #4a7c3f; color: #fff; font-weight: 600; white-space: nowrap; }
+  tr:nth-child(even) { background: #e8f5ec; }
+  pre { background: #f5f0eb; color: #3d3731; padding: 12px 16px; border-radius: 8px; overflow-x: auto; font-size: 0.8em; line-height: 1.45; margin: 8px 0; }
+  code { font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace; }
+  p > code, li > code, td > code { background: #e4eddb; padding: 2px 6px; border-radius: 4px; font-size: 0.88em; color: #3d6b35; }
+  .star { color: #d4a017; font-weight: bold; }
+  .done { color: #16a34a; font-weight: bold; }
+  .pending { color: #94a3b8; }
+  hr { border: none; border-top: 2px dashed #c3dbcc; margin: 16px 0; }
+  .route { background: linear-gradient(135deg, #2d5a27, #4a7c3f); color: #fff; padding: 12px 20px; border-radius: 12px; margin: 12px 0; line-height: 1.7; font-size: 0.9em; }
+  .route strong { color: #fbbf24; }
+  td:first-child, th:first-child { text-align: center; white-space: nowrap; }
+  td:nth-child(2), th:nth-child(2) { text-align: center; }
+  td:nth-child(4), th:nth-child(4) { text-align: center; }
+  td:nth-child(6), th:nth-child(6) { text-align: center; }
+</style>
+</head>
+<body>
+
+<h1>Prefix Sum (前缀和)</h1>
+
+<blockquote><strong>核心性质：</strong>连续子数组/子串求和问题 → 优先考虑前缀和或滑动窗口。有负数时滑动窗口失效，前缀和+HashMap 是通用解法。前缀和能在 O(1) 时间内求出任意子数组的和，空间换时间。</blockquote>
+
+<h2>题目列表（按面试频次降序）</h2>
+
+<table>
+  <tr><th>频次</th><th>题号</th><th>题目</th><th>难度</th><th>核心思路</th><th>状态</th></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>560</td><td>Subarray Sum Equals K</td><td>🟡 Medium</td><td>前缀和+HashMap（存频率），<code>ans += map.getOrDefault(cur - k, 0)</code></td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>238</td><td>Product of Array Except Self</td><td>🟡 Medium</td><td>前缀积：左→右扫一遍，右→左扫一遍</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>53</td><td>Maximum Subarray</td><td>🟡 Medium</td><td>Kadane 算法：<code>cur = max(cur + nums[i], nums[i])</code></td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>303</td><td>Range Sum Query - Immutable</td><td>🟢 Easy</td><td>一维前缀和裸题，<code>prefix[i] = prefix[i-1] + nums[i-1]</code></td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>304</td><td>Range Sum Query 2D - Immutable</td><td>🟡 Medium</td><td>二维前缀和，<code>sum = s[x2][y2] - s[x1-1][y2] - s[x2][y1-1] + s[x1-1][y1-1]</code></td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>724</td><td>Find Pivot Index</td><td>🟢 Easy</td><td>中心下标，左和 = 右和，<code>leftSum == total - leftSum - nums[i]</code></td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>525</td><td>Contiguous Array</td><td>🟡 Medium</td><td>0→-1，前缀和+HashMap（存最早索引），求最长</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>974</td><td>Subarray Sums Divisible by K</td><td>🟡 Medium</td><td>前缀和取模，<code>ans += map.getOrDefault((cur % k + k) % k, 0)</code></td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>523</td><td>Continuous Subarray Sum</td><td>🟡 Medium</td><td>前缀和取模+存索引，要求长度≥2</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>930</td><td>Binary Subarrays With Sum</td><td>🟡 Medium</td><td>560 的 binary 特化版（元素只有 0/1）</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>1248</td><td>Count Number of Nice Subarrays</td><td>🟡 Medium</td><td>奇→1, 偶→0，转化为 560</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>1310</td><td>XOR Queries of a Subarray</td><td>🟡 Medium</td><td>前缀异或，<code>xor[i..j] = pref[j+1] ^ pref[i]</code></td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>325</td><td>Maximum Size Subarray Sum Equals k</td><td>🟡 Medium</td><td>前缀和+HashMap（存最早索引），<code>O(n)</code></td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>1094</td><td>Car Pooling</td><td>🟡 Medium</td><td>差分数组，<code>diff[l] += val; diff[r] -= val</code></td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>370</td><td>Range Addition</td><td>🟡 Medium</td><td>差分数组模板题</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>1480</td><td>Running Sum of 1d Array</td><td>🟢 Easy</td><td>基础前缀和，入门级</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>1732</td><td>Find the Highest Altitude</td><td>🟢 Easy</td><td>前缀和最大值</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>1314</td><td>Matrix Block Sum</td><td>🟡 Medium</td><td>二维前缀和应用，注意边界处理</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>1442</td><td>Count Triplets That Form Two Equal XOR</td><td>🟡 Medium</td><td>前缀异或，<code>arr[i..j-1] XOR == 0</code> 时成立</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>1590</td><td>Make Sum Divisible by P</td><td>🟡 Medium</td><td>取模+HashMap，找最短移除子数组</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★</span></td><td>1074</td><td>Number of Submatrices That Sum to Target</td><td>🔴 Hard</td><td>二维+HashMap，枚举行上下界降维成一维</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★</span></td><td>1371</td><td>Find Longest Substring with Vowels in Even Counts</td><td>🟡 Medium</td><td>状态压缩(5位bit)+前缀异或</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★</span></td><td>1542</td><td>Find Longest Awesome Substring</td><td>🔴 Hard</td><td>状态压缩(10位bit)+前缀异或</td><td><span class="pending">⬜</span></td></tr>
+</table>
+
+<h2>核心套路</h2>
+
+<pre>
+区间和查询（数组不变）        → 一维前缀和： prefix[i] = prefix[i-1] + nums[i-1]
+矩阵区域和查询               → 二维前缀和： s[x][y] = s[x-1][y] + s[x][y-1] - s[x-1][y-1] + matrix[x][y]
+子数组和 = k（有负数）        → 前缀和+HashMap： map.put(0,1); ans += map.getOrDefault(cur - k, 0)
+子数组和 % k == 0            → 前缀和取模： ans += map.getOrDefault((cur % k + k) % k, 0)
+子数组长度 ≥ 2 && 和%k==0     → 取模存索引，要求 idx - map.get(mod) ≥ 2
+0/1 数组等值转化             → 0→-1，求前缀和，转化为和为 0 的最长子数组
+区间更新，少查询              → 差分数组： diff[l] += val; diff[r+1] -= val
+前缀积                      → 左→右算 prefix，右→左算 suffix，相乘排除自身
+前缀异或                    → pref[i+1] = pref[i] ^ nums[i]; 区间异或 = pref[j+1] ^ pref[i]
+最大子数组和                 → Kadane： cur = max(cur + nums[i], nums[i]); ans = max(ans, cur)
+状态压缩+前缀异或            → 用 bit 表示状态（奇偶），最早出现同状态的距离即为最长
+</pre>
+
+<h2>快速判题指南</h2>
+
+<table>
+  <tr><th>场景</th><th>用哪个</th></tr>
+  <tr><td>有负数，求子数组和 = k 的<strong>个数</strong></td><td>前缀和+HashMap（存频率）</td></tr>
+  <tr><td>有负数，求子数组和 = k 的<strong>最长长度</strong></td><td>前缀和+HashMap（存最早索引）</td></tr>
+  <tr><td>只有正数，求子数组和 = k</td><td>滑动窗口（O(n) 无额外空间）</td></tr>
+  <tr><td>子数组和能被 k 整除</td><td>前缀和取模</td></tr>
+  <tr><td>0/1 数组求 0和1 数量相等</td><td>0→-1 转化为和为 0</td></tr>
+  <tr><td>矩阵子矩阵和 = target</td><td>二维前缀和 或 枚举行+一维降维</td></tr>
+  <tr><td>区间内奇偶元素计数</td><td>前缀和（奇→1，偶→0 或状态压缩）</td></tr>
+  <tr><td>区间多次求和查询</td><td>裸前缀和 （303, 304）</td></tr>
+  <tr><td>区间多次更新，很少查询</td><td>差分数组（1094, 370）</td></tr>
+  <tr><td>从 i 到 j 的异或值</td><td>前缀异或</td></tr>
+  <tr><td>排除自身外的乘积</td><td>前缀积（左右两次遍历）</td></tr>
+</table>
+
+</body>
+</html>

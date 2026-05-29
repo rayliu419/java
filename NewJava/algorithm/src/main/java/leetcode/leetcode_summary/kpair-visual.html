@@ -5,43 +5,43 @@
 <title>K Pairs with Smallest Sums — 可视化</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'San Francisco', -apple-system, 'Segoe UI', sans-serif; background: #1a1a2e; color: #e0e0e0; display: flex; justify-content: center; padding: 20px; }
+  body { font-family: 'San Francisco', -apple-system, 'Segoe UI', sans-serif; background: #f5faf6; color: #2d3a31; display: flex; justify-content: center; padding: 20px; }
   .container { max-width: 1100px; width: 100%; }
-  h1 { text-align: center; font-size: 24px; margin-bottom: 4px; color: #fff; }
+  h1 { text-align: center; font-size: 24px; margin-bottom: 4px; color: #2d5a27; }
   h1 span { color: #f59e0b; }
-  .subtitle { text-align: center; color: #888; font-size: 14px; margin-bottom: 20px; }
+  .subtitle { text-align: center; color: #5a7155; font-size: 14px; margin-bottom: 20px; }
 
   .main-panel { display: flex; gap: 20px; }
   .left-col { flex: 1; min-width: 0; }
   .right-col { flex: 0 0 300px; }
 
   /* Matrix section */
-  .matrix-section { background: #16213e; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-  .matrix-section h2 { font-size: 14px; color: #888; margin-bottom: 8px; }
+  .matrix-section { background: #e8f5ec; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #c3dbcc; }
+  .matrix-section h2 { font-size: 14px; color: #3d6b35; margin-bottom: 8px; }
   .matrix-wrapper { overflow-x: auto; }
   .matrix-grid { display: inline-grid; gap: 4px; }
   .matrix-row { display: contents; }
-  .matrix-label-row, .matrix-label-col { display: flex; align-items: center; justify-content: center; font-weight: 600; color: #888; font-size: 13px; }
-  .matrix-cell { width: 90px; height: 60px; border-radius: 8px; background: #0f3460; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.3s; cursor: default; position: relative; }
-  .matrix-cell .pair { font-size: 13px; font-weight: 600; color: #fff; }
-  .matrix-cell .sum { font-size: 11px; color: #888; margin-top: 2px; }
-  .matrix-cell.in-heap { background: #3730a3; box-shadow: 0 0 12px rgba(124,58,237,0.4); }
-  .matrix-cell.in-heap .pair { color: #c4b5fd; }
-  .matrix-cell.current { background: #f59e0b; transform: scale(1.05); box-shadow: 0 0 16px rgba(245,158,11,0.5); }
+  .matrix-label-row, .matrix-label-col { display: flex; align-items: center; justify-content: center; font-weight: 600; color: #5a7155; font-size: 13px; }
+  .matrix-cell { width: 90px; height: 60px; border-radius: 8px; background: #e8edf5; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.3s; cursor: default; position: relative; }
+  .matrix-cell .pair { font-size: 13px; font-weight: 600; color: #2d3a31; }
+  .matrix-cell .sum { font-size: 11px; color: #8a9a85; margin-top: 2px; }
+  .matrix-cell.in-heap { background: #e4eddb; box-shadow: 0 0 12px rgba(74,124,63,0.3); }
+  .matrix-cell.in-heap .pair { color: #2d5a27; }
+  .matrix-cell.current { background: #d4a017; transform: scale(1.05); box-shadow: 0 0 16px rgba(212,160,23,0.4); }
   .matrix-cell.current .pair { color: #fff; }
   .matrix-cell.current .sum { color: #fef3c7; }
-  .matrix-cell.done { background: #065f46; opacity: 0.7; }
-  .matrix-cell.done .pair { color: #6ee7b7; }
-  .matrix-cell.exhausted { background: #1f2937; opacity: 0.4; }
-  .matrix-cell.exhausted .pair { color: #6b7280; }
+  .matrix-cell.done { background: #4a7c3f; opacity: 0.8; }
+  .matrix-cell.done .pair { color: #fff; }
+  .matrix-cell.exhausted { background: #c3dbcc; opacity: 0.5; }
+  .matrix-cell.exhausted .pair { color: #8a9a85; }
 
   /* Heap section */
-  .heap-section { background: #16213e; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-  .heap-section h2 { font-size: 14px; color: #888; margin-bottom: 8px; }
-  .heap-section h2 span { color: #7c3aed; }
-  .heap-visual { display: flex; flex-wrap: wrap; gap: 6px; min-height: 60px; padding: 10px; border: 2px dashed #2a2a4a; border-radius: 8px; justify-content: center; align-items: center; }
-  .heap-empty { color: #555; font-size: 13px; }
-  .heap-item { padding: 6px 12px; background: linear-gradient(135deg, #7c3aed, #6d28d9); border-radius: 6px; font-weight: 600; font-size: 13px; color: #fff; transition: all 0.3s; text-align: center; }
+  .heap-section { background: #e8f5ec; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #c3dbcc; }
+  .heap-section h2 { font-size: 14px; color: #3d6b35; margin-bottom: 8px; }
+  .heap-section h2 span { color: #4a7c3f; }
+  .heap-visual { display: flex; flex-wrap: wrap; gap: 6px; min-height: 60px; padding: 10px; border: 2px dashed #c3dbcc; border-radius: 8px; justify-content: center; align-items: center; background: #e8f5ec; }
+  .heap-empty { color: #8a9a85; font-size: 13px; }
+  .heap-item { padding: 6px 12px; background: linear-gradient(135deg, #4a7c3f, #2d5a27); border-radius: 6px; font-weight: 600; font-size: 13px; color: #fff; transition: all 0.3s; text-align: center; }
   .heap-item .heap-pair { font-size: 11px; opacity: 0.8; }
   .heap-item.poll { animation: pollAnim 0.4s; }
   .heap-item.push { animation: pushAnim 0.4s; }
@@ -49,40 +49,40 @@
   @keyframes pushAnim { 0% { transform: translateY(-10px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
 
   /* Result section */
-  .result-section { background: #16213e; border-radius: 12px; padding: 16px; }
-  .result-section h2 { font-size: 14px; color: #888; margin-bottom: 8px; }
-  .result-section h2 span { color: #10b981; }
-  .result-list { display: flex; flex-wrap: wrap; gap: 6px; min-height: 40px; padding: 10px; border: 2px dashed #2a2a4a; border-radius: 8px; justify-content: center; align-items: center; }
-  .result-empty { color: #555; font-size: 13px; }
-  .result-item { padding: 6px 10px; background: #065f46; border-radius: 6px; font-weight: 600; font-size: 13px; color: #6ee7b7; animation: pushAnim 0.4s; }
+  .result-section { background: #e8f5ec; border-radius: 12px; padding: 16px; border: 1px solid #c3dbcc; }
+  .result-section h2 { font-size: 14px; color: #3d6b35; margin-bottom: 8px; }
+  .result-section h2 span { color: #16a34a; }
+  .result-list { display: flex; flex-wrap: wrap; gap: 6px; min-height: 40px; padding: 10px; border: 2px dashed #c3dbcc; border-radius: 8px; justify-content: center; align-items: center; background: #e8f5ec; }
+  .result-empty { color: #8a9a85; font-size: 13px; }
+  .result-item { padding: 6px 10px; background: #4a7c3f; border-radius: 6px; font-weight: 600; font-size: 13px; color: #fff; animation: pushAnim 0.4s; }
 
   /* Explain */
-  .explain { background: #16213e; border-radius: 12px; padding: 16px; margin-top: 16px; min-height: 70px; }
-  .explain .phase { font-size: 12px; color: #7c3aed; font-weight: 600; margin-bottom: 4px; }
-  .explain .action { font-size: 15px; color: #fff; margin-bottom: 4px; }
-  .explain .detail { font-size: 13px; color: #aaa; }
+  .explain { background: #e8f5ec; border-radius: 12px; padding: 16px; margin-top: 16px; min-height: 70px; border: 1px solid #c3dbcc; }
+  .explain .phase { font-size: 12px; color: #4a7c3f; font-weight: 600; margin-bottom: 4px; }
+  .explain .action { font-size: 15px; color: #2d3a31; margin-bottom: 4px; }
+  .explain .detail { font-size: 13px; color: #5a7155; }
 
   /* Controls */
   .controls { display: flex; gap: 10px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
   .controls button { padding: 10px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
   .controls button:hover { transform: translateY(-1px); }
-  .btn-prev { background: #374151; color: #e0e0e0; }
-  .btn-next { background: #7c3aed; color: #fff; }
-  .btn-reset { background: #374151; color: #e0e0e0; }
-  .btn-auto { background: #047857; color: #fff; }
+  .btn-prev { background: #c3dbcc; color: #2d3a31; }
+  .btn-next { background: #4a7c3f; color: #fff; }
+  .btn-reset { background: #c3dbcc; color: #2d3a31; }
+  .btn-auto { background: #2d5a27; color: #fff; }
   .controls button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-  .step-counter { text-align: center; font-size: 13px; color: #888; margin-top: 10px; }
+  .step-counter { text-align: center; font-size: 13px; color: #5a7155; margin-top: 10px; }
 
   .legend { display: flex; gap: 16px; justify-content: center; margin: 10px 0; font-size: 12px; flex-wrap: wrap; }
   .legend span { display: flex; align-items: center; gap: 4px; }
   .legend-dot { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
-  .legend-heap { background: #3730a3; }
-  .legend-cur { background: #f59e0b; }
-  .legend-done { background: #065f46; }
-  .legend-exhausted { background: #1f2937; }
+  .legend-heap { background: #4a7c3f; }
+  .legend-cur { background: #d4a017; }
+  .legend-done { background: #2d5a27; }
+  .legend-exhausted { background: #c3dbcc; }
 
-  .formula { text-align: center; font-size: 13px; color: #888; margin-bottom: 10px; }
-  .formula code { background: #0f3460; padding: 2px 6px; border-radius: 4px; color: #c4b5fd; }
+  .formula { text-align: center; font-size: 13px; color: #5a7155; margin-bottom: 10px; }
+  .formula code { background: #e4eddb; padding: 2px 6px; border-radius: 4px; color: #2d5a27; }
 </style>
 </head>
 <body>

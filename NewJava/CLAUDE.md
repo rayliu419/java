@@ -39,3 +39,38 @@ Multi-module Maven project (Java 17) with 7 modules:
 - ANTLR grammar generates parser code; generated sources are checked in under `compiler/src/main/java/gen/`
 - Tests use JUnit 4 (no JUnit 5 / Jupiter)
 
+## HTML 笔记风格指南
+
+`leetcode_summary/` 下的 HTML 笔记使用以下样式以减少视觉疲劳：
+
+### 色彩基调
+
+- **背景**：柔和的草绿色 `#f2f7ed`（大面积使用，比白色更护眼）
+- **正文**：深灰 `#2c3e2d`，不使用纯黑（降低对比度）
+- **标题**：深绿 `#2d5a27` / 墨绿 `#3d6b35`
+
+### 代码块
+
+- 使用 **暖灰色** 背景（`#f5f0eb`）替代深色背景，搭配深色文字（`#3d3731`），模拟纸质书效果
+- 或者保留深色背景但降低对比度：背景 `#2b2b2b`，文字 `#d4cfc6`
+
+### 高亮框体系（圆角 + 左侧色条）
+
+| 类型 | 色条颜色 | 背景色 | 用途 |
+|------|----------|--------|------|
+| 核心心法 | 靛蓝 `#6366f1` | `#f0eeff` | 最关键的方法论 |
+| 提示 | 琥珀 `#d4a017` | `#fef9e7` | 小技巧 / 注意点 |
+| 警告 | 红 `#d9534f` | `#fdf0ef` | 易错点 / 边界情况 |
+| 总结 | 翠绿 `#4caf50` | `#edf7ed` | 解题步骤归纳 |
+
+### 降低疲劳的通用手法
+
+1. **充足行高**：`line-height: 1.8` 以上，段落间距 16px+
+2. **柔和阴影**：卡片类用 `box-shadow: 0 1px 4px rgba(0,0,0,0.06)`，不刺眼
+3. **表格斑马纹**：`tr:nth-child(even)` 用极浅色（`#f4f8f2`），hover 用 `#eaf3e5`
+4. **避免荧光色**：高亮只用柔和的背景色块 + 边框，不用 `yellow` 或高饱和色
+5. **字体选型**：`-apple-system, "Noto Sans SC", "Microsoft YaHei", sans-serif`，系统字体渲染最平滑
+6. **两侧留白**：内容区最大宽度 920px，内边距 32px+
+7. **分割线淡化**：`hr` 用 `1px solid #e2e8d8` 而不是纯黑或粗线
+8. **分级标题**：h2 用左侧色条 + 稍大字号区分层级，避免加粗过度使用
+

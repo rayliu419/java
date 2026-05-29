@@ -7,24 +7,28 @@
 <style>
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
-    line-height: 1.7;
+    line-height: 1.45;
     max-width: 960px;
     margin: 0 auto;
-    padding: 24px 32px 80px;
-    color: #1a1a2e;
-    background: #f8f9fa;
+    padding: 16px 24px 60px;
+    color: #2d3a31;
+    background: #f5faf6;
+    font-size: 13px;
   }
-  h1 { font-size: 2em; border-bottom: 3px solid #2563eb; padding-bottom: 10px; margin-bottom: 24px; }
-  h2 { font-size: 1.5em; color: #1e40af; margin-top: 36px; padding-left: 8px; border-left: 4px solid #3b82f6; }
-  h3 { font-size: 1.2em; color: #1e293b; margin-top: 28px; }
-  h4 { font-size: 1.05em; color: #334155; margin-top: 20px; }
+  h1 { font-size: 1.35em; border-bottom: 3px solid #4a7c3f; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
+  h2 { font-size: 1.2em; color: #3d6b35; margin-top: 20px; padding-left: 8px; border-left: 4px solid #5a8f4c; }
+  h3 { font-size: 1.02em; color: #2d3a31; margin-top: 16px; }
+  h4 { font-size: 0.95em; color: #3a5235; margin-top: 12px; }
 
   /* 核心心法高亮 */
+  p { margin: 6px 0; }
+  li { margin: 2px 0; }
+  ol, ul { padding-left: 20px; }
   blockquote {
-    margin: 16px 0;
+    margin: 10px 0;
     padding: 12px 20px;
-    background: #eef2ff;
-    border-left: 5px solid #6366f1;
+    background: #eaf3e5;
+    border-left: 5px solid #5a8f4c;
     border-radius: 0 8px 8px 0;
     font-size: 1.05em;
   }
@@ -34,44 +38,44 @@
   table {
     width: 100%;
     border-collapse: collapse;
-    margin: 16px 0;
-    font-size: 0.95em;
+    margin: 12px 0;
+    font-size: 0.9em;
   }
   th, td {
-    border: 1px solid #d1d5db;
+    border: 1px solid #c3dbcc;
     padding: 8px 12px;
     text-align: left;
     vertical-align: top;
   }
   th {
-    background: #2563eb;
+    background: #4a7c3f;
     color: #fff;
     font-weight: 600;
     white-space: nowrap;
   }
-  tr:nth-child(even) { background: #f1f5f9; }
-  tr:hover { background: #e0e7ff; }
+  tr:nth-child(even) { background: #f0f6eb; }
+  tr:hover { background: #e4eddb; }
 
   /* 代码块 */
   pre {
-    background: #1e293b;
-    color: #e2e8f0;
+    background: #f5f0eb;
+    color: #3d3731;
     padding: 16px 20px;
     border-radius: 8px;
     overflow-x: auto;
-    font-size: 0.9em;
-    line-height: 1.5;
-    margin: 12px 0;
+    font-size: 0.8em;
+    line-height: 1.45;
+    margin: 8px 0;
   }
   code {
     font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
   }
   p > code, li > code, td > code {
-    background: #e2e8f0;
+    background: #e4eddb;
     padding: 2px 6px;
     border-radius: 4px;
-    font-size: 0.92em;
-    color: #1e40af;
+    font-size: 0.88em;
+    color: #3d6b35;
   }
 
   /* 题目列表星级 */
@@ -84,13 +88,13 @@
   /* 分界线 */
   hr {
     border: none;
-    border-top: 2px dashed #cbd5e1;
-    margin: 32px 0;
+    border-top: 2px dashed #c3dbcc;
+    margin: 16px 0;
   }
 
   /* 路线图卡片 */
   .route {
-    background: linear-gradient(135deg, #1e3a5f, #2563eb);
+    background: linear-gradient(135deg, #2d5a27, #4a7c3f);
     color: #fff;
     padding: 16px 24px;
     border-radius: 12px;
@@ -110,23 +114,23 @@
   .comparison > div {
     padding: 12px 16px;
     border-radius: 8px;
-    border: 1px solid #d1d5db;
-    background: #fff;
+    border: 1px solid #c3dbcc;
+    background: #e8f5ec;
   }
   .comparison > div h4 { margin: 0 0 8px; }
   @media (max-width: 640px) { .comparison { grid-template-columns: 1fr; } }
 
   /* 提示框 */
   .tip {
-    background: #fef9c3;
-    border-left: 5px solid #eab308;
+    background: #fef9e7;
+    border-left: 5px solid #d4a017;
     padding: 10px 16px;
     border-radius: 0 8px 8px 0;
     margin: 12px 0;
   }
   .warn {
-    background: #fee2e2;
-    border-left: 5px solid #ef4444;
+    background: #fdf0ef;
+    border-left: 5px solid #d9534f;
     padding: 10px 16px;
     border-radius: 0 8px 8px 0;
     margin: 12px 0;
