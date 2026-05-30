@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>回溯去重：startIndex 与非递减下标序列</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+    line-height: 1.45;
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 16px 32px 60px;
+    color: #2d3a31;
+    background: #f5faf6;
+    font-size: 13px;
+  }
+  h1 { font-size: 1.35em; border-bottom: 3px solid #2d5a27; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
+  h2 { font-size: 1.2em; color: #2d5a27; margin-top: 20px; padding-left: 8px; border-left: 4px solid #5a8f4c; }
+  h3 { font-size: 1.02em; color: #2d3a31; margin-top: 14px; margin-bottom: 6px; }
+  h4 { font-size: 0.95em; color: #2d3a31; margin: 10px 0 4px; }
+  p { margin: 6px 0; }
+  li { margin: 2px 0; }
+  ol, ul { padding-left: 20px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    font-size: 0.9em;
+  }
+  th, td {
+    border: 1px solid #c3dbcc;
+    padding: 5px 8px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #2d5a27;
+    color: #fff;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  tr:nth-child(even) { background: #e8f5ec; }
+  tr:hover { background: #d4e8da; }
+
+  pre {
+    background: #f5f0eb;
+    color: #3d3731;
+    padding: 10px 14px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.8em;
+    line-height: 1.5;
+    margin: 8px 0;
+  }
+  code {
+    font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+  }
+  p > code, li > code, td > code {
+    background: #ddeae0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.88em;
+    color: #2d5a27;
+  }
+
+  hr { border: none; border-top: 2px dashed #c3dbcc; margin: 16px 0; }
+
+  /* 色条高亮框 */
+  .core {
+    background: #f0eeff;
+    border-left: 5px solid #6366f1;
+    padding: 10px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 10px 0;
+  }
+  .core > p { margin: 0; }
+
+  .warn {
+    background: #fdf0ef;
+    border-left: 5px solid #d9534f;
+    padding: 10px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 10px 0;
+  }
+  .warn > p { margin: 0; }
+
+  .tip {
+    background: #fef9e7;
+    border-left: 5px solid #d4a017;
+    padding: 10px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 10px 0;
+  }
+  .tip > p { margin: 0; }
+
+  .summary-box {
+    background: #edf7ed;
+    border-left: 5px solid #4caf50;
+    padding: 10px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 10px 0;
+  }
+  .summary-box > p { margin: 0; }
+
+  .diff-add { background: #d4edda; color: #155724; padding: 1px 4px; border-radius: 3px; }
+  .diff-remove { background: #f8d7da; color: #721c24; padding: 1px 4px; border-radius: 3px; text-decoration: line-through; }
+</style>
+</head>
+<body>
+
+<h1>回溯去重：startIndex 与非递减下标序列</h1>
+
+<!-- ═══════════════ Summary：概述 ═══════════════ -->
+<div class="summary-box">
+<p><strong>回溯组合题中，startIndex 解决了一个核心矛盾：</strong>组合不关心顺序，但回溯的递归搜索天然会枚举所有排列。从 <code>i=0</code> 开始遍历等价于在全排列空间中搜索，同一组数字的不同排列都会出现。startIndex 通过强制下<strong>标序列非递减</strong>，将搜索空间从 n! 压缩到组合空间的 2ⁿ / C(n,k)，彻底消除排列重复。</p>
+</div>
+
+<!-- ═══════════════ Details：逐层分析 ═══════════════ -->
+
+<h2>1. 有 Bug 的 case</h2>
+
+<p><code>candidates = [2, 3, 6, 7], target = 7</code></p>
+
+<div class="warn">
+<p><strong>错误写法：</strong>每次递归从 <code>i = 0</code> 开始遍历</p>
+<pre>
+for (int i = <span class="diff-remove">0</span>; i &lt; candidates.length; i++) {
+    ...
+    combinationSum(finalResult, cur, candidates, target - candidates[i]);
+    ...
+}</pre>
+<p><strong>输出：</strong><code>[2,2,3]</code>、<code>[2,3,2]</code>、<code>[3,2,2]</code>、<code>[7]</code></p>
+<p>{2,2,3} 这组数字产生了 3 种排列，期望只有 <code>[2,2,3]</code> 一个解。</p>
+</div>
+
+<h2>2. 根因：排列空间 vs 组合空间</h2>
+
+<p>每次从 <code>i = 0</code> 开始遍历，意味着递归的每一层都能<strong>回头</strong>选择之前已经选过的下标。这等价于在全排列空间中搜索——排列关心"按什么顺序选"，不关心"选了哪些数"。</p>
+
+<div class="core">
+<p><strong>本质：</strong>当你用排列的搜索方式（每层全量遍历）去做组合题，就会得到"不该出现的排列"。</p>
+</div>
+
+<h2>3. 修复：startIndex</h2>
+
+<pre>
+void backtrack(..., <span class="diff-add">int start</span>) {
+    if (target == 0) { res.add(new ArrayList&lt;&gt;(cur)); return; }
+    for (int i = <span class="diff-add">start</span>; i &lt; candidates.length; i++) {
+        if (target - candidates[i] &lt; 0) continue;
+        cur.add(candidates[i]);
+        backtrack(res, cur, candidates, target - candidates[i], <span class="diff-add">i</span>);
+        cur.remove(cur.size() - 1);
+    }
+}</pre>
+
+<p>两处改动：循环起始改为 <code>start</code>，递归传递 <code>i</code>（不是 <code>i+1</code>，因为允许重复用当前元素）。</p>
+
+<h2>4. 核心原理：非递减下标序列</h2>
+
+<div class="core">
+<p><strong>startIndex 约束下标序列单调不减。</strong>选了下标 1 之后不能再回头选 0。同一组数字只保留下标递增的"规范形"，其他排列组合被自动排除。</p>
+</div>
+
+<table>
+  <tr><th>下标序列</th><th>对应组合</th><th>是否非递减</th><th>startIndex 能否产生</th></tr>
+  <tr><td>[0, 0, 1]</td><td>2+2+3</td><td>✅</td><td>✅</td></tr>
+  <tr><td>[0, 1, 0]</td><td>2+3+2</td><td>❌（1→0）</td><td>❌</td></tr>
+  <tr><td>[1, 0, 0]</td><td>3+2+2</td><td>❌（1→0）</td><td>❌</td></tr>
+</table>
+
+<div class="core">
+<p><strong>洞察：</strong>组合的解由<strong>下标的多重集</strong>唯一确定。将下标按非递减排序后，每个多重集有且仅有一个规范形。startIndex 保证回溯只在规范形空间中搜索，自然零重复。</p>
+</div>
+
+<h2>5. 与排列的对比</h2>
+
+<table>
+  <tr><th></th><th>组合（Combination）</th><th>排列（Permutation）</th></tr>
+  <tr><td><strong>能否回头</strong></td><td>❌ 产生重复</td><td>✅ 产生新解</td></tr>
+  <tr><td><strong>遍历范围</strong></td><td><code>start ~ n-1</code></td><td><code>0 ~ n-1</code>（跳过已选）</td></tr>
+  <tr><td><strong>空间大小</strong></td><td>C(n,k) / 2ⁿ</td><td>n!</td></tr>
+</table>
+
+<div class="tip">
+<p><strong>区分判断：</strong>[2,3] 和 [3,2] 在你的问题语境下是同一个解还是两个解？前者用 startIndex，后者用 used[] 数组。</p>
+</div>
+
+<!-- ═══════════════ Conclusions：总结 ═══════════════ -->
+
+<h2>总结与启发</h2>
+
+<div class="summary-box">
+<p><strong>startIndex 的本质是对搜索空间施加"下标单调性"约束。</strong></p>
+</div>
+
+<p>这个约束将排列空间（n!）降维到组合空间（2ⁿ / C(n,k)），消除重复的同时保持了回溯搜索的完整性。</p>
+
+<p><strong>更一般的模式：</strong>几乎所有组合类回溯题（组合总和、子集、有重复元素的组合）的去重方案，最终都归结为同一条原则：</p>
+
+<div class="core">
+<p><strong>当解空间不关心元素顺序时，在递归中强制下标单向移动，就是最自然的去重手段。</strong></p>
+</div>
+
+<p>思考链路总结：</p>
+
+<ol>
+  <li>出现排列重复 → 检查每层递归的循环起点</li>
+  <li>若从 <code>i=0</code> 开始 → 相当于在排列空间搜索</li>
+  <li>加 startIndex → 强制下标非递减 → 回到组合空间</li>
+  <li>允许重复选同一元素 → 递归传 <code>i</code>；不允许 → 传 <code>i+1</code></li>
+</ol>
+
+</body>
+</html>

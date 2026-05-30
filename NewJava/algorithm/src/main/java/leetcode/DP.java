@@ -5,7 +5,6 @@ import java.util.List;
 
 public class DP {
 
-
     /**
      * https://leetcode.cn/problems/permutations/ - 无重复的数
      *

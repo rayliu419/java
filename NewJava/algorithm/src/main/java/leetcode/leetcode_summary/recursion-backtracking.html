@@ -187,11 +187,11 @@
   <tr>
     <th>频次</th><th>题号</th><th>题目</th><th>难度</th><th>核心思路</th><th>状态</th>
   </tr>
-  <tr><td><span class="star">★★★★★</span></td><td>46</td><td>Permutations</td><td>🟡 Medium</td><td>used[] 标记已选，回溯全排列</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>78</td><td>Subsets</td><td>🟡 Medium</td><td>选/不选 或 startIndex 控制分支</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>39</td><td>Combination Sum</td><td>🟡 Medium</td><td>startIndex 同层去重，可复用同一元素</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>22</td><td>Generate Parentheses</td><td>🟡 Medium</td><td>left &lt; n 加左，right &lt; left 加右</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>17</td><td>Letter Combinations of a Phone Number</td><td>🟡 Medium</td><td>数字→字母映射，DFS 逐位构建</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>46</td><td>Permutations</td><td>🟡 Medium</td><td>used[] 标记已选，回溯全排列</td><td><span class="done">✅ DFS.java</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>78</td><td>Subsets</td><td>🟡 Medium</td><td>选/不选 或 startIndex 控制分支</td><td><span class="done">✅ DFS.java</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>39</td><td>Combination Sum</td><td>🟡 Medium</td><td>startIndex 同层去重，可复用同一元素</td><td><span class="done">✅ DFS.java</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>22</td><td>Generate Parentheses</td><td>🟡 Medium</td><td>left &lt; n 加左，right &lt; left 加右</td><td><span class="done">✅ DFS.java</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>17</td><td>Letter Combinations of a Phone Number</td><td>🟡 Medium</td><td>数字→字母映射，DFS 逐位构建</td><td><span class="done">✅ DFS.java</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>79</td><td>Word Search</td><td>🟡 Medium</td><td>DFS + 回溯标记，四方向探索</td><td><span class="done">✅ DFS.java</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>131</td><td>Palindrome Partitioning</td><td>🟡 Medium</td><td>startIndex 逐段检查回文，切割回溯</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>51</td><td>N-Queens</td><td>🔴 Hard</td><td>逐行放置，列/对角线冲突检查回溯</td><td><span class="pending">⬜</span></td></tr>
@@ -226,11 +226,11 @@
   <strong>第四梯队（扩展 · 6 题）：</strong>89 Gray Code → 282 Expression Add Operators → 980 Unique Paths III
 </div>
 
-<!-- ─── 一、核心心法 ─── -->
 <h2>学习笔记</h2>
-<hr>
 
-<h3>一、核心心法</h3>
+<!-- ─── 总结 ─── -->
+<div class="pattern-card">
+<h3>总结</h3>
 
 <blockquote>回溯的本质是 <strong>DFS + 状态重置</strong>。所有回溯题共用同一个模板，区别只在剪枝条件。</blockquote>
 
@@ -309,6 +309,10 @@ subsets(cur, nums, index) {
 <div class="tip">
 <strong>💡</strong> 为什么子集用 startIndex 而排列用 used[]？子集/组合关心"选哪些"不关心顺序，startIndex 保证每次只从下一个位置往后选，天然避免 {1,2} 和 {2,1} 同时出现。排列关心顺序，每个位置都可以从全集里选，所以用 used[] 标记哪些已经用过。
 </div>
+</div>
+
+<!-- ─── 详情 ─── -->
+<h3>详情</h3>
 
 <!-- ─── 二、去重套路 ─── -->
 <hr>
@@ -710,6 +714,10 @@ void backtrack(StringBuilder path, int left, int right) {
 
 <p>合法性：任何时候右括号数不能超过左括号数 → 在递归中保证 <code>right &lt; left</code> 才加右括号。</p>
 
+<div class="tip">
+<strong>💡</strong> <strong>DFS.java 变体：</strong>不写条件分支，每次无脑 append '(' 和 ')' 各一次（2^(2n) 节点），在函数开头统一用 <code>if (right &gt; left || left &gt; n || right &gt; n) return;</code> 剪枝。更简洁但递归节点更多。两种写法等价。
+</div>
+
 <hr>
 
 <!---------- 17 ---------->
@@ -717,7 +725,7 @@ void backtrack(StringBuilder path, int left, int right) {
 <blockquote>数字→字母映射 + 逐位回溯，最直观的入门回溯题之一</blockquote>
 
 <ul>
-  <li>建立 <code>Map&lt;Character, String&gt;</code> 数字到字母的映射</li>
+  <li>建立 <code>Map&lt;Integer, String&gt;</code> 数字→字母映射，<code>digit - '0'</code> 取数字键</li>
   <li>递归参数：<code>digits</code> 字符串 + <code>index</code> 当前处理到第几位</li>
   <li>每次取 <code>digits.charAt(index)</code> 对应的字母串，遍历每个字母做选择</li>
   <li>剪枝：<code>digits == null || digits.isEmpty()</code> 返回空列表</li>
@@ -934,11 +942,55 @@ if (numStr.length() > 1 && numStr.charAt(0) == '0') break;
 </pre>
 </div>
 
-<!-- ─── 七、递归与回溯的关系 ─── -->
+<!-- ─── 结论 ─── -->
 <hr>
-<h3>七、递归与回溯的关系</h3>
+<h3>结论</h3>
 
 <blockquote>回溯 = 递归 + 状态重置。不是所有递归都是回溯，但所有回溯都基于递归。</blockquote>
+
+<p>回顾整个知识体系：回溯算法的核心是一套统一的模板（路径-选择-结束条件），通过递归枚举所有可能性，用状态重置保证分支独立。不同题型（组合、排列、分割、棋盘）的区别仅在 <strong>状态传递方式</strong>（startIndex vs used[]）和 <strong>剪枝策略</strong>（去重条件、合法性检查）。每道题的本质都是对模板的微调。</p>
+
+<h4>高效的递归去重</h4>
+
+<blockquote>有重复元素的回溯，去重本质是控制<strong>相同值在递归树的同一层只走一次</strong>。排序 + 特定剪枝条件是最高效的方案。</blockquote>
+
+<div class="comparison">
+  <div>
+    <h4>组合/子集去重（同层）</h4>
+    <pre>
+sort(nums);
+void dfs(start) {
+    for (int i = start; i &lt; n; i++) {
+        if (i > start && nums[i] == nums[i-1])
+            continue;  // 同层跳过
+        path.add(nums[i]);
+        dfs(i + 1);
+        path.remove();
+    }
+}</pre>
+    <p>无需额外空间，O(1) 判断。条件 <code>i &gt; start</code> 保证只在同层生效。</p>
+  </div>
+  <div>
+    <h4>排列去重（同枝+同层）</h4>
+    <pre>
+sort(nums);
+void dfs() {
+    for (int i = 0; i &lt; n; i++) {
+        if (used[i]) continue;
+        if (i > 0 && nums[i] == nums[i-1] && !used[i-1])
+            continue;  // 前一个同值没用过 → 跳过
+        used[i] = true;
+        path.add(nums[i]);
+        dfs();
+        path.remove();
+        used[i] = false;
+    }
+}</pre>
+    <p>比组合多了 <code>used[]</code> 数组，条件 <code>!used[i-1]</code> 区分同层 vs 同枝。</p>
+  </div>
+</div>
+
+<p>两种去重的共同逻辑：<strong>排序 + 前一个同值未使用 → 当前跳过</strong>。组合用 <code>i &gt; start</code> 隐式判断"前一个同值未在当前路径选过"；排列用 <code>!used[i-1]</code> 显式判断。理解这个统一视角可以避免死记硬背去重条件。</p>
 
 <table>
   <tr><th>维度</th><th>纯递归</th><th>回溯</th></tr>

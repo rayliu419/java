@@ -1,13 +1,14 @@
 package leetcode;
 
 import infra.TreeNode;
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.*;
 
 public class DFS {
 
     /**
-     * https://leetcode.cn/problems/permutations/ - 无重复的数
+     * https://leetcode.cn/problems/permutations/ - nums里面无重复的数
      *
      * @param root
      * @return
@@ -52,7 +53,7 @@ public class DFS {
 
     private void subsets(List<List<Integer>> finalResult, List<Integer> cur, int[] nums, int index) {
         if (index == nums.length) {
-            List<Integer> temp = new LinkedList<>(cur);
+            List<Integer> temp = new ArrayList<>(cur);
             finalResult.add(temp);
             return;
         }
@@ -60,6 +61,97 @@ public class DFS {
         cur.add(nums[index]);
         subsets(finalResult, cur, nums, index + 1);
         cur.remove(cur.size() - 1);
+    }
+
+    /**
+     * https://leetcode.com/problems/combination-sum/ - nums是没有重复
+     * 1. 即使nums没有重复，也需要引入startIndex去重。
+     * 2. 如果有重复，则更复杂。
+     * @param root
+     * @return
+     */
+    public List<List<Integer>> combinationSum(int[] candidates, int target) {
+        List<List<Integer>> finalResult = new ArrayList<>();
+        List<Integer> cur = new ArrayList<>();
+        combinationSum(finalResult, cur, candidates, target, 0);
+        return finalResult;
+    }
+
+    private void combinationSum(List<List<Integer>> finalResult, List<Integer> cur, int[] candidates, int target, int startIndex) {
+        if (target == 0) {
+            List<Integer> res = new ArrayList<>(cur);
+            finalResult.add(res);
+            return ;
+        }
+        for (int i = startIndex; i < candidates.length; i++) {
+            if (target - candidates[i] < 0) continue;
+            cur.add(candidates[i]);
+            combinationSum(finalResult, cur, candidates, target - candidates[i], i);
+            cur.remove(cur.size() - 1);
+        }
+    }
+
+    /**
+     * https://leetcode.com/problems/generate-parentheses
+     * @param root
+     * @return
+     */
+    public List<String> generateParenthesis(int n) {
+        List<String> result = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        generateParenthesis(result, sb, 0, 0, n);
+        return result;
+    }
+
+    private void generateParenthesis(List<String> result, StringBuilder sb, int left, int right, int n) {
+        if (right > left || left > n || right > n) return;
+        if (left == n && right == n) {
+            result.add(sb.toString());
+            return;
+        }
+        sb.append("(");
+        generateParenthesis(result, sb, left + 1, right, n);
+        sb.deleteCharAt(sb.length() - 1);
+        sb.append(")");
+        generateParenthesis(result, sb, left, right + 1, n);
+        sb.deleteCharAt(sb.length()- 1);
+    }
+
+    /**
+     * https://leetcode.com/problems/letter-combinations-of-a-phone-number
+     * @param root
+     * @return
+     */
+    public List<String> letterCombinations(String digits) {
+        Map<Integer, String> number2Chars = new HashMap<>();
+        number2Chars.put(2, "abc");
+        number2Chars.put(3, "def");
+        number2Chars.put(4, "ghi");
+        number2Chars.put(5, "jkl");
+        number2Chars.put(6, "mno");
+        number2Chars.put(7, "pqrs");
+        number2Chars.put(8, "tuv");
+        number2Chars.put(9, "wxyz");
+        List<String> result = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        letterCombinations(result, sb, digits, 0, number2Chars);
+        return result;
+    }
+
+    private void letterCombinations(List<String> result, StringBuilder sb, String digit, int index,
+                                    Map<Integer, String> number2Chars) {
+        if (index == digit.length()) {
+            result.add(sb.toString());
+            return;
+        }
+        int cur = digit.charAt(index) - '0';
+        String s = number2Chars.get(cur);
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            sb.append(c);
+            letterCombinations(result, sb, digit, index + 1, number2Chars);
+            sb.deleteCharAt(sb.length() - 1);
+        }
     }
 
     public int rob(TreeNode root) {
