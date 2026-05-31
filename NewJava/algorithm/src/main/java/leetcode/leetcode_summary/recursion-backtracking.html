@@ -194,9 +194,9 @@
   <tr><td><span class="star">★★★★★</span></td><td>17</td><td>Letter Combinations of a Phone Number</td><td>🟡 Medium</td><td>数字→字母映射，DFS 逐位构建</td><td><span class="done">✅ DFS.java</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>79</td><td>Word Search</td><td>🟡 Medium</td><td>DFS + 回溯标记，四方向探索</td><td><span class="done">✅ DFS.java</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>131</td><td>Palindrome Partitioning</td><td>🟡 Medium</td><td>startIndex 逐段检查回文，切割回溯</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>51</td><td>N-Queens</td><td>🔴 Hard</td><td>逐行放置，列/对角线冲突检查回溯</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>40</td><td>Combination Sum II</td><td>🟡 Medium</td><td>排序 + i &gt; startIndex 同层剪枝去重</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>90</td><td>Subsets II</td><td>🟡 Medium</td><td>排序 + i &gt; startIndex 同层去重</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>51</td><td>N-Queens</td><td>🔴 Hard</td><td>逐行放置，列/对角线冲突检查回溯</td><td><span class="done">✅ DFS.java</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>90</td><td>Subsets II</td><td>🟡 Medium</td><td>排序 + i &gt; startIndex 同层去重</td><td><span class="done">✅ DFS.java</span></td></tr>
+	  <tr><td><span class="star">★★★★</span></td><td>40</td><td>Combination Sum II</td><td>🟡 Medium</td><td>排序 + i &gt; startIndex 同层剪枝去重</td><td><span class="done">✅ DFS.java</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>47</td><td>Permutations II</td><td>🟡 Medium</td><td>排序 + !used[i-1] 同值剪枝</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>93</td><td>Restore IP Addresses</td><td>🟡 Medium</td><td>分 4 段每段 1-3 位，验证范围 0-255</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★</span></td><td>77</td><td>Combinations</td><td>🟡 Medium</td><td>startIndex 控制组合，选够 k 个停止</td><td><span class="pending">⬜</span></td></tr>
@@ -671,6 +671,96 @@ void backtrack(int pos, List&lt;Integer&gt; path) {
 
 <hr>
 
+<!---------- 78 vs 90 ---------->
+<h4>Subsets（78）vs Subsets II（90）—— 一行之差</h4>
+
+<blockquote>78 和 90 的代码差异只有<strong>一行</strong>：加不加同层去重。因为子集类题目输入可重复时，同值元素在同一层会产生重复子集。</blockquote>
+
+<table>
+  <tr><th></th><th>78 Subsets</th><th>90 Subsets II</th></tr>
+  <tr><td>输入</td><td>无重复元素</td><td>可能包含重复元素</td></tr>
+  <tr><td>记录时机</td><td>每个节点都记录（不只在叶子）</td><td>同 78</td></tr>
+  <tr><td>去重条件</td><td>无</td><td><code>i &gt; startIndex &amp;&amp; nums[i] == nums[i-1]</code></td></tr>
+  <tr><td>前置处理</td><td>无需排序</td><td>必须 <code>Arrays.sort()</code></td></tr>
+</table>
+
+<div class="comparison">
+  <div>
+    <h4>78 — 输入无重复</h4>
+    <pre>
+nums = [1, 2, 3]
+
+backtrack(start=0, path=[])
+├─ res.add([]) ← 记录空集
+│  i=0 pick 1 → backtrack(start=1, [1])
+│  ├─ res.add([1])
+│  │  i=1 pick 2 → backtrack(start=2, [1,2])
+│  │  ├─ res.add([1,2])
+│  │  │  i=2 pick 3 → backtrack(start=3, [1,2,3])
+│  │  │  └─ res.add([1,2,3])
+│  │  └─ i=2 pick 3 → backtrack(start=3, [1,3])
+│  │     └─ res.add([1,3])
+│  └─ i=2 pick 3 → backtrack(start=3, [2,3])
+│     └─ res.add([2,3])
+└─ i=1 pick 2 → ...
+
+输出（共 8 个）：[[], [1], [1,2], [1,2,3], [1,3], [2], [2,3], [3]]</pre>
+  </div>
+  <div>
+    <h4>90 — 输入有重复</h4>
+    <pre>
+nums = [1, 2, 2]
+
+backtrack(start=0, path=[])
+├─ res.add([])
+│  i=0 pick 1 → backtrack(start=1, [1])
+│  ├─ res.add([1])
+│  │  i=1 pick 2 → backtrack(start=2, [1,2])
+│  │  ├─ res.add([1,2])
+│  │  │  i=2 pick 2 → ✓ [1,2,2]    ← 同枝，允许
+│  │  └─ i=2 pick 2 → ✗ 跳过       ← 同层去重！
+│  └─ i=2 pick 2 → backtrack([1,2]) ← 实际重复，已被 i=1 分支记录
+│  i=1 pick 2 → backtrack(start=2, [2])
+│  ├─ res.add([2])
+│  │  i=2 pick 2 → ✓ [2,2]
+│  └─ i=2 pick 2 → ✗ 跳过          ← 同层去重！
+└─ i=2 pick 2 → ✗ 跳过              ← 同层去重！
+
+输出（共 6 个）：[[], [1], [1,2], [1,2,2], [2], [2,2]]</pre>
+  </div>
+</div>
+
+<h4>为什么记录时机不同？子集 vs 组合</h4>
+
+<blockquote>子集在<strong>每个节点</strong>记录（所有前缀都是有效子集）；组合只在<strong>叶子节点</strong>记录（只有完整组合才有效）。</blockquote>
+
+<p>与 39/40 的模板对比：subsets 多了一行 <code>res.add(new ArrayList&lt;&gt;(path))</code> 在 for 循环之前，因为 subsets 的决策树中每个节点都是一个合法子集。而组合只在满足特定条件（和为 target）时才记录。</p>
+
+<pre>
+// Subsets 模板（每个节点都记录）
+void backtrack(int start) {
+    res.add(new ArrayList<>(path));  // ← 所有 path 都是有效子集
+    for (int i = start; i &lt; n; i++) {
+        if (i > start && nums[i] == nums[i-1]) continue;  // 去重（90 才需要）
+        path.add(nums[i]);
+        backtrack(i + 1);
+        path.remove(path.size() - 1);
+    }
+}
+
+// Combination Sum 模板（只在满足条件时记录）
+void backtrack(int start, int remain) {
+    if (remain == 0) { res.add(new ArrayList<>(path)); return; }
+    if (remain &lt; 0) return;
+    for (int i = start; i &lt; n; i++) {
+        path.add(nums[i]);
+        backtrack(i, remain - nums[i]);
+        path.remove(path.size() - 1);
+    }
+}</pre>
+
+<hr>
+
 <!---------- 39 ---------->
 <h4>Combination Sum（39）⭐⭐⭐⭐⭐</h4>
 <blockquote>关键区别：<code>backtrack(i, ...)</code> 而不是 <code>backtrack(i+1, ...)</code></blockquote>
@@ -687,6 +777,133 @@ void backtrack(int start, int remain, List&lt;Integer&gt; path) {
 }</pre>
 
 <p>为什么是 <code>i</code> 而不是 <code>i+1</code>？因为题目允许<strong>重复使用同一个元素</strong>。传 <code>i</code> 意味着下一轮仍然可以从当前位置开始选。</p>
+
+<hr>
+
+<!---------- 39 vs 40 ---------->
+<h4>Combination Sum 系列对比 —— 39 与 40 的微妙差异</h4>
+
+<blockquote>39 和 40 只有两行代码的差别，但每一行都是独立的约束维度。用对比例子理解比死记硬背有效得多。</blockquote>
+
+<p>两道题的代码差异只有<strong>两处</strong>：</p>
+
+<table>
+  <tr><th></th><th>39 Combination Sum</th><th>40 Combination Sum II</th></tr>
+  <tr><td>输入</td><td>无重复元素</td><td>可能包含重复元素</td></tr>
+  <tr><td>每个元素用几次</td><td><strong>无限次</strong>（可复用）</td><td><strong>一次</strong>（不可复用）</td></tr>
+  <tr><td>递归传参</td><td><code>backtrack(i, ...)</code></td><td><code>backtrack(i+1, ...)</code></td></tr>
+  <tr><td>去重条件</td><td>无（输入已无重复）</td><td><code>i &gt; startIndex &amp;&amp; candidates[i] == candidates[i-1]</code></td></tr>
+  <tr><td>前置处理</td><td>通常无需排序</td><td>必须 <code>Arrays.sort()</code></td></tr>
+</table>
+
+<div class="comparison">
+  <div>
+    <h4>39 — 可复用，无重复输入</h4>
+    <pre>
+candidates = [2,3,6,7], target = 7
+
+backtrack(start=0, remain=7)
+├─ i=0 pick 2 → backtrack(i=0, remain=5)   ← i 不变，可复用
+│  └─ i=0 pick 2 → backtrack(i=0, remain=3)  ← 再次复用
+│     ├─ i=0 pick 2 → remain=-1  剪枝
+│     └─ i=1 pick 3 → remain=0   ✓ [2,2,3]
+├─ i=1 pick 3 → 无解
+├─ i=2 pick 6 → 无解
+└─ i=3 pick 7 → remain=0   ✓ [7]
+
+输出：[[2,2,3], [7]]</pre>
+    <p>因为可以复用，<code>[2,2,3]</code> 是合法解。传递 <code>i</code> 让下一层仍能从当前位置开始。</p>
+  </div>
+  <div>
+    <h4>40 — 不可复用，有重复输入</h4>
+    <pre>
+candidates = [1,1,2,5,6,7,8], target = 8
+
+backtrack(start=0, remain=8)
+├─ i=0 pick 1 → start=1, remain=7     ← i+1，不回退
+│  ├─ i=1 pick 1 → start=2, remain=6  ← 同枝第二个 1，允许
+│  │  └─ i=4 pick 6 → ✓ [1,1,6]
+│  ├─ i=2 pick 2 → start=3, remain=5
+│  │  └─ i=3 pick 5 → ✓ [1,2,5]
+│  └─ i=5 pick 7 → ✓ [1,7]
+├─ i=1 pick 1 → ✗ 跳过                ← 同层去重！i&gt;startIndex
+│                                       若不跳过→重复 [1,2,5][1,7]
+├─ i=2 pick 2 → start=3, remain=6
+│  └─ i=3 pick 5 → start=4, remain=1
+│     └─ i=4 pick 6 → ✓ [2,6]
+└─ i=7 pick 8 → ✓ [8]
+
+输出：[[1,1,6], [1,2,5], [1,7], [2,6], [8]]</pre>
+    <p>不可复用 → 传 <code>i+1</code>。有重复 → <code>i &gt; startIndex</code> 同层去重。排序是去重的前置条件。</p>
+  </div>
+</div>
+
+<h4>层（Level）vs 枝（Branch）—— 去重作用的位置</h4>
+
+<blockquote>这是理解去重条件最核心的前提：<code>i &gt; startIndex</code> 作用在"同层"上，而不是"同枝"上。</blockquote>
+
+<p>看 40 侧的调用图时，注意<strong>缩进层级</strong>和<strong>递归深度</strong>的关系：</p>
+
+<pre>
+backtrack(start=0, remain=8)              ← 第 0 层
+├─ i=0 pick 1 → start=1, remain=7         ← 第 1 层
+│  ├─ i=1 pick 1 → start=2, remain=6      ← 第 2 层（同枝，同一个递归路径向下）
+│  │  └─ i=4 pick 6 → ✓ [1,1,6]          ← 第 3 层
+│  ├─ i=2 pick 2 → start=3, remain=5      ← 第 2 层（同枝，兄弟分支）
+│  └─ i=5 pick 7 → ✓ [1,7]               ← 第 2 层
+├─ i=1 pick 1 → ✗ 跳过                    ← 第 1 层（同层！i=1 > startIndex=0）
+├─ i=2 pick 2 → start=3, remain=6         ← 第 1 层
+└─ i=7 pick 8 → ✓ [8]                    ← 第 1 层
+
+  同层（同一缩进）       同枝（同一条递归链路）
+  ──────────────       ─────────────────
+  [1₀] 和 [1₁]          [1₀] → [1₀,1₁] → [1₀,1₁,6]
+  都是第 1 层节点        沿着同一条路径向下走
+  区别是第一个 1 用      i 从 0→1→4，index 递增
+  的是 index=0，        值上允许重复（两个 1）
+  第二个用 index=1      因为它们在"同枝不同层"
+  i=1 > startIndex=0
+  所以去重跳过</pre>
+
+<table>
+  <tr><th>概念</th><th>含义</th><th>对应代码</th><th>何时触发去重</th></tr>
+  <tr><td><strong>层（Level）</strong></td><td>递归深度，一次递归调用里的 for 循环</td><td><code>startIndex</code> 所在的某一层</td><td><code>i &gt; startIndex</code> → 同一层的第二个及之后元素，同值要跳过</td></tr>
+  <tr><td><strong>枝（Branch）</strong></td><td>从根到当前节点的递归调用链</td><td>递归调用链路上所有 <code>cur.add()</code> 的序列</td><td><code>i == startIndex</code> → 同枝上的第一个元素，同值不跳过（允许重复值出现在不同深度）</td></tr>
+</table>
+
+<div class="tip">
+<strong>💡</strong> 一个简单的记忆方法：<strong>缩进相同 = 同层，缩进更深 = 同枝</strong>。<code>i &gt; startIndex</code> 只在同一缩进层级生效，不会影响更深缩进的选择。所以在 40 中，第 1 层的两个 1 只能进一个，但第 1 层的 1 往下递归时，第 2 层还能再选另一个 1。
+</div>
+
+<h4>两处差异对应两个独立约束</h4>
+
+<blockquote><code>i</code> vs <code>i+1</code> 控制"同一个元素能否重复选"；<code>i &gt; startIndex</code> 控制"相同值的元素在同一层能否作为多个入口"。</blockquote>
+
+<table>
+  <tr><th>代码行</th><th>解决的问题</th><th>39</th><th>40</th></tr>
+  <tr><td><code>backtrack(i)</code> vs <code>backtrack(i+1)</code></td><td>每个元素可用几次</td><td><code>i</code>（无限次）</td><td><code>i+1</code>（一次）</td></tr>
+  <tr><td><code>if (i &gt; startIndex &amp;&amp; ...)</code></td><td>同值元素在同一层避免重复入口</td><td>不需要（输入无重复）</td><td>需要（输入有重复）</td></tr>
+</table>
+
+<p>注意这两者完全独立：<code>i</code> 控制的是<strong>当前元素 index</strong> 能否被下一层再用；<code>i &gt; startIndex</code> 控制的是<strong>相同值</strong>的不同 index 在同一层是否都尝试。所以 40 需要同时用两者，39 两个都不需要。</p>
+
+<div class="warn">
+<strong>⚠️ 常见误解：</strong>把"每个元素只能用一次"和"同一层跳过重复值"混为一谈。
+<ul>
+  <li><code>i+1</code> → 保证 index=0 的 1 不会在下一层再次使用（每个元素只用一次）</li>
+  <li><code>i &gt; startIndex</code> → 保证 index=0 的 1 和 index=1 的 1 不在同一层都作为起点（同值去重）</li>
+  <li>所以 <code>[1, 1, 6]</code> 是合法的，因为它用了两个不同的 index 各一次</li>
+</ul>
+</div>
+
+<h4>扩展：如果只有部分约束会怎样？</h4>
+
+<table>
+  <tr><th>约束组合</th><th>候选集</th><th>结果</th><th>解释</th></tr>
+  <tr><td>可复用 + 有重复输入<br>（传 i，无去重）</td><td>[1,1,2], target=3</td><td>[[1,1,1],[1,1,1]..., 巨量重复]</td><td>每个 1 都可无限复用，组合爆炸</td></tr>
+  <tr><td>不可复用 + 有重复输入<br>（传 i+1，无去重）</td><td>[1,1,2,5,6,7,8], target=8</td><td>[[1,2,5],[1,2,5],[1,7],[1,7],...]</td><td>两个 1 各自走完整条路径，输出重复</td></tr>
+  <tr><td>不可复用 + 有重复输入 + <code>startIndex!=0</code>（错误去重）</td><td>[1,1,2,5,6,7,8], target=8</td><td>[[1,2,5],[1,2,5],[1,7],[1,7],[2,6],[8]]<br>缺失 [1,1,6]</td><td>depth&gt;0 时所有重复都跳过，漏解</td></tr>
+</table>
 
 <hr>
 

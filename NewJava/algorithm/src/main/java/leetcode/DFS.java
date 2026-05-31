@@ -64,6 +64,38 @@ public class DFS {
     }
 
     /**
+     * https://leetcode.com/problems/subsets-ii/
+     * 选/不选解法（解法B）
+     * nums可能有重复
+     * 不能返回重复的子集
+     * 选：直接加入当前元素
+     * 不选：跳过后面的所有重复值，避免同层重复
+     */
+    public List<List<Integer>> subsetsWithDup(int[] nums) {
+        List<List<Integer>> finalResult = new ArrayList<>();
+        List<Integer> cur = new ArrayList<>();
+        Arrays.sort(nums);
+        subsetsWithDup(finalResult, cur, nums, 0);
+        return finalResult;
+    }
+
+    private void subsetsWithDup(List<List<Integer>> finalResult, List<Integer> cur, int[] nums, int pos) {
+        if (pos == nums.length) {
+            finalResult.add(new ArrayList<>(cur));
+            return;
+        }
+        // 选
+        cur.add(nums[pos]);
+        subsetsWithDup(finalResult, cur, nums, pos + 1);
+        cur.remove(cur.size() - 1);
+        // 不选 — 跳过所有重复值，避免进入同层重复分支
+        // 如果不跳过，选 index=0 的 1 + 不选 index=1 的 1 与
+        // 不选 index=0 的 1 + 选 index=1 的 1 会产生相同子集
+        while (pos + 1 < nums.length && nums[pos] == nums[pos + 1]) pos++;
+        subsetsWithDup(finalResult, cur, nums, pos + 1);
+    }
+
+    /**
      * https://leetcode.com/problems/combination-sum/ - nums是没有重复
      * 1. 即使nums没有重复，也需要引入startIndex去重。
      * 2. 如果有重复，则更复杂。
@@ -90,6 +122,36 @@ public class DFS {
             cur.remove(cur.size() - 1);
         }
     }
+
+    /**
+     * https://leetcode.com/problems/combination-sum-ii
+     * nums可能包含重复的数
+     * 每个数只能用一次，"每个数字只能用一次" 指的是每个索引位置上的元素只能用一次，而不是每个数值只能用一次。
+     */
+    public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+        List<List<Integer>> finalResult = new ArrayList<>();
+        List<Integer> cur = new ArrayList<>();
+        Arrays.sort(candidates);
+        combinationSum2(finalResult, cur, candidates, target, 0);
+        return finalResult;
+    }
+
+    private void combinationSum2(List<List<Integer>> finalResult, List<Integer> cur, int[] candidates, int target, int startIndex) {
+        if (target == 0) {
+            List<Integer> res = new ArrayList<>(cur);
+            finalResult.add(res);
+            return ;
+        }
+        for (int i = startIndex; i < candidates.length; i++) {
+            if (target - candidates[i] < 0) continue;
+            // i > startIndex !
+            if (i > startIndex && candidates[i] == candidates[i - 1]) continue;
+            cur.add(candidates[i]);
+            combinationSum2(finalResult, cur, candidates, target - candidates[i], i + 1);
+            cur.remove(cur.size() - 1);
+        }
+    }
+
 
     /**
      * https://leetcode.com/problems/generate-parentheses
