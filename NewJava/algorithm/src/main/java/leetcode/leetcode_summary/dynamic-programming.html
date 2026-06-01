@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>动态规划 总结</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+    line-height: 1.45;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 16px 24px 60px;
+    color: #2d3a31;
+    background: #f5faf6;
+    font-size: 13px;
+  }
+  h1 { font-size: 1.35em; border-bottom: 3px solid #4a7c3f; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
+  h2 { font-size: 1.2em; color: #3d6b35; margin-top: 20px; padding-left: 8px; border-left: 4px solid #5a8f4c; }
+  h3 { font-size: 1.02em; color: #2d3a31; margin-top: 16px; }
+  h4 { font-size: 0.95em; color: #3a5235; margin-top: 12px; }
+
+  p { margin: 6px 0; }
+  li { margin: 2px 0; }
+  ol, ul { padding-left: 20px; }
+  blockquote {
+    margin: 10px 0;
+    padding: 12px 20px;
+    background: #eaf3e5;
+    border-left: 5px solid #5a8f4c;
+    border-radius: 0 8px 8px 0;
+    font-size: 1.05em;
+  }
+  blockquote > p { margin: 0; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 0.9em;
+  }
+  th, td {
+    border: 1px solid #c8d6c0;
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #4a7c3f;
+    color: #fff;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  tr:nth-child(even) { background: #f0f6eb; }
+  tr:hover { background: #e4eddb; }
+
+  pre {
+    background: #f5f0eb;
+    color: #3d3731;
+    padding: 16px 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.8em;
+    line-height: 1.45;
+    margin: 8px 0;
+  }
+  code {
+    font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+  }
+  p > code, li > code, td > code {
+    background: #e4eddb;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.88em;
+    color: #3d6b35;
+  }
+
+  .star { color: #f59e0b; font-weight: bold; }
+  .done { color: #16a34a; font-weight: bold; }
+  .pending { color: #94a3b8; }
+
+  hr {
+    border: none;
+    border-top: 2px dashed #c3dbcc;
+    margin: 16px 0;
+  }
+
+  .route {
+    background: linear-gradient(135deg, #2d5a27, #4a7c3f);
+    color: #fff;
+    padding: 16px 24px;
+    border-radius: 12px;
+    margin: 16px 0;
+    line-height: 1.8;
+    font-size: 0.95em;
+  }
+  .route strong { color: #fbbf24; }
+
+  .comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .comparison > div {
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #c8d6c0;
+    background: #e8f5ec;
+  }
+  .comparison > div h4 { margin: 0 0 8px; }
+  @media (max-width: 640px) { .comparison { grid-template-columns: 1fr; } }
+
+  .tip {
+    background: #fef9e7;
+    border-left: 5px solid #d4a017;
+    padding: 10px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 12px 0;
+  }
+  .warn {
+    background: #fdf0ef;
+    border-left: 5px solid #d9534f;
+    padding: 10px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 12px 0;
+  }
+  .key {
+    background: #f0eeff;
+    border-left: 5px solid #6366f1;
+    padding: 10px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 12px 0;
+  }
+
+  td:first-child, th:first-child { text-align: center; white-space: nowrap; }
+  td:nth-child(2), th:nth-child(2) { text-align: center; }
+  td:nth-child(4), th:nth-child(4) { text-align: center; }
+  td:nth-child(6), th:nth-child(6) { text-align: center; }
+
+  .complexity { font-size: 0.85em; color: #64748b; }
+
+  .pattern-card {
+    background: #e8f5ec;
+    border: 1px solid #c8d6c0;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 12px 0;
+  }
+  .pattern-card h4 { margin-top: 0; color: #3d6b35; }
+
+  .step-list { counter-reset: step; }
+  .step-list li { list-style: none; margin-bottom: 6px; }
+  .step-list li::before {
+    counter-increment: step;
+    content: counter(step);
+    background: #4a7c3f;
+    color: #fff;
+    font-weight: bold;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: inline-block;
+    text-align: center;
+    line-height: 22px;
+    font-size: 0.8em;
+    margin-right: 8px;
+  }
+
+  .dp-tab { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+  .dp-tab a {
+    display: inline-block;
+    padding: 6px 14px;
+    background: #e8f5ec;
+    border: 1px solid #c8d6c0;
+    border-radius: 20px;
+    color: #3d6b35;
+    text-decoration: none;
+    font-size: 0.9em;
+  }
+  .dp-tab a:hover { background: #d4e8ce; }
+</style>
+</head>
+<body>
+
+<h1>动态规划</h1>
+
+<blockquote><strong>DP = 最优子结构 + 重叠子问题 · 核心：定义状态 → 找到转移 → 初始化 → 遍历 → 返回</strong></blockquote>
+
+<!-- ─── 索引 ─── -->
+<div style="background:#e8f5ec; border:1px solid #c3dbcc; border-radius:8px; padding:12px 20px; margin:12px 0;">
+  <strong style="color:#2d5a27;">📑 索引</strong>
+  <div style="display:grid; grid-template-columns:1fr 1fr; grid-auto-flow:column; grid-template-rows:repeat(4,auto); gap:4px 24px; margin-top:8px;">
+    <div><a href="#problems" style="color:#3d6b35; text-decoration:none;">1. 题目列表</a></div>
+    <div><a href="#route" style="color:#3d6b35; text-decoration:none;">2. 刷题路线</a></div>
+    <div><a href="#notes" style="color:#3d6b35; text-decoration:none;">3. 学习笔记</a></div>
+    <div style="padding-left:16px;"><a href="#core" style="color:#3d6b35; text-decoration:none;">3.1 核心思想</a></div>
+    <div style="padding-left:16px;"><a href="#aftereffect" style="color:#3d6b35; text-decoration:none;">3.2 无后效性详解</a></div>
+    <div style="padding-left:16px;"><a href="#patterns" style="color:#3d6b35; text-decoration:none;">3.3 八大模式</a></div>
+    <div style="padding-left:16px;"><a href="#details" style="color:#3d6b35; text-decoration:none;">3.4 各题要点</a></div>
+    <div style="padding-left:16px;"><a href="#errors" style="color:#3d6b35; text-decoration:none;">3.5 常见错误</a></div>
+    <div style="padding-left:16px;"><a href="#conclusion" style="color:#3d6b35; text-decoration:none;">3.6 结论</a></div>
+  </div>
+</div>
+
+<!-- ─── 题目列表 ─── -->
+<h2 id="problems">题目列表（按面试频次降序）</h2>
+
+<table>
+  <tr>
+    <th>频次</th><th>题号</th><th>题目</th><th>难度</th><th>核心思路</th><th>状态</th>
+  </tr>
+  <tr><td><span class="star">★★★★★</span></td><td>53</td><td>Maximum Subarray</td><td>🟡 Medium</td><td>Kadane：dp[i] = max(dp[i-1] + n, n)</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>300</td><td>Longest Increasing Subsequence</td><td>🟡 Medium</td><td>O(n²) 基础 + O(nlogn) 二分优化（耐心排序）</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>1143</td><td>Longest Common Subsequence</td><td>🟡 Medium</td><td>dp[i][j]：相等取左上加1，不等取max左/上</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>70</td><td>Climbing Stairs</td><td>🟢 Easy</td><td>dp[i] = dp[i-1] + dp[i-2]，斐波那契</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>198</td><td>House Robber</td><td>🟡 Medium</td><td>dp[i] = max(dp[i-1], dp[i-2] + nums[i])</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>322</td><td>Coin Change</td><td>🟡 Medium</td><td>完全背包：dp[a] = min(dp[a], dp[a-c] + 1)</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>139</td><td>Word Break</td><td>🟡 Medium</td><td>dp[i] = dp[j] && wordDict.contains(s[j:i])</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>72</td><td>Edit Distance</td><td>🟡 Medium</td><td>dp[i][j]：增删改三操作取最小</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>5</td><td>Longest Palindromic Substring</td><td>🟡 Medium</td><td>区间DP：dp[i][j] = s[i]==s[j] && dp[i+1][j-1]</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>121</td><td>Best Time to Buy and Sell Stock</td><td>🟢 Easy</td><td>维护minPrice，dp[i] = max(dp[i-1], price-minPrice)</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>416</td><td>Partition Equal Subset Sum</td><td>🟡 Medium</td><td>0-1背包：dp[s] = dp[s] || dp[s - num]</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>64</td><td>Minimum Path Sum</td><td>🟡 Medium</td><td>网格DP：dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1])</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>152</td><td>Maximum Product Subarray</td><td>🟡 Medium</td><td>维护max/min双状态（负负得正）</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>62</td><td>Unique Paths</td><td>🟡 Medium</td><td>dp[i][j] = dp[i-1][j] + dp[i][j-1]</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>91</td><td>Decode Ways</td><td>🟡 Medium</td><td>一维DP：dp[i] = dp[i-1] + dp[i-2]（有条件）</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>221</td><td>Maximal Square</td><td>🟡 Medium</td><td>dp[i][j] = min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]) + 1</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>279</td><td>Perfect Squares</td><td>🟡 Medium</td><td>dp[i] = min(dp[i], dp[i - j*j] + 1)</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>494</td><td>Target Sum</td><td>🟡 Medium</td><td>0-1背包变形：dp[s] += dp[s - num]</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>518</td><td>Coin Change II</td><td>🟡 Medium</td><td>完全背包计数：dp[a] += dp[a - c]</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>647</td><td>Palindromic Substrings</td><td>🟡 Medium</td><td>同5回文DP，计数所有dp[i][j]==true</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>516</td><td>Longest Palindromic Subsequence</td><td>🟡 Medium</td><td>区间DP：s[i]==s[j]则+2，否则取max(i+1,j)和(i,j-1)</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>746</td><td>Min Cost Climbing Stairs</td><td>🟢 Easy</td><td>dp[i] = cost[i] + min(dp[i-1], dp[i-2])</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>740</td><td>Delete and Earn</td><td>🟡 Medium</td><td>转化为House Robber（值映射到score数组）</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>377</td><td>Combination Sum IV</td><td>🟡 Medium</td><td>排列背包：外层target内层nums</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>122</td><td>Best Time to Buy and Sell Stock II</td><td>🟡 Medium</td><td>可无限次交易，利润 = 累加所有上涨日差值</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>309</td><td>Best Time to Buy and Sell Stock with Cooldown</td><td>🟡 Medium</td><td>三状态机：hold/sold/cooldown</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>123</td><td>Best Time to Buy and Sell Stock III</td><td>🔴 Hard</td><td>五状态机或分割法：左→右/右→左</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>45</td><td>Jump Game II</td><td>🟡 Medium</td><td>贪心更优，DP：dp[i] = min(dp[j]+1) for reachable j</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>10</td><td>Regular Expression Matching</td><td>🔴 Hard</td><td>二维DP：处理'*'匹配0次/多次，'.'通配</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>97</td><td>Interleaving String</td><td>🟡 Medium</td><td>dp[i][j] = (dp[i-1][j] && match) || (dp[i][j-1] && match)</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>115</td><td>Distinct Subsequences</td><td>🔴 Hard</td><td>dp[i][j] = dp[i-1][j] + (s[i]==t[j] ? dp[i-1][j-1] : 0)</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>312</td><td>Burst Balloons</td><td>🔴 Hard</td><td>区间DP：最后戳的气球作为分割点</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>354</td><td>Russian Doll Envelopes</td><td>🔴 Hard</td><td>LIS变体：先w升序w相同h降序，然后LIS on h</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>376</td><td>Wiggle Subsequence</td><td>🟡 Medium</td><td>up/down双状态，差值为正up=down+1，负down=up+1</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>650</td><td>2 Keys Keyboard</td><td>🟡 Medium</td><td>dp[i] = min(dp[j] + i/j) for i%j==0</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>673</td><td>Number of LIS</td><td>🟡 Medium</td><td>dp[i] + count[i] 双数组统计</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>718</td><td>Maximum Length of Repeated Subarray</td><td>🟡 Medium</td><td>dp[i][j] = dp[i-1][j-1] + 1（连续，相等时）</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>813</td><td>Largest Sum of Averages</td><td>🟡 Medium</td><td>dp[k][i] = max(dp[k-1][j] + avg(j,i))</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>877</td><td>Stone Game</td><td>🟡 Medium</td><td>区间DP：dp[i][j] = max(piles[i] - dp[i+1][j], piles[j] - dp[i][j-1])</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>887</td><td>Super Egg Drop</td><td>🔴 Hard</td><td>dp[k][m] = dp[k-1][m-1] + dp[k][m-1] + 1（反向思维）</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>935</td><td>Knight Dialer</td><td>🟡 Medium</td><td>dp[i][d] = sum(dp[i-1][prev])，prev能跳到d</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>87</td><td>Scramble String</td><td>🔴 Hard</td><td>区间DP + 分割点枚举，含交换/不交换两路</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>132</td><td>Palindrome Partitioning II</td><td>🔴 Hard</td><td>dp[i] = min(dp[j-1] + 1)，预计算回文表O(n²)</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>174</td><td>Dungeon Game</td><td>🔴 Hard</td><td>从右下向左上递推，dp[i][j] = max(1, min(dp[i+1][j], dp[i][j+1]) - dungeon[i][j])</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>486</td><td>Predict the Winner</td><td>🟡 Medium</td><td>同877，区间DP差值法</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>664</td><td>Strange Printer</td><td>🔴 Hard</td><td>区间DP：s[i]==s[j]则dp[i][j]=dp[i][j-1]，否则枚举分割点</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>688</td><td>Knight Probability in Chessboard</td><td>🟡 Medium</td><td>dp[step][i][j] = sum(dp[step-1][ni][nj]) / 8</td><td><span class="pending">⬜</span></td></tr>
+</table>
+
+<p class="complexity">共 45 题 · 其中 ⭐⭐⭐⭐⭐ 12 题（必会）· ⭐⭐⭐⭐ 16 题（高频）· ⭐⭐⭐ 12 题（进阶）· ⭐⭐ 5 题（扩展）</p>
+
+<!-- ─── 刷题路线 ─── -->
+<h2 id="route">刷题路线</h2>
+
+<div class="route">
+  <strong>第一阶段（一维DP · 建立直觉）：</strong>70 Climbing Stairs → 746 Min Cost Climbing Stairs → 198 House Robber → 740 Delete and Earn → 279 Perfect Squares → 322 Coin Change → 139 Word Break<br>
+  <strong>第二阶段（二维DP · 掌握表格法）：</strong>62 Unique Paths → 64 Minimum Path Sum → 1143 LCS → 72 Edit Distance → 5 最长回文子串 → 647 回文子串计数 → 516 最长回文子序列<br>
+  <strong>第三阶段（背包DP · 核心考点）：</strong>416 Partition Equal Subset Sum → 494 Target Sum → 518 Coin Change II → 377 Combination Sum IV → 322 Coin Change（复习·完全背包视角）<br>
+  <strong>第四阶段（Kadane · 股票系列 · 状态机）：</strong>53 Maximum Subarray → 152 Maximum Product Subarray → 121/122/123/309/714 股票系列五连<br>
+  <strong>第五阶段（进阶DP · 区间/博弈/综合）：</strong>300 LIS（含nlogn） → 354 Russian Doll（LIS变体） → 312 Burst Balloons → 877 Stone Game → 10 正则匹配 → 887 Super Egg Drop
+</div>
+
+<!-- ─── 学习笔记 ─── -->
+<h2 id="notes">学习笔记</h2>
+
+<!-- ─── 核心思想 ─── -->
+<div class="pattern-card" id="core">
+<h3>一、核心思想</h3>
+
+<blockquote>动态规划的本质是<strong>用空间换时间</strong>：把大问题拆成可重复的子问题，记录子问题答案避免重复计算。</blockquote>
+
+<h4>DP 五步法（解题框架）</h4>
+
+<ol class="step-list">
+  <li><strong>定义状态</strong>：dp[i][j] 表示什么？一定要明确语义</li>
+  <li><strong>状态转移</strong>：dp[i][j] 怎么从之前的状态推导过来？</li>
+  <li><strong>初始化</strong>：base case 是什么？（dp[0]、dp[i][0] 等）</li>
+  <li><strong>遍历顺序</strong>：从小到大？从大到小？左上到右下？</li>
+  <li><strong>返回结果</strong>：最终答案在 dp 的哪个位置？</li>
+</ol>
+
+<blockquote>五步法中<strong>状态定义</strong>是最关键的一步，状态定义对了，转移往往自然而出。</blockquote>
+
+<h4>用 DP 解决的问题特征</h4>
+
+<table>
+  <tr><th>特征</th><th>含义</th><th>判断方式</th></tr>
+  <tr><td><strong>最优子结构</strong></td><td>大问题的最优解包含子问题的最优解</td><td>子问题不互相依赖？可以独立求解再组合？</td></tr>
+  <tr><td><strong>重叠子问题</strong></td><td>不同路径会遇到相同的子问题</td><td>递归时出现重复计算？（与分治的区别）</td></tr>
+  <tr><td><strong>无后效性</strong></td><td>当前状态一旦确定，之后决策不受之前路径影响</td><td>dp[i] 只关心值，不关心怎么来的？</td></tr>
+</table>
+
+<div class="comparison">
+  <div>
+    <h4>✅ 适合 DP 的问题</h4>
+    <ul>
+      <li>最值问题（最长、最短、最大、最小）</li>
+      <li>计数问题（多少种方案）</li>
+      <li>可行性判断（是否可达、是否可分割）</li>
+      <li>递推关系明显的序列问题</li>
+    </ul>
+  </div>
+  <div>
+    <h4>✅ 不适合 DP 的问题</h4>
+    <ul>
+      <li>求具体方案（路径、序列）→ 回溯更适合</li>
+      <li>结果巨大但不需要模 → 指数爆炸</li>
+      <li>子问题无重叠 → 用分治/贪心</li>
+      <li>状态空间连续 → 用数学/二分</li>
+    </ul>
+  </div>
+</div>
+
+<h4>递归 vs 递推：两种 DP 实现方式</h4>
+
+<table>
+  <tr><th>维度</th><th>记忆化递归（Top-down）</th><th>递推（Bottom-up）</th></tr>
+  <tr><td>方向</td><td>从问题出发向下分解，到 base case 后返回</td><td>从 base case 开始向上构建，直到目标</td></tr>
+  <tr><td>难点</td><td>递归栈深度、缓存设计</td><td>遍历顺序、边界初始化</td></tr>
+  <tr><td>代码</td><td>递归 + memo 数组/Map</td><td>for 循环填表</td></tr>
+  <tr><td>优势</td><td>自然反映问题结构，只计算需要的子问题</td><td>无递归开销，性能稳定</td></tr>
+  <tr><td>场景</td><td>状态难以确定遍历顺序（区间DP常用）</td><td>顺序已知（网格DP、一维DP）</td></tr>
+</table>
+
+<blockquote>面试中<strong>强烈推荐 Bottom-up</strong>，代码更简洁、性能更好、不易栈溢出。但区间DP（如 312 Burst Balloons）用记忆化递归更容易理解。</blockquote>
+
+<div class="tip">
+<strong>💡 空间优化意识</strong>：二维 dp 很多时候可以压到一维（滚动数组），一维可以压到常数变量。先写出标准版再优化，不要一步到位。
+</div>
+
+</div>
+
+<!-- ─── 无后效性详解 ─── -->
+<hr>
+<h3 id="aftereffect">二、无后效性详解（DP 最重要也最容易被忽略的特性）</h3>
+
+<blockquote>无后效性（No Aftereffect / Markov Property）：一旦某个阶段的状态确定，后续决策只依赖于当前状态的值，不关心之前到达该状态的具体路径。"未来只关心现在是什么，不关心过去怎么来的"。</blockquote>
+
+<p>无后效性是 DP 区别于回溯/暴力搜索的核心分界线。<strong>有后效性的问题无法用简单的 dp 数组求解</strong>，但可以通过<strong>扩展状态维度</strong>将关键历史信息编码到状态中，从而消除后效性。</p>
+
+<h4>反例：有后效性的问题（含详细分析）</h4>
+
+<p>考虑一个网格路径问题：从左上角 (0,0) 走到右下角 (m-1,n-1)，只能向右或向下。但额外规则：<strong>不能连续两次向右</strong>（上一步向右了，这一步必须向下）。</p>
+
+<pre>
+// ❌ 有后效性的错误定义 — 直接套用标准网格DP
+int[][] dp = new int[m][n];
+dp[0][0] = 1;
+for (int i = 0; i &lt; m; i++)
+    for (int j = 0; j &lt; n; j++) {
+        if (i > 0) dp[i][j] += dp[i-1][j]; // 从上往下
+        if (j > 0) dp[i][j] += dp[i][j-1]; // 从左往右
+    }
+// 为什么错？
+// dp[i][j-1] 包含了两种路径的计数：
+//   ① 从上方到达 (i,j-1) 的路径（上一步是向下）
+//   ② 从左方到达 (i,j-1) 的路径（上一步是向右）
+// 从 (i,j-1) 向右走到 (i,j) 时，路径 ② 的最后一步是"向右"，
+// 如果上一步已经是向右了，根据规则不能再向右，
+// 所以路径 ② 不能继续向右！
+// 但 dp[i][j-1] 只存了总数，无法区分①②。
+// =&gt; 后效性：dp[i][j-1] 的值不足以决定"能否向右"这个未来</pre>
+
+<div class="key">
+<strong>💡 有后效性的本质：</strong>当前状态丢失了未来决策所需的关键历史信息。上一步的方向决定了"能否继续向右"，但 <code>dp[i][j]</code> 只记录了路径总数，没有记录这个方向信息。不同路径走到同一个格子后，对未来的影响不同——这就是后效性。
+</div>
+
+<h4>修复：扩展状态维度消除后效性</h4>
+
+<pre>
+// ✅ 将"上一步的方向"加入状态定义，消除后效性
+// dp[i][j][0] = 从上方到达 (i,j) 的路径数（上一步是向下）
+// dp[i][j][1] = 从左方到达 (i,j) 的路径数（上一步是向右）
+// 这样每个状态对未来完全确定：
+//   dp[i][j][0] → 下一步可右可下（从上往下，无连续向右限制）
+//   dp[i][j][1] → 下一步只能向下（上一步已向右，不能再右）
+
+int[][][] dp = new int[m][n][2];
+dp[0][0][0] = 1; dp[0][0][1] = 1;
+
+for (int i = 0; i &lt; m; i++) {
+    for (int j = 0; j &lt; n; j++) {
+        if (i == 0 &amp;&amp; j == 0) continue;
+        // 从上往下到 (i,j)：上一步无论怎么来都行
+        if (i > 0) dp[i][j][0] = dp[i-1][j][0] + dp[i-1][j][1];
+        // 从左往右到 (i,j)：上一步必须是从上往下来的
+        // 关键：只用 dp[i][j-1][0]，不用 dp[i][j-1][1]
+        // 因为 dp[i][j-1][1] 的最后一步是"向右"，不能连续向右
+        if (j > 0) dp[i][j][1] = dp[i][j-1][0];
+    }
+}
+// 结果 = dp[m-1][n-1][0] + dp[m-1][n-1][1]
+// 现在每个状态只依赖确定的前驱，前驱的值不会因为"怎么来"而不同
+// dp[i][j][0] → 只依赖 dp[i-1][j]，无循环依赖
+// dp[i][j][1] → 只依赖 dp[i][j-1][0]，确定且唯一
+// =&gt; 无后效性 ✓</pre>
+
+<blockquote>扩展状态维度的本质：把"未来需要知道的过去信息"编码到当前状态中。加了"上一步方向"后，每个状态对未来的影响完全确定了，不再依赖更久远的历史。</blockquote>
+
+<h4>LeetCode 实例：309 股票含冷冻期</h4>
+
+<p>如果只定义 <code>dp[i]</code> = 第 i 天的最大利润，是有后效性的——因为第 i 天能不能买入取决于第 i-1 天是否刚卖出（冷冻期），而 <code>dp[i]</code> 丢失了"最后一天是什么操作"这个信息。修复方案：扩展为三状态：</p>
+
+<pre>
+// 有后效性的错误定义
+// dp[i] = 第 i 天的最大利润
+// 问题：dp[i] 无法回答"今天能不能买入"（因为不知道昨天是否卖出）
+
+// ✅ 扩展为三状态，消除后效性
+// hold[i]  = 第 i 天结束时持有股票的最大利润
+// sold[i]  = 第 i 天结束时刚卖出（明天冷冻）
+// rest[i]  = 第 i 天结束时不持股且可买入
+
+hold[i] = max(hold[i-1], rest[i-1] - prices[i])
+sold[i] = hold[i-1] + prices[i]
+rest[i] = max(rest[i-1], sold[i-1])
+// 每个状态只依赖 i-1 天的状态，无后效性</pre>
+
+<div class="tip">
+<strong>💡 如何判断是否有后效性？</strong>问自己：从 <code>dp[i]</code> 的值只能知道"最优值是多少"，但不知道"达到这个最优值时的具体末态"，而未来决策需要这个末态信息吗？如果需要 → 有后效性。解法：<strong>扩展状态维度</strong>——把"达到 dp[i] 时的最后一个决策/状态"作为新维度加进去。
+</div>
+
+<h4>后效性消除方法总结</h4>
+
+<table>
+  <tr><th>有后效性的表现</th><th>消除方法</th><th>代表例子</th></tr>
+  <tr><td>状态丢失"当前所处模式/阶段"信息</td><td>扩展状态维度，增加模式/阶段维度</td><td>网格约束路径: 加 direction 维；309: 加 hold/sold/rest</td></tr>
+  <tr><td>环形结构导致首尾互相依赖</td><td>拆环为线，枚举所有断点情况分别求解</td><td>213 House Robber II: 分成[0,n-2]和[1,n-1]两个线性问题</td></tr>
+  <tr><td>决策影响未来多个步骤（如交易次数限制）</td><td>将"剩余可用次数"作为状态维度</td><td>123/188 股票: 加 k 维度表示已交易次数</td></tr>
+  <tr><td>状态之间形成循环依赖（互相需要）</td><td>用图论算法（Bellman-Ford）或改为迭代逼近</td><td>有环图中的最短路 / 概率DP中的方程组求解</td></tr>
+</table>
+
+<div class="warn">
+<strong>⚠️ 无后效性是 DP 的基石：</strong>如果一个问题有后效性但你没有消除它，直接写 DP 会得到错误答案。即使状态转移方程"看起来对"，结果也可能是错的。务必先验证后效性，再写代码。
+</div>
+
+<!-- ─── 八大模式 ─── -->
+<hr>
+<h3 id="patterns">三、八大 DP 模式</h3>
+
+<div class="dp-tab">
+  <a href="#p1">① 一维DP</a>
+  <a href="#p2">② 网格DP</a>
+  <a href="#p3">③ 背包DP</a>
+  <a href="#p4">④ 区间DP</a>
+  <a href="#p5">⑤ LIS/LCS</a>
+  <a href="#p6">⑥ 序列匹配</a>
+  <a href="#p7">⑦ 股票系列</a>
+  <a href="#p8">⑧ Kadane</a>
+</div>
+
+<!---------- 模式一：一维DP ---------->
+<hr>
+<h4 id="p1">模式一：一维 DP（Linear DP）</h4>
+
+<blockquote>dp[i] 只依赖前一个或前几个状态，是最简单的 DP 形式。</blockquote>
+
+<table>
+  <tr><th>题目</th><th>状态定义</th><th>转移方程</th></tr>
+  <tr><td>70 Climbing Stairs</td><td>dp[i] = 爬到第 i 阶的方法数</td><td>dp[i] = dp[i-1] + dp[i-2]</td></tr>
+  <tr><td>198 House Robber</td><td>dp[i] = 前 i 间房最多偷多少</td><td>dp[i] = max(dp[i-1], dp[i-2] + nums[i])</td></tr>
+  <tr><td>746 Min Cost Climbing Stairs</td><td>dp[i] = 到达第 i 阶的最小花费</td><td>dp[i] = cost[i] + min(dp[i-1], dp[i-2])</td></tr>
+  <tr><td>322 Coin Change</td><td>dp[a] = 凑成金额 a 所需最少硬币数</td><td>dp[a] = min(dp[a], dp[a-c] + 1)</td></tr>
+  <tr><td>139 Word Break</td><td>dp[i] = s[0:i] 能否被分割</td><td>dp[i] = dp[j] && dict.contains(s[j:i])</td></tr>
+  <tr><td>91 Decode Ways</td><td>dp[i] = s[0:i] 的解码方法数</td><td>dp[i] = dp[i-1](if valid) + dp[i-2](if valid pair)</td></tr>
+  <tr><td>279 Perfect Squares</td><td>dp[i] = 组成 i 的最少完全平方数</td><td>dp[i] = min(dp[i], dp[i-j*j] + 1)</td></tr>
+</table>
+
+<pre>
+// House Robber 模板（一维DP典型结构）
+public int rob(int[] nums) {
+    if (nums.length == 0) return 0;
+    if (nums.length == 1) return nums[0];
+    int prev2 = nums[0];
+    int prev1 = Math.max(nums[0], nums[1]);
+    for (int i = 2; i &lt; nums.length; i++) {
+        int cur = Math.max(prev1, prev2 + nums[i]);
+        prev2 = prev1;
+        prev1 = cur;
+    }
+    return prev1;
+}
+// 空间 O(1)：只保留前两个状态，无需完整 dp 数组
+</pre>
+
+<!---------- 模式二：网格DP ---------->
+<hr>
+<h4 id="p2">模式二：网格 DP（Grid DP / 2D DP）</h4>
+
+<blockquote>在二维网格上递推，dp[i][j] 通常依赖左、上、或左上三个方向。</blockquote>
+
+<table>
+  <tr><th>题目</th><th>状态定义</th><th>转移方程</th></tr>
+  <tr><td>62 Unique Paths</td><td>dp[i][j] = 到达 (i,j) 的路径数</td><td>dp[i][j] = dp[i-1][j] + dp[i][j-1]</td></tr>
+  <tr><td>64 Minimum Path Sum</td><td>dp[i][j] = 到达 (i,j) 的最小和</td><td>dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1])</td></tr>
+  <tr><td>221 Maximal Square</td><td>dp[i][j] = 以 (i,j) 为右下角最大正方形边长</td><td>dp[i][j] = min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]) + 1</td></tr>
+</table>
+
+<pre>
+// 网格DP空间优化 — 滚动数组
+// 以 64 Minimum Path Sum 为例：
+public int minPathSum(int[][] grid) {
+    int m = grid.length, n = grid[0].length;
+    int[] dp = new int[n];
+    dp[0] = grid[0][0];
+    for (int j = 1; j &lt; n; j++)
+        dp[j] = dp[j-1] + grid[0][j];
+    for (int i = 1; i &lt; m; i++) {
+        dp[0] += grid[i][0];
+        for (int j = 1; j &lt; n; j++)
+            dp[j] = grid[i][j] + Math.min(dp[j], dp[j-1]);
+    }
+    return dp[n-1];
+}
+// 二维 O(mn) → 一维 O(n)，因为每行只依赖上一行和当前行左邻居
+</pre>
+
+<div class="key">
+<strong>💡 网格DP空间优化口诀：</strong>只依赖左和上 → 一维滚动；同时依赖左上 → 需要额外变量保存被覆盖前的值。
+</div>
+
+<!---------- 模式三：背包DP ---------->
+<hr>
+<h4 id="p3">模式三：背包 DP（Knapsack）</h4>
+
+<blockquote>背包问题区分"组合"（外层物品内层容量）和"排列"（外层容量内层物品）。0-1背包容量倒序，完全背包正序。</blockquote>
+
+<h4>背包问题核心对照表</h4>
+
+<table>
+  <tr><th>类型</th><th>题目</th><th>外层循环</th><th>容量循环</th><th>转移</th></tr>
+  <tr><td><strong>0-1 背包</strong></td><td>416 Partition Equal Subset Sum</td><td>物品</td><td>倒序</td><td>dp[s] = dp[s] || dp[s-num]</td></tr>
+  <tr><td><strong>0-1 背包</strong></td><td>494 Target Sum</td><td>物品</td><td>倒序</td><td>dp[s] += dp[s-num]</td></tr>
+  <tr><td><strong>完全背包（组合）</strong></td><td>518 Coin Change II</td><td>物品</td><td>正序</td><td>dp[a] += dp[a-c]</td></tr>
+  <tr><td><strong>完全背包（最值）</strong></td><td>322 Coin Change</td><td>物品</td><td>正序</td><td>dp[a] = min(dp[a], dp[a-c]+1)</td></tr>
+  <tr><td><strong>排列背包</strong></td><td>377 Combination Sum IV</td><td><strong>容量</strong></td><td>正序（内层物品）</td><td>dp[t] += dp[t-num]</td></tr>
+</table>
+
+<div class="key">
+<strong>💡 背包问题关键判断：</strong>
+<ul>
+  <li><strong>0-1 vs 完全</strong>：每个元素能用几次？一次 → 倒序（0-1）；无限次 → 正序（完全）</li>
+  <li><strong>组合 vs 排列</strong>：{1,2} 和 {2,1} 是否视为不同？不同 → 外层容量内层物品（排列）；相同 → 外层物品内层容量（组合）</li>
+  <li><strong>最值 vs 计数</strong>：求最少/最大 → min/max；求方案数 → +=</li>
+</ul>
+</div>
+
+<div class="comparison">
+  <div>
+    <h4>✅ 0-1 背包（416）</h4>
+    <pre>
+boolean[] dp = new boolean[target+1];
+dp[0] = true;
+for (int num : nums) {
+    for (int s = target; s >= num; s--) {
+        dp[s] = dp[s] || dp[s - num];
+    }
+}
+// 倒序保证每个 num 只用一次</pre>
+  </div>
+  <div>
+    <h4>✅ 完全背包组合（518）</h4>
+    <pre>
+int[] dp = new int[amount+1];
+dp[0] = 1;
+for (int coin : coins) {
+    for (int a = coin; a <= amount; a++) {
+        dp[a] += dp[a - coin];
+    }
+}
+// 正序允许重复使用同一硬币
+// 外物品内容量 → 组合（不重复计数顺序）</pre>
+  </div>
+</div>
+
+<div class="comparison">
+  <div>
+    <h4>✅ 排列背包（377）</h4>
+    <pre>
+int[] dp = new int[target+1];
+dp[0] = 1;
+for (int t = 1; t <= target; t++) {
+    for (int num : nums) {
+        if (t >= num)
+            dp[t] += dp[t - num];
+    }
+}
+// 外容量内物品 → 排列
+// {1,2} 和 {2,1} 都会被计数</pre>
+  </div>
+  <div>
+    <h4>✅ 完全背包最值（322）</h4>
+    <pre>
+int[] dp = new int[amount+1];
+Arrays.fill(dp, amount+1);
+dp[0] = 0;
+for (int coin : coins) {
+    for (int a = coin; a <= amount; a++) {
+        dp[a] = Math.min(dp[a], dp[a-coin] + 1);
+    }
+}
+// 这里组合/排列顺序不影响最值
+// 因为 min 操作交换律</pre>
+  </div>
+</div>
+
+<div class="warn">
+<strong>⚠️ 494 Target Sum 的转化技巧：</strong>将数组分成 P（正号集）和 N（负号集），sum(P) - sum(N) = target，则 sum(P) = (total + target)/2。转化为：选若干元素使和为 (total+target)/2 的方案数 — 就是 0-1 背包计数。
+</div>
+
+<!---------- 模式四：区间DP ---------->
+<hr>
+<h4 id="p4">模式四：区间 DP（Interval DP）</h4>
+
+<blockquote>dp[i][j] 表示区间 [i,j] 上的最优解。遍历顺序按<strong>区间长度</strong>从小到大，而不是按行列。</blockquote>
+
+<pre>
+// 区间DP模板
+int n = arr.length;
+int[][] dp = new int[n][n];
+
+// 初始化长度为1的区间
+for (int i = 0; i &lt; n; i++) dp[i][i] = baseValue;
+
+// 按区间长度从小到大遍历
+for (int len = 2; len <= n; len++) {
+    for (int i = 0; i + len - 1 &lt; n; i++) {
+        int j = i + len - 1;
+        // 枚举分割点 k
+        for (int k = i; k &lt; j; k++) {
+            dp[i][j] = max/min(dp[i][j],
+                               dp[i][k] + dp[k+1][j] + cost);
+        }
+    }
+}</pre>
+
+<table>
+  <tr><th>题目</th><th>状态定义</th><th>转移特点</th></tr>
+  <tr><td>5 最长回文子串</td><td>dp[i][j] = s[i:j] 是否回文</td><td>s[i]==s[j] && (j-i&lt;2 || dp[i+1][j-1])</td></tr>
+  <tr><td>516 最长回文子序列</td><td>dp[i][j] = s[i:j] 中最长回文子序列长度</td><td>s[i]==s[j] → dp[i+1][j-1]+2；否则 max(dp[i+1][j], dp[i][j-1])</td></tr>
+  <tr><td>312 Burst Balloons</td><td>dp[i][j] = 戳破 (i,j) 区间内气球的最大得分</td><td>最后戳 k：dp[i][k] + dp[k][j] + nums[i]*nums[k]*nums[j]</td></tr>
+  <tr><td>877 Stone Game</td><td>dp[i][j] = 先手在 [i,j] 能领先对手的分数</td><td>max(piles[i] - dp[i+1][j], piles[j] - dp[i][j-1])</td></tr>
+  <tr><td>664 Strange Printer</td><td>dp[i][j] = 打印 s[i:j] 的最少次数</td><td>s[i]==s[j] → dp[i][j-1]；否则分割求和取min</td></tr>
+</table>
+
+<blockquote>区间 DP 的循环顺序是<strong>长度优先</strong>，因为长区间依赖短区间的结果。这也是区间 DP 最容易搞错的地方。</blockquote>
+
+<div class="comparison">
+  <div>
+    <h4>✅ 516 回文子序列</h4>
+    <pre>
+int[][] dp = new int[n][n];
+for (int i = n-1; i >= 0; i--) {
+    dp[i][i] = 1;
+    for (int j = i+1; j &lt; n; j++) {
+        if (s.charAt(i) == s.charAt(j))
+            dp[i][j] = dp[i+1][j-1] + 2;
+        else
+            dp[i][j] = Math.max(
+                dp[i+1][j], dp[i][j-1]);
+    }
+}
+// 注意 i 从 n-1 到 0 倒序遍历！
+// 因为 dp[i][j] 依赖 dp[i+1][...]
+// 也可以按长度遍历：更统一</pre>
+  </div>
+  <div>
+    <h4>✅ 312 Burst Balloons</h4>
+    <pre>
+// 在 nums 两端加虚拟气球 1
+int[] arr = new int[n+2];
+arr[0] = arr[n+1] = 1;
+// copy nums to arr[1..n]
+
+int[][] dp = new int[n+2][n+2];
+for (int len = 1; len <= n; len++) {
+    for (int i = 1; i + len - 1 <= n; i++) {
+        int j = i + len - 1;
+        for (int k = i; k <= j; k++) {
+            int cur = dp[i][k-1] + dp[k+1][j]
+                    + arr[i-1]*arr[k]*arr[j+1];
+            dp[i][j] = Math.max(dp[i][j], cur);
+        }
+    }
+}
+// 关键思想：k 是区间内"最后戳破"的气球
+// 此时 (i-1) 和 (j+1) 都还在</pre>
+  </div>
+</div>
+
+<div class="key">
+<strong>💡 Burst Balloons 核心理解：</strong>常见的误区是"第一个戳谁"，正确的思考方向是<strong>最后一个戳谁</strong>。如果 k 是区间内最后戳破的，那么它的左右邻居就是 i-1 和 j+1。这个"最后戳破"的思路是区间 DP 中最精妙的技巧。
+</div>
+
+<!---------- 模式五：LIS/LCS ---------->
+<hr>
+<h4 id="p5">模式五：LIS / LCS</h4>
+
+<blockquote>LIS 和 LCS 是序列 DP 的两大基础，可以衍生出大量变体题。</blockquote>
+
+<h4>LIS（300）—— 两个版本都得会</h4>
+
+<div class="comparison">
+  <div>
+    <h4>✅ O(n²) DP 版</h4>
+    <pre>
+int[] dp = new int[n];
+Arrays.fill(dp, 1);
+int max = 1;
+for (int i = 0; i &lt; n; i++) {
+    for (int j = 0; j &lt; i; j++) {
+        if (nums[j] &lt; nums[i]) {
+            dp[i] = Math.max(dp[i], dp[j] + 1);
+        }
+    }
+    max = Math.max(max, dp[i]);
+}
+// dp[i] 以 i 结尾的 LIS 长度
+// 必须依赖所有 j &lt; i，所以 O(n²)</pre>
+  </div>
+  <div>
+    <h4>✅ O(nlogn) 耐心排序</h4>
+    <pre>
+int[] tails = new int[n];
+int size = 0;
+for (int num : nums) {
+    int l = 0, r = size;
+    while (l &lt; r) {
+        int m = l + (r - l) / 2;
+        if (tails[m] &lt; num) l = m + 1;
+        else r = m;
+    }
+    tails[l] = num;
+    if (l == size) size++;
+}
+// tails[i] 长度为 i+1 的 IS 的最小结尾
+// 二分查找第一个 >= num 的位置替换它
+// ⚠️ tails 不是 LIS 序列本身，只记录长度</pre>
+  </div>
+</div>
+
+<h4>LCS（1143）—— 经典 2D DP</h4>
+
+<pre>
+int m = text1.length(), n = text2.length();
+int[][] dp = new int[m+1][n+1];
+for (int i = 1; i <= m; i++) {
+    for (int j = 1; j <= n; j++) {
+        if (text1.charAt(i-1) == text2.charAt(j-1))
+            dp[i][j] = dp[i-1][j-1] + 1;
+        else
+            dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+    }
+}
+// dp[i][j]：s1[0:i] 和 s2[0:j] 的 LCS 长度
+// 相等时 +1，不等时取左/上最大值
+</pre>
+
+<blockquote>LCS 的空间优化：只依赖上一行和当前行左邻居，可压到一维。但需要一个变量保存被覆盖前的 dp[i-1][j-1]。工程中通常写标准版即可，面试再提优化。</blockquote>
+
+<h4>LIS / LCS 衍生题</h4>
+
+<table>
+  <tr><th>题目</th><th>与 LIS/LCS 的关系</th><th>关键额外处理</th></tr>
+  <tr><td>354 Russian Doll</td><td>二维 LIS</td><td>w 升序，w 相等时 h 降序，然后 LIS on h</td></tr>
+  <tr><td>673 Number of LIS</td><td>LIS 计数</td><td>dp[i] 存长度，count[i] 存方案数</td></tr>
+  <tr><td>376 Wiggle Subsequence</td><td>LIS 变体</td><td>up/down 双状态，比较 nums[i] 和 nums[i-1]</td></tr>
+  <tr><td>718 最长重复子数组</td><td>连续版LCS</td><td>相等时 dp[i-1][j-1] + 1，否则置 0</td></tr>
+  <tr><td>583 两字符串删除</td><td>LCS 应用</td><td>m + n - 2 * LCS(m,n)</td></tr>
+  <tr><td>712 最小 ASCII 删除和</td><td>带权 LCS</td><td>转移取最大值改为取最小删除和</td></tr>
+</table>
+
+<!---------- 模式六：序列匹配 ---------->
+<hr>
+<h4 id="p6">模式六：序列匹配（Edit Distance 家族）</h4>
+
+<blockquote>序列匹配类 DP 的核心是 dp[i][j] 表示两个字符串前缀的匹配状态，转移时考虑各种编辑操作。</blockquote>
+
+<table>
+  <tr><th>题目</th><th>状态定义</th><th>转移特点</th></tr>
+  <tr><td>72 Edit Distance</td><td>dp[i][j] = word1[0:i] → word2[0:j] 最小编辑距离</td><td>增删改三操作取 min</td></tr>
+  <tr><td>10 正则匹配</td><td>dp[i][j] = s[0:i] 是否匹配 p[0:j]</td><td>'*' 匹配 0 次（跳过 p[j-1]）或多次（匹配不上时看 dp[i-1][j]）</td></tr>
+  <tr><td>97 Interleaving String</td><td>dp[i][j] = s1[0:i] 和 s2[0:j] 交错匹配 s3[0:i+j]</td><td>两种来源：来自 s1 或来自 s2</td></tr>
+  <tr><td>115 不同子序列</td><td>dp[i][j] = s[0:i] 中 t[0:j] 作为子序列出现次数</td><td>相等时 = 不用 s[i] + 用 s[i]（即 dp[i-1][j] + dp[i-1][j-1]）</td></tr>
+</table>
+
+<div class="comparison">
+  <div>
+    <h4>✅ Edit Distance（72）</h4>
+    <pre>
+int[][] dp = new int[m+1][n+1];
+// 初始化
+for (int i = 0; i <= m; i++) dp[i][0] = i;
+for (int j = 0; j <= n; j++) dp[0][j] = j;
+
+for (int i = 1; i <= m; i++) {
+    for (int j = 1; j <= n; j++) {
+        if (w1[i-1] == w2[j-1])
+            dp[i][j] = dp[i-1][j-1];
+        else
+            dp[i][j] = 1 + Math.min(
+                dp[i-1][j],    // 删 w1[i-1]
+                Math.min(
+                dp[i][j-1],    // 增 w2[j-1]
+                dp[i-1][j-1])  // 改
+            );
+    }
+}</pre>
+  </div>
+  <div>
+    <h4>✅ 正则匹配（10）</h4>
+    <pre>
+boolean[][] dp = new boolean[m+1][n+1];
+dp[0][0] = true;
+// 初始化：处理 p 开头有 '*' 的情况
+for (int j = 2; j <= n; j++)
+    if (p.charAt(j-1) == '*')
+        dp[0][j] = dp[0][j-2];
+
+for (int i = 1; i <= m; i++) {
+    for (int j = 1; j <= n; j++) {
+        if (p.charAt(j-1) == '.' ||
+            p.charAt(j-1) == s.charAt(i-1))
+            dp[i][j] = dp[i-1][j-1];
+        else if (p.charAt(j-1) == '*') {
+            // '*' 匹配 0 次
+            dp[i][j] = dp[i][j-2];
+            // '*' 匹配 1 次或多次（前提是 p[j-2] 能匹配 s[i-1]）
+            if (p.charAt(j-2) == '.' ||
+                p.charAt(j-2) == s.charAt(i-1))
+                dp[i][j] = dp[i][j] || dp[i-1][j];
+        }
+    }
+}</pre>
+  </div>
+</div>
+
+<div class="warn">
+<strong>⚠️ 正则匹配中 '*' 的处理：</strong>两个分支必须都检查！先试匹配 0 次（dp[i][j-2]），再试匹配多次（dp[i-1][j]）。后者意味着"去掉 s 的一个字符再看"，可以反复进入直到匹配完。
+</div>
+
+<!---------- 模式七：股票系列 ---------->
+<hr>
+<h4 id="p7">模式七：股票系列（状态机 DP）</h4>
+
+<blockquote>股票系列的核心是<strong>状态机</strong>：用不同的状态代表不同的操作阶段，状态之间通过交易动作转移。所有股票题都可统一到一个框架下。</blockquote>
+
+<h4>统一状态定义</h4>
+
+<pre>
+// 统一模板：dp[i][k][s]
+// i: 第 i 天（0-based）
+// k: 已经完成的交易次数上限（买入算一次交易）
+// s: 当前是否持有股票（0=未持有, 1=持有）
+dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i]);  // 休息 / 卖出
+dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i]); // 休息 / 买入
+// 初始条件：
+// dp[-1][k][0] = 0      还没开始，没股票，利润0
+// dp[-1][k][1] = -inf   还没开始，不可能持有股票
+// dp[i][0][0] = 0       交易次数为0，利润0
+// dp[i][0][1] = -inf    交易次数为0，不可能持有股票
+</pre>
+
+<table>
+  <tr><th>题目</th><th>k</th><th>简化要点</th><th>最终答案</th></tr>
+  <tr><td>121 一次交易</td><td>k=1</td><td>简化：minPrice + maxProfit 维护即可</td><td>dp[n-1][1][0]</td></tr>
+  <tr><td>122 无限次交易</td><td>k=∞</td><td>dp[i][0] 和 dp[i][1] 两个变量滚动</td><td>dp[n-1][0]</td></tr>
+  <tr><td>123 两次交易</td><td>k=2</td><td>手写 5 个状态：buy1/sell1/buy2/sell2</td><td>sell2</td></tr>
+  <tr><td>188 k 次交易</td><td>k 给定</td><td>三维 DP 按模板；k &gt; n/2 退化无限次</td><td>dp[n-1][k][0]</td></tr>
+  <tr><td>309 含冷冻期</td><td>∞</td><td>三状态：持有/不持有(冷冻)/不持有(非冷冻)</td><td>max(不持有状态)</td></tr>
+  <tr><td>714 含手续费</td><td>∞</td><td>卖出时减 fee：dp[i][0] = max(dp[i-1][0], dp[i-1][1] + p[i] - fee)</td><td>dp[n-1][0]</td></tr>
+</table>
+
+<div class="comparison">
+  <div>
+    <h4>✅ 121 一次交易（简化版）</h4>
+    <pre>
+int minPrice = Integer.MAX_VALUE;
+int maxProfit = 0;
+for (int price : prices) {
+    if (price &lt; minPrice)
+        minPrice = price;
+    else if (price - minPrice > maxProfit)
+        maxProfit = price - minPrice;
+}
+return maxProfit;
+// 也可以统一用状态机：</pre>
+  </div>
+  <div>
+    <h4>✅ 122 无限次（两状态）</h4>
+    <pre>
+int hold = -prices[0];  // 持有股票时最大利润
+int cash = 0;            // 不持有股票时最大利润
+for (int price : prices) {
+    // 新 cash = 继续空仓 / 卖出
+    cash = Math.max(cash, hold + price);
+    // 新 hold = 继续持有 / 买入
+    hold = Math.max(hold, cash - price);
+}
+return cash;
+// 注意：cash 和 hold 是同一天的，
+// 这里用先更新 cash 后更新 hold 确保
+// 买入时用的是当天卖出前的 cash（无限次允许当天买卖）</pre>
+  </div>
+</div>
+
+<div class="comparison">
+  <div>
+    <h4>✅ 123 两次交易（五状态）</h4>
+    <pre>
+int buy1 = -prices[0], sell1 = 0;
+int buy2 = -prices[0], sell2 = 0;
+for (int p : prices) {
+    buy1  = Math.max(buy1, -p);
+    sell1 = Math.max(sell1, buy1 + p);
+    buy2  = Math.max(buy2, sell1 - p);
+    sell2 = Math.max(sell2, buy2 + p);
+}
+return sell2;
+// 五状态：rest/持有1/空仓1/持有2/空仓2
+// 买入用负号表示成本</pre>
+  </div>
+  <div>
+    <h4>✅ 309 含冷冻期（三状态）</h4>
+    <pre>
+int hold = -prices[0];
+int sold = 0;     // 刚卖出（明天冷冻）
+int rest = 0;     // 不持有且可买入
+for (int p : prices) {
+    int prevSold = sold;
+    sold = hold + p;          // 卖出
+    hold = Math.max(hold, rest - p); // 持有（只能从 rest 买入）
+    rest = Math.max(rest, prevSold); // 冷冻后恢复
+}
+return Math.max(sold, rest);
+// 关键：卖出第二天不能买入，
+// 所以 hold 只能从 rest 转移（rest 表示至少冷冻过一天了）</pre>
+  </div>
+</div>
+
+<div class="key">
+<strong>💡 股票系列记忆法：</strong>状态机的本质是<strong>"今天做什么"</strong>。每天可以：① 什么也不做（状态保持）② 买入（状态从无股→持股）③ 卖出（状态从持股→无股）。不同题目的差异只是交易次数的限制和额外的约束（冷冻期/手续费）。
+</div>
+
+<!---------- 模式八：Kadane ---------->
+<hr>
+<h4 id="p8">模式八：Kadane 算法（最大子数组和）</h4>
+
+<blockquote>Kadane 是简化到极致的 DP：dp[i] 表示以 i 结尾的最大子数组和，然后用一个变量滚动。</blockquote>
+
+<pre>
+// 53 Maximum Subarray — Kadane 标准实现
+public int maxSubArray(int[] nums) {
+    int cur = nums[0];
+    int max = nums[0];
+    for (int i = 1; i &lt; nums.length; i++) {
+        // 要么把当前元素接到已有子数组后，要么重新开始
+        cur = Math.max(nums[i], cur + nums[i]);
+        max = Math.max(max, cur);
+    }
+    return max;
+}
+// 核心思想：当前位置结尾的最大子数组和 = max(当前元素, 之前累积+当前元素)
+</pre>
+
+<div class="comparison">
+  <div>
+    <h4>✅ 53 最大子数组和</h4>
+    <pre>
+// dp[i] = max(nums[i], dp[i-1] + nums[i])
+// 要么重新开始，要么接上之前
+// 可压缩为 cur 变量
+
+public int maxSubArray(int[] nums) {
+    int cur = nums[0], max = nums[0];
+    for (int i = 1; i &lt; nums.length; i++) {
+        cur = Math.max(nums[i], cur + nums[i]);
+        max = Math.max(max, cur);
+    }
+    return max;
+}</pre>
+  </div>
+  <div>
+    <h4>✅ 152 最大子数组积</h4>
+    <pre>
+// 额外维护最小值（负负得正）
+int curMax = nums[0], curMin = nums[0];
+int max = nums[0];
+for (int i = 1; i &lt; nums.length; i++) {
+    int n = nums[i];
+    int tmpMax = curMax;
+    curMax = Math.max(n,
+        Math.max(tmpMax * n, curMin * n));
+    curMin = Math.min(n,
+        Math.min(tmpMax * n, curMin * n));
+    max = Math.max(max, curMax);
+}
+return max;
+// 因为负数 * 负数 = 正数，
+// 所以必须同时维护当前最大和当前最小
+// curMax = max(n, max*n, min*n)
+// curMin = min(n, max*n, min*n)
+// 三个候选中一定包含正确答案</pre>
+  </div>
+</div>
+
+<div class="warn">
+<strong>⚠️ 152 乘积子数组为什么需要 min？</strong>假设 [-2, 3, -4]：到 -2 时 curMax=-2 curMin=-2；到 3 时 curMax=3 curMin=-6（-2*3）；到 -4 时 curMax = max(-4, 3*(-4)=-12, -6*(-4)=24) = 24。如果只维护 max，到 -4 时只有 max(-4, 3*(-4)=-12) = -4，丢失了正确答案 24。因为负负得正，需要保存"最小的负值"等待后面负数翻盘。
+</div>
+
+<!-- ─── 各题要点 ─── -->
+<hr>
+<h3 id="details">四、各题要点</h3>
+
+<!---- 70 ---->
+<h4>Climbing Stairs（70）⭐⭐⭐⭐⭐</h4>
+<blockquote>最简单的 DP，本质是斐波那契数列</blockquote>
+<pre>
+// dp[i] = dp[i-1] + dp[i-2]
+// 空间优化：只需两个变量
+int a = 1, b = 1;  // dp[0]=1, dp[1]=1
+for (int i = 2; i <= n; i++) {
+    int c = a + b;
+    a = b;
+    b = c;
+}
+return b;
+// 扩展：如果一次可以走 1/2/3 步，则 dp[i] = dp[i-1] + dp[i-2] + dp[i-3]
+</pre>
+
+<!---- 198 ---->
+<hr>
+<h4>House Robber（198）⭐⭐⭐⭐⭐</h4>
+<blockquote>一维DP经典：选 / 不选</blockquote>
+<pre>
+// dp[i] = max(dp[i-1], dp[i-2] + nums[i])
+// 不偷这间 = 前 i-1 间最大；偷这间 = 前 i-2 间最大 + 这间
+// 空间 O(1) 版本见模式一
+</pre>
+<ul>
+  <li><strong>House Robber II（213）</strong>：环形数组，拆成两个线性问题：不抢第一间 / 不抢最后一间</li>
+  <li><strong>740 Delete and Earn</strong>：值映射到 score 数组，转化为 House Robber</li>
+</ul>
+
+<!---- 322 ---->
+<hr>
+<h4>Coin Change（322）⭐⭐⭐⭐⭐</h4>
+<blockquote>完全背包求最值，面试极高频</blockquote>
+<pre>
+// 完全背包（每个硬币无限枚）
+int[] dp = new int[amount + 1];
+Arrays.fill(dp, amount + 1);  // 初始化为"不可能"
+dp[0] = 0;
+for (int coin : coins) {
+    for (int a = coin; a <= amount; a++) {
+        dp[a] = Math.min(dp[a], dp[a - coin] + 1);
+    }
+}
+return dp[amount] > amount ? -1 : dp[amount];
+// 注意初始值用 amount+1 而不是 Integer.MAX_VALUE
+// 因为 dp[a-coin] + 1 可能溢出
+</pre>
+
+<!---- 5 ---->
+<hr>
+<h4>Longest Palindromic Substring（5）⭐⭐⭐⭐⭐</h4>
+<blockquote>区间DP入门题，重点在遍历顺序</blockquote>
+<pre>
+// 解法一：区间DP O(n²)
+boolean[][] dp = new boolean[n][n];
+int start = 0, maxLen = 1;
+for (int len = 1; len <= n; len++) {
+    for (int i = 0; i + len - 1 < n; i++) {
+        int j = i + len - 1;
+        if (s.charAt(i) == s.charAt(j) && (len <= 2 || dp[i+1][j-1])) {
+            dp[i][j] = true;
+            if (len > maxLen) { start = i; maxLen = len; }
+        }
+    }
+}
+// 解法二：中心扩展法（更优，O(n²)时间，O(1)空间）
+// 每个中心点向两边扩展，分奇偶两种中心
+</pre>
+
+<!---- 416 ---->
+<hr>
+<h4>Partition Equal Subset Sum（416）⭐⭐⭐⭐⭐</h4>
+<blockquote>0-1背包可行性问题</blockquote>
+<pre>
+// 问题：能否把数组分成两个和相等的子集？
+// → 找 subset sum = total/2
+if (total % 2 != 0) return false;
+int target = total / 2;
+boolean[] dp = new boolean[target + 1];
+dp[0] = true;
+for (int num : nums) {
+    for (int s = target; s >= num; s--) {
+        dp[s] = dp[s] || dp[s - num];  // 不选/选
+    }
+}
+return dp[target];
+</pre>
+
+<!---- 300 ---->
+<hr>
+<h4>LIS（300）⭐⭐⭐⭐⭐</h4>
+<blockquote>O(nlogn)二分优化是 LIS 系列最关键的能力</blockquote>
+<pre>
+// 一定要会 O(nlogn) 版本（耐心排序）：
+// tails[i] = 长度为 i+1 的递增子序列的最小末尾值
+// 遍历每个数，二分找到 tails 中第一个 >= 它的位置替换
+// 如果比所有都大则 append
+</pre>
+<ul>
+  <li><strong>673 Number of LIS</strong>：多一个 count 数组同步更新</li>
+  <li><strong>354 Russian Doll</strong>：w升序+同w降序h → LIS on h</li>
+</ul>
+
+<!---- 72 ---->
+<hr>
+<h4>Edit Distance（72）⭐⭐⭐⭐⭐</h4>
+<blockquote>最经典的序列匹配 DP</blockquote>
+<pre>
+// 递推逻辑：
+// word1[i] == word2[j] → dp[i][j] = dp[i-1][j-1]  // 无需操作
+// 不等 → dp[i][j] = 1 + min(
+//   dp[i-1][j],      // 删 word1[i]
+//   dp[i][j-1],      // 增 word2[j]（等价于删 word2[j]）
+//   dp[i-1][j-1]     // 改
+// )
+</pre>
+
+<!---- 312 ---->
+<hr>
+<h4>Burst Balloons（312）⭐⭐⭐</h4>
+<blockquote>区间DP的巅峰之作，思想比代码重要</blockquote>
+<pre>
+// 核心思想：对于区间 [i,j]，枚举最后戳破的气球 k
+// 当 k 是最后一个时，它两侧的邻居是 i-1 和 j+1
+// 所以得分 = dp[i][k-1] + dp[k+1][j] + nums[i-1]*nums[k]*nums[j+1]
+// 加虚拟头尾（值为1）简化边界
+</pre>
+
+<!---- 10 ---->
+<hr>
+<h4>Regular Expression Matching（10）⭐⭐⭐</h4>
+<blockquote>序列匹配 DP 中条件最复杂的题</blockquote>
+<pre>
+// '*' 匹配的两个分支：
+// 1. 匹配 0 次：跳过 p[j-2] 和 '*'
+// 2. 匹配多次：s[i-1] 被 '*' 匹配，看 s[0:i-1] 和 p[0:j] 的关系
+// 注意 '.' 匹配任意单个字符
+</pre>
+
+<!---- 91 ---->
+<hr>
+<h4>Decode Ways（91）⭐⭐⭐⭐</h4>
+<blockquote>有条件的一维DP，注意边界情况</blockquote>
+<pre>
+// dp[i] = decode ways of s[0:i]
+// 两种情况：
+// 1. s[i-1] != '0' → dp[i-1]（最后一位单独编码）
+// 2. s[i-2:i] in ["10","26"] → dp[i-2]（最后两位一起编码）
+// 注意 "0" 不能单独编码，但可以和前一位组成 "10" 或 "20"
+</pre>
+
+<!---- 877 ---->
+<hr>
+<h4>Stone Game（877）⭐⭐⭐</h4>
+<blockquote>零和博弈区间DP，也可以数学推导</blockquote>
+<pre>
+// dp[i][j] = 先手在 [i,j] 能领先对手多少分
+// dp[i][j] = max(piles[i] - dp[i+1][j], piles[j] - dp[i][j-1])
+// 因为先手取完一堆后，对手就变成了 [i+1,j] 或 [i,j-1] 的先手
+// 所以己方得分 - 对方得分 = 当前取得值 - dp[区间]
+</pre>
+
+<!---- 887 ---->
+<hr>
+<h4>Super Egg Drop（887）⭐⭐⭐</h4>
+<blockquote>反向思维的 DP，从"扔鸡蛋"变为"能验证多少层"</blockquote>
+<pre>
+// 正向：dp[k][n] = k 个鸡蛋测 n 层楼的最少次数
+// 正向需要枚举所有楼层扔鸡蛋，太慢
+
+// 反向：dp[k][m] = k 个鸡蛋扔 m 次最多能确定多少层
+// dp[k][m] = dp[k-1][m-1] + dp[k][m-1] + 1
+// 第一项：鸡蛋碎了，鸡蛋减1、次数减1
+// 第二项：鸡蛋没碎，鸡蛋不减、次数减1
+// +1：当前这一层
+// 直到 dp[k][m] >= n，m 就是答案
+</pre>
+
+<!-- ─── 常见错误 ─── -->
+<hr>
+<h3 id="errors">五、常见错误</h3>
+
+<div class="warn">
+<strong>🚫 1. 背包问题循环顺序搞反</strong>
+<pre>
+// 错误 — 0-1 背包用了正序，导致同一物品被多次使用
+for (int num : nums)
+    for (int s = num; s <= target; s++)  // 正序 → 完全背包！
+        dp[s] |= dp[s - num];
+
+// 正确 — 0-1 背包用倒序
+for (int num : nums)
+    for (int s = target; s >= num; s--)  // 倒序 → 0-1 背包
+        dp[s] |= dp[s - num];
+</pre>
+</div>
+
+<div class="warn">
+<strong>🚫 2. 区间 DP 遍历顺序错误</strong>
+<pre>
+// 错误 — 按 i、j 递增遍历，依赖的状态还没算出来
+for (int i = 0; i < n; i++)
+    for (int j = i+1; j < n; j++)
+        dp[i][j] = ... dp[i+1][j-1] ...;  // dp[i+1] 还没算！
+
+// 正确 — 按区间长度从小到大
+for (int len = 2; len <= n; len++)
+    for (int i = 0; i + len - 1 < n; i++) {
+        int j = i + len - 1;
+        dp[i][j] = ...;
+    }
+</pre>
+</div>
+
+<div class="warn">
+<strong>🚫 3. Coin Change 初始值设成 Integer.MAX_VALUE</strong>
+<pre>
+// 错误 — dp[a-coin] + 1 会溢出成负数
+int[] dp = new int[amount+1];
+Arrays.fill(dp, Integer.MAX_VALUE);
+dp[0] = 0;
+// 当 dp[a-coin] == MAX_VALUE 时，+1 溢出成 Integer.MIN_VALUE
+// Math.min 会选这个负数！
+
+// 正确 — 用 amount+1 作为"不可能"标记
+Arrays.fill(dp, amount + 1);
+</pre>
+</div>
+
+<div class="warn">
+<strong>🚫 4. 子序列 vs 子数组（子串）混淆</strong>
+<pre>
+// 子序列：可以不连续 → 通常 dp 取 max（跳过）
+// 子数组/子串：必须连续 → 不符合条件时 dp 归零
+
+// 例：718 最长重复子数组（连续）
+if (A[i-1] == B[j-1]) dp[i][j] = dp[i-1][j-1] + 1;
+else dp[i][j] = 0;  // 不连续就断了！
+
+// 而 1143 LCS（可以不连续）
+if (A[i-1] == B[j-1]) dp[i][j] = dp[i-1][j-1] + 1;
+else dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);  // 跳过
+</pre>
+</div>
+
+<div class="warn">
+<strong>🚫 5. 忘记检查"是否可达"（-1 / false 的情况）</strong>
+<pre>
+// 322 Coin Change：如果 amount 凑不出来，返回 -1
+return dp[amount] > amount ? -1 : dp[amount];
+
+// 139 Word Break：dp[0] = true；初始化不能漏
+</pre>
+</div>
+
+<div class="warn">
+<strong>🚫 6. Decode Ways 忽略 '0' 的特殊处理</strong>
+<pre>
+// '0' 不能单独编码，只能和前一个数字组成 "10" 或 "20"
+// 当 s[i-1] == '0' 时，dp[i] 不能从 dp[i-1] 转移
+// 如果 s[0] == '0'，直接返回 0
+</pre>
+</div>
+
+<div class="warn">
+<strong>🚫 7. 误以为 dp 数组越大越好——缺乏空间优化意识</strong>
+<pre>
+// 面试中可以先写标准二维/一维 DP，再提空间优化
+// 很多题都可以从 O(n²) → O(n) → O(1)
+// 但不要一开始就写滚动数组，容易搞混边界
+// 策略：先 AC 标准版，再说"还可以优化到 O(1)"
+</pre>
+</div>
+
+<!-- ─── 结论 ─── -->
+<hr>
+<h3 id="conclusion">六、结论</h3>
+
+<blockquote>DP 的难点不是代码，而是<strong>状态定义</strong>。定义对了，转移方程自然浮现。</blockquote>
+
+<h4>面试 DP 速查清单</h4>
+
+<ol>
+  <li><strong>能识别是 DP 题吗？</strong> 最值/计数/可行性 + 有重叠子问题 → DP</li>
+  <li><strong>状态怎么定义？</strong> 一维/二维/三维？dp[i] 表示以 i 结尾还是前 i 个？</li>
+  <li><strong>转移方程是什么？</strong> 当前状态能从哪些之前状态得到？</li>
+  <li><strong>base case 怎么初始化？</strong> dp[0]、dp[i][0]、dp[0][j] 分别是什么？</li>
+  <li><strong>遍历顺序是什么？</strong> 从小到大？从大到小？按长度？</li>
+  <li><strong>最终答案在哪？</strong> dp[n]、dp[m][n]、max(dp[i])？</li>
+  <li><strong>能空间优化吗？</strong> 面试中作为加分项提及</li>
+</ol>
+
+<h4>按题型快速定位</h4>
+
+<table>
+  <tr><th>看到什么</th><th>想到什么模式</th><th>代表题</th></tr>
+  <tr><td>"最长递增子序列"</td><td>LIS · O(nlogn) 耐心排序</td><td>300, 354, 673</td></tr>
+  <tr><td>"两个字符串/数组"</td><td>2D DP · 序列匹配</td><td>1143, 72, 10, 97, 115, 718</td></tr>
+  <tr><td>"能否平分/凑成某数"</td><td>0-1 背包</td><td>416, 494</td></tr>
+  <tr><td>"凑成金额的方案数"</td><td>完全背包（组合/排列）</td><td>518, 322, 377</td></tr>
+  <tr><td>"不能偷相邻的"</td><td>一维DP · 选/不选</td><td>198, 213, 740</td></tr>
+  <tr><td>"格子/网格上走"</td><td>网格 DP</td><td>62, 63, 64, 221</td></tr>
+  <tr><td>"买卖股票"</td><td>状态机 DP</td><td>121, 122, 123, 188, 309, 714</td></tr>
+  <tr><td>"子数组最大/最小"</td><td>Kadane</td><td>53, 152</td></tr>
+  <tr><td>"回文"</td><td>区间 DP / 中心扩展</td><td>5, 516, 647, 132</td></tr>
+  <tr><td>"戳气球/合并石子"</td><td>区间 DP · 最后分割点</td><td>312, 664, 87</td></tr>
+  <tr><td>"拿石子/两人游戏"</td><td>博弈 DP · 差值法</td><td>877, 486</td></tr>
+  <tr><td>"扔鸡蛋"</td><td>反向思维 DP</td><td>887</td></tr>
+  <tr><td>"爬楼梯"</td><td>斐波那契类一维DP</td><td>70, 746, 91, 279</td></tr>
+  <tr><td>"字典分割"</td><td>一维DP · 枚举分割点</td><td>139</td></tr>
+</table>
+
+<blockquote>每个模式学透后，同一模式的新题就是<strong>微调转移方程</strong>——这是 DP 复习最高效的策略。</blockquote>
+
+</body>
+</html>
