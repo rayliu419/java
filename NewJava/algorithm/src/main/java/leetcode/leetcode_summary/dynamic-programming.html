@@ -222,7 +222,7 @@
   <tr><td><span class="star">★★★★★</span></td><td>121</td><td>Best Time to Buy and Sell Stock</td><td>🟢 Easy</td><td>维护minPrice，dp[i] = max(dp[i-1], price-minPrice)</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>416</td><td>Partition Equal Subset Sum</td><td>🟡 Medium</td><td>0-1背包：dp[s] = dp[s] || dp[s - num]</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>64</td><td>Minimum Path Sum</td><td>🟡 Medium</td><td>网格DP：dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1])</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>152</td><td>Maximum Product Subarray</td><td>🟡 Medium</td><td>维护max/min双状态（负负得正）</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>152</td><td>Maximum Product Subarray</td><td>🟡 Medium</td><td>维护max/min双状态（负负得正）</td><td><span class="done">✅</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>62</td><td>Unique Paths</td><td>🟡 Medium</td><td>dp[i][j] = dp[i-1][j] + dp[i][j-1]</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>91</td><td>Decode Ways</td><td>🟡 Medium</td><td>一维DP：dp[i] = dp[i-1] + dp[i-2]（有条件）</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>221</td><td>Maximal Square</td><td>🟡 Medium</td><td>dp[i][j] = min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]) + 1</td><td><span class="pending">⬜</span></td></tr>
@@ -1203,6 +1203,68 @@ return dp[target];
 // 直到 dp[k][m] >= n，m 就是答案
 </pre>
 
+<!---- 152 ---->
+<hr>
+<h4>Maximum Product Subarray（152）⭐⭐⭐⭐</h4>
+<blockquote>Kadane 变体，因为乘法符号翻转，需要同时维护最大和最小两个状态</blockquote>
+
+<div class="key">
+<strong>💡 和 53 最大子数组和的本质区别：</strong>加法单调，乘法不单调。负数 × 负数 = 正数，所以"当前最小"可能变成"未来最大"。
+</div>
+
+<pre>
+// 状态定义：
+// curMax = 以当前元素结尾的**最大**乘积
+// curMin = 以当前元素结尾的**最小**乘积
+
+public int maxProduct(int[] nums) {
+    int curMax = nums[0];
+    int curMin = nums[0];
+    int result = nums[0];
+
+    for (int i = 1; i &lt; nums.length; i++) {
+        int num = nums[i];
+        int prevMax = curMax;          // ⚠️ 必须暂存旧值！
+
+        curMax = Math.max(num, Math.max(curMax * num, curMin * num));
+        curMin = Math.min(num, Math.min(prevMax * num, curMin * num));
+
+        result = Math.max(result, curMax);
+    }
+    return result;
+}
+// 三个候选来源：
+// ① 从当前元素重新开始（nums[i]）
+// ② 延续之前的最大乘积（max[i-1] * nums[i]）
+// ③ 延续之前的最小乘积，符号翻转（min[i-1] * nums[i]）
+</pre>
+
+<div class="warn">
+<strong>⚠️ 必须暂存 prevMax：</strong>更新 curMin 需要旧 curMax（即 maxEnding[i-1]），如果先更新了 curMax，拿到的就是 maxEnding[i] 了。同理，更新 curMax 需要旧 curMin，好在 curMax 是第一个更新的，此时 curMin 还没变——所以只需要保存 prevMax。
+</div>
+
+<h4>执行过程推演：nums = [-2, 3, -4]</h4>
+
+<table>
+  <tr><th>i</th><th>nums[i]</th><th>curMax 候选</th><th>curMax</th><th>curMin 候选</th><th>curMin</th></tr>
+  <tr><td>0</td><td>-2</td><td>—</td><td>−2</td><td>—</td><td>−2</td></tr>
+  <tr><td>1</td><td>3</td><td>max(3, −6, −6)</td><td>3</td><td>min(3, −6, −6)</td><td>−6</td></tr>
+  <tr><td>2</td><td>−4</td><td>max(−4, −12, <strong>24</strong>)</td><td style="color:#d9534f;font-weight:700;">24</td><td>min(−4, −12, 24)</td><td>−12</td></tr>
+</table>
+
+<div class="tip">
+<strong>🔑 关键一步：</strong>i=2 时，如果没有 curMin = −6，就只能拿到 max(−4, −12) = −4。正是因为 curMin 追踪到了"最小"的 −6，乘上 −4 后翻牌为 24——正确答案。这也印证了 DP 的核心思想：<strong>未来可能翻盘，当前最小值也要保留</strong>。
+</div>
+
+<h4>和一维 DP / Kadane 的关系</h4>
+<p>152 在 DP 分类中属于 <strong>Kadane 变体</strong>：</p>
+<ul>
+  <li>状态定义：<code>以 i 结尾</code>（而非"前 i 个"）</li>
+  <li>答案位置：遍历取 <code>max(curMax)</code>（而非 dp[n]）</li>
+  <li>特殊性：需要<strong>双状态</strong>（max + min），因为乘法打破了单调性</li>
+</ul>
+<p>状态定义方式属于规律一中的"以 i 结尾"，答案需要从遍历中取最大值。具体见 Kadane 模式八中的对比代码。</p>
+
 <!-- ─── 常见错误 ─── -->
 <hr>
 <h3 id="errors">五、常见错误</h3>
@@ -1336,6 +1398,97 @@ return dp[amount] > amount ? -1 : dp[amount];
   <tr><td>"爬楼梯"</td><td>斐波那契类一维DP</td><td>70, 746, 91, 279</td></tr>
   <tr><td>"字典分割"</td><td>一维DP · 枚举分割点</td><td>139</td></tr>
 </table>
+
+<h4>DP 经验公式（状态定义规律总结）</h4>
+
+<div class="pattern-card">
+<h4>规律一：一维 DP 的三种状态定义</h4>
+<table>
+  <tr><th>定义方式</th><th>适用场景</th><th>典型题</th><th>答案位置</th></tr>
+  <tr>
+    <td><code>dp[i]</code> = <strong>以 i 结尾</strong>的某个定义</td>
+    <td><strong>子序列 / 子数组</strong>问题（必须包含最后一个元素）</td>
+    <td>300 LIS、53 最大子数组和、152 乘积子数组、5 回文子串</td>
+    <td><code>max(dp[0..n-1])</code></td>
+  </tr>
+  <tr>
+    <td><code>dp[i]</code> = <strong>前 i 个</strong>（0..i-1）的某个定义</td>
+    <td><strong>递推累加</strong>问题（不要求以 i 结尾，只关心前 i 个的整体）</td>
+    <td>70 爬楼梯、198 打家劫舍、139 单词拆分、91 解码方法</td>
+    <td><code>dp[n]</code></td>
+  </tr>
+  <tr>
+    <td><code>dp[a]</code> = <strong>凑成值 a</strong> 的某个定义</td>
+    <td><strong>背包 / 凑数</strong>问题（容量作为状态）</td>
+    <td>322 零钱兑换、416 分割等和、518 零钱兑换II</td>
+    <td><code>dp[amount]</code> 或 <code>dp[target]</code></td>
+  </tr>
+</table>
+<blockquote><strong>判断口诀</strong>：需要"结尾信息" → 以 i 结尾；只关心"整体结果" → 前 i 个；有"容量限制" → 以容量为状态。</blockquote>
+</div>
+
+<div class="pattern-card">
+<h4>规律二：二维 DP 的四种状态定义</h4>
+<table>
+  <tr><th>定义方式</th><th>适用场景</th><th>典型题</th><th>答案位置</th></tr>
+  <tr>
+    <td><code>dp[i][j]</code> = 数组A前 i 个、数组B前 j 个的某个定义</td>
+    <td><strong>两个序列比较</strong>（LCS、编辑距离、正则匹配）</td>
+    <td>1143 LCS、72 编辑距离、10 正则匹配、97 交错字符串、115 不同子序列</td>
+    <td><code>dp[m][n]</code></td>
+  </tr>
+  <tr>
+    <td><code>dp[i][j]</code> = 到达网格位置 <strong>(i,j)</strong> 的某个定义</td>
+    <td><strong>网格路径</strong>问题（从起点到终点）</td>
+    <td>62 不同路径、64 最小路径和、221 最大正方形</td>
+    <td><code>dp[m-1][n-1]</code> 或遍历取 max</td>
+  </tr>
+  <tr>
+    <td><code>dp[i][j]</code> = 区间 <strong>[i,j]</strong> 上的某个定义</td>
+    <td><strong>区间</strong>问题（回文、合并、博弈）</td>
+    <td>5 最长回文子串、516 最长回文子序列、312 戳气球、877 石子游戏</td>
+    <td><code>dp[0][n-1]</code></td>
+  </tr>
+  <tr>
+    <td><code>dp[i][j]</code> = A以 i 结尾、B以 j 结尾的某个定义</td>
+    <td><strong>连续匹配</strong>问题（必须同时以 i,j 结尾）</td>
+    <td>718 最长重复子数组</td>
+    <td>遍历取 <code>max(dp[i][j])</code></td>
+  </tr>
+</table>
+</div>
+
+<div class="pattern-card">
+<h4>规律三：两个序列问题时，dp[i][j] 的最常见定义</h4>
+<blockquote>绝大多数两个字符串/数组的 DP 题，<code>dp[i][j]</code> 定义为 <strong>「A[0:i] 和 B[0:j]」</strong>（前 i 个和前 j 个），答案在 <code>dp[m][n]</code>。</blockquote>
+<p>例外情况：当要求<strong>连续</strong>匹配时（如 718 最长重复子数组），dp[i][j] 定义为"以 A[i] 和 B[j] 结尾"，答案需要遍历取 <code>max</code>。</p>
+</div>
+
+<div class="pattern-card">
+<h4>规律四：返回值的位置</h4>
+<table>
+  <tr><th>状态定义</th><th>答案位置</th><th>原因</th></tr>
+  <tr><td>以 i 结尾</td><td><code>max(dp[0..n-1])</code></td><td>不知道最优解在哪个位置结尾</td></tr>
+  <tr><td>前 i 个 / 前 i 个和 j 个</td><td><code>dp[n]</code> 或 <code>dp[m][n]</code></td><td>自然收敛到完整输入</td></tr>
+  <tr><td>区间 [i,j]</td><td><code>dp[0][n-1]</code></td><td>自然收敛到完整区间</td></tr>
+  <tr><td>到达 (i,j)</td><td><code>dp[m-1][n-1]</code></td><td>自然收敛到终点</td></tr>
+  <tr><td>凑成值 a</td><td><code>dp[target]</code></td><td>自然收敛到目标值</td></tr>
+  <tr><td>状态机（股票类）</td><td>某状态变量的值</td><td>结束时刻指定状态的值</td></tr>
+</table>
+</div>
+
+<div class="pattern-card">
+<h4>规律五：子序列 vs 子数组（连续 vs 不连续）的影响</h4>
+<table>
+  <tr><th></th><th>子序列（不要求连续）</th><th>子数组/子串（必须连续）</th></tr>
+  <tr><td>dp[i] 定义</td><td>以 i 结尾的子序列</td><td>以 i 结尾的子数组</td></tr>
+  <tr><td>不匹配时</td><td><code>dp[i] = dp[i-1]</code>（继承前一个）</td><td><code>dp[i] = 0</code> 或 <code>dp[i] = nums[i]</code>（重新开始）</td></tr>
+  <tr><td>二维不匹配时</td><td><code>max(dp[i-1][j], dp[i][j-1])</code>（跳过）</td><td><code>dp[i][j] = 0</code>（断开）</td></tr>
+  <tr><td>典型题</td><td>LIS、LCS、516 回文子序列</td><td>53 最大子数组、718 重复子数组、5 回文子串</td></tr>
+</table>
+</div>
+
+<blockquote><strong>总结</strong>：写 DP 的第一步是问自己三个问题——① 几维？② 状态表示"以 i 结尾"还是"前 i 个"？③ 最终答案在哪？90% 的 DP 题的答案都在这三个问题的框架内。</blockquote>
 
 <blockquote>每个模式学透后，同一模式的新题就是<strong>微调转移方程</strong>——这是 DP 复习最高效的策略。</blockquote>
 
