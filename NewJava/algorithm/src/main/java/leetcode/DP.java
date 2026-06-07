@@ -1,6 +1,7 @@
 package leetcode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class DP {
@@ -29,6 +30,29 @@ public class DP {
         }
         return result;
     }
+
+    /**
+     * https://leetcode.com/problems/house-robber
+     * 两个屋子不能连着偷，最多能偷多少?
+     * dp[i] = 从第 0 到第 i 间房能偷的最大值
+     * dp[i] = max {dp[i-1], dp[i-2] + nums[i]}
+     */
+    public int rob(int[] nums) {
+        if (nums.length == 0) return 0;
+        if (nums.length == 1) return nums[0];
+        if (nums.length == 2) return Math.max(nums[0], nums[1]);
+        int prev2 = nums[0];
+        int prev1 = Math.max(nums[0], nums[1]);
+        int max = Integer.MIN_VALUE;
+        for (int i = 3; i <= nums.length; i++) {
+            int cur = Math.max(prev1, prev2 + nums[i-1]);
+            max = Math.max(cur, max);
+            prev2 = prev1;
+            prev1 = cur;
+        }
+        return max;
+    }
+
 
     /**
      * <a href="https://leetcode.com/problems/maximum-subarray">...</a>
@@ -83,6 +107,27 @@ public class DP {
      *  dp[i] 以i结尾的LIS的长度
      *  dp[i] = max{dp[0]..dp[i-1]} + 1  -- if nums[k] < nums[i]
      *        = 1                        -- if nums[k] < all
+     *  LIS及扩展题型
+     */
+    public int lengthOfLIS(int[] nums) {
+        if (nums.length == 0) return 0;
+        int[] dp = new int[nums.length];
+        Arrays.fill(dp, 1);
+        int max = 1;
+        for (int i = 1; i < nums.length; i++) {
+            for (int j = i - 1; j >= 0; j--) {
+                if (nums[i] > nums[j] && dp[j] + 1 > dp[i]) {
+                        dp[i] = dp[j] + 1;
+                }
+            }
+            max = Math.max(dp[i], max);
+        }
+        return max;
+    }
+
+    /**
+     * https://leetcode.com/problems/longest-common-subsequence
+     * LCS 及扩展类型
      */
 
     /**
