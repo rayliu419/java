@@ -210,16 +210,16 @@
   <tr>
     <th>频次</th><th>题号</th><th>题目</th><th>难度</th><th>核心思路</th><th>状态</th>
   </tr>
-  <tr><td><span class="star">★★★★★</span></td><td>53</td><td>Maximum Subarray</td><td>🟡 Medium</td><td>Kadane：dp[i] = max(dp[i-1] + n, n)</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>300</td><td>Longest Increasing Subsequence</td><td>🟡 Medium</td><td>O(n²) 基础 + O(nlogn) 二分优化（耐心排序）</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>53</td><td>Maximum Subarray</td><td>🟡 Medium</td><td>Kadane：dp[i] = max(dp[i-1] + n, n)</td><td><span class="done">✅</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>300</td><td>Longest Increasing Subsequence</td><td>🟡 Medium</td><td>O(n²) 基础 + O(nlogn) 二分优化（耐心排序）</td><td><span class="done">✅</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>1143</td><td>Longest Common Subsequence</td><td>🟡 Medium</td><td>dp[i][j]：相等取左上加1，不等取max左/上</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>70</td><td>Climbing Stairs</td><td>🟢 Easy</td><td>dp[i] = dp[i-1] + dp[i-2]，斐波那契</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>198</td><td>House Robber</td><td>🟡 Medium</td><td>dp[i] = max(dp[i-1], dp[i-2] + nums[i])</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>322</td><td>Coin Change</td><td>🟡 Medium</td><td>完全背包：dp[a] = min(dp[a], dp[a-c] + 1)</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>70</td><td>Climbing Stairs</td><td>🟢 Easy</td><td>dp[i] = dp[i-1] + dp[i-2]，斐波那契</td><td><span class="done">✅</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>198</td><td>House Robber</td><td>🟡 Medium</td><td>dp[i] = max(dp[i-1], dp[i-2] + nums[i])</td><td><span class="done">✅</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>322</td><td>Coin Change</td><td>🟡 Medium</td><td>完全背包：dp[a] = min(dp[a], dp[a-c] + 1)</td><td><span class="done">✅</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>139</td><td>Word Break</td><td>🟡 Medium</td><td>dp[i] = dp[j] && wordDict.contains(s[j:i])</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>72</td><td>Edit Distance</td><td>🟡 Medium</td><td>dp[i][j]：增删改三操作取最小</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>5</td><td>Longest Palindromic Substring</td><td>🟡 Medium</td><td>区间DP：dp[i][j] = s[i]==s[j] && dp[i+1][j-1]</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>121</td><td>Best Time to Buy and Sell Stock</td><td>🟢 Easy</td><td>维护minPrice，dp[i] = max(dp[i-1], price-minPrice)</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>121</td><td>Best Time to Buy and Sell Stock</td><td>🟢 Easy</td><td>维护minPrice，dp[i] = max(dp[i-1], price-minPrice)</td><td><span class="done">✅</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>416</td><td>Partition Equal Subset Sum</td><td>🟡 Medium</td><td>0-1背包：dp[s] = dp[s] || dp[s - num]</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>64</td><td>Minimum Path Sum</td><td>🟡 Medium</td><td>网格DP：dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1])</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>152</td><td>Maximum Product Subarray</td><td>🟡 Medium</td><td>维护max/min双状态（负负得正）</td><td><span class="done">✅</span></td></tr>
@@ -234,7 +234,7 @@
   <tr><td><span class="star">★★★★</span></td><td>746</td><td>Min Cost Climbing Stairs</td><td>🟢 Easy</td><td>dp[i] = cost[i] + min(dp[i-1], dp[i-2])</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>740</td><td>Delete and Earn</td><td>🟡 Medium</td><td>转化为House Robber（值映射到score数组）</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>377</td><td>Combination Sum IV</td><td>🟡 Medium</td><td>排列背包：外层target内层nums</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>122</td><td>Best Time to Buy and Sell Stock II</td><td>🟡 Medium</td><td>可无限次交易，利润 = 累加所有上涨日差值</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>122</td><td>Best Time to Buy and Sell Stock II</td><td>🟡 Medium</td><td>可无限次交易，利润 = 累加所有上涨日差值</td><td><span class="done">✅</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>309</td><td>Best Time to Buy and Sell Stock with Cooldown</td><td>🟡 Medium</td><td>三状态机：hold/sold/cooldown</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>123</td><td>Best Time to Buy and Sell Stock III</td><td>🔴 Hard</td><td>五状态机或分割法：左→右/右→左</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>45</td><td>Jump Game II</td><td>🟡 Medium</td><td>贪心更优，DP：dp[i] = min(dp[j]+1) for reachable j</td><td><span class="pending">⬜</span></td></tr>
@@ -338,6 +338,26 @@
 
 <div class="tip">
 <strong>💡 效率取舍</strong>：Top-Down（记忆化递归）<strong>只计算递归路径上需要的子问题</strong>，如果某些状态永远不会被访问到，它自然跳过。但 Bottom-up 通常<strong>需要填满整个 dp 表</strong>，即使有些状态最终用不上也没办法跳过。因此当实际需要的子问题远小于状态空间时（例如某些状态根本不会出现），Top-Down 可能更快。
+</div>
+
+<div class="tip">
+<strong>💡 什么时候需要填满、什么时候可以跳过？</strong>关键在于状态空间是否<strong>稠密</strong> vs <strong>稀疏</strong>：<br><br>
+
+<strong>需要填满整个 dp 表（稠密）：</strong>
+<ul>
+  <li><strong>网格型</strong>（62 Unique Paths、64 Minimum Path Sum）— 每个格子都是可达的，填满就是最小计算量</li>
+  <li><strong>双序列型</strong>（1143 LCS、72 Edit Distance）— 二维表所有格子都需要参与计算，没有"无用的"子问题</li>
+  <li><strong>普通背包</strong>— dp 数组每个位置都可能被用到，填满就是最优复杂度</li>
+</ul>
+
+<strong>不需要 / 部分可跳过（稀疏）：</strong>
+<ul>
+  <li><strong>Coin Change（322）特例</strong>— 虽然 Bottom-up 填满了 dp[0..amount]，但其中真正能被硬币组合出来的只有一部分 <code>dp[i]</code> 会是非 -1。不过由于起点不确定，Bottom-up 无法预测哪些会成功，所以"全部都算"往往更简单。Top-Down 在硬币面值很大、amount 很大时（如 coins=[10000,20000], amount=10⁶）可以少走很多分支。</li>
+  <li><strong>区间 DP</strong>（312 Burst Balloons、877 Stone Game）— Bottom-up 按区间长度遍历，所有区间都要填；但 Top-Down 只探索递归路径上的区间。如果目标只有 dp[0][n-1]，且决策树中间剪枝很多，Top-Down 的实际计算量更小。</li>
+  <li><strong>Word Break（139）</strong>— Bottom-up 从 0 填到 n，但一旦找到 dp[n] = true 就可以提前 break，不需要填完所有位置（早期终止优化）。</li>
+</ul>
+
+<strong>总结</strong>：面试首选 Bottom-up 写标准版，只有遇到状态空间极大且实际访问量远小于理论量（如超大 amount 的 Coin Change、复杂区间 DP）时才考虑 Top-Down。
 </div>
 
 <div class="tip">

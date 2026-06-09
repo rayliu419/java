@@ -1,8 +1,6 @@
 package leetcode;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class DP {
 
@@ -32,6 +30,24 @@ public class DP {
     }
 
     /**
+     * https://leetcode.com/problems/climbing-stairs/
+     * dp[n] = dp[n-1] + dp[n-2]
+     */
+    public int climbStairs(int n) {
+        if (n == 1) return 1;
+        if (n == 2) return 2;
+        int prev2 = 1; // dp[n-2]
+        int prev1 = 2; // dp[n-1]
+        int cur = -1;
+        for (int i = 3; i <= n; i++) {
+            cur = prev2 + prev1;
+            prev2 = prev1;
+            prev1 = cur;
+        }
+        return cur;
+    }
+
+    /**
      * https://leetcode.com/problems/house-robber
      * 两个屋子不能连着偷，最多能偷多少?
      * dp[i] = 从第 0 到第 i 间房能偷的最大值
@@ -53,6 +69,87 @@ public class DP {
         return max;
     }
 
+    /**
+     * https://leetcode.com/problems/coin-change/
+     * 注意: 完全背包问题，每个硬币都可以重复使用。
+     * Top-Down的解题
+     */
+    public int coinChange(int[] coins, int amount) {
+        HashMap<Integer, Integer> cache = new HashMap<>();
+        return coinChange(coins, amount, cache);
+    }
+
+    private int coinChange(int[] coins, int amount, Map<Integer, Integer> cache) {
+        if (amount < 0) return -1;
+        if (amount == 0) return 0;
+        if (cache.containsKey(amount)) return cache.get(amount);
+        // 计算当前的amount的最小值。
+        int min = Integer.MAX_VALUE;
+        for (int i = 0; i < coins.length; i++) {
+            int cur = coinChange(coins, amount - coins[i], cache);
+            if (cur != -1) {
+                min = Math.min(min, cur + 1);
+            }
+        }
+        if (min == Integer.MAX_VALUE) {
+            // amount凑不了
+            cache.put(amount, -1);
+            return -1;
+        } else {
+            cache.put(amount, min);
+            return min;
+        }
+    }
+
+    // Bottom-Up
+    // dp[n] = dp[j] && dp[n-j]
+    public int coinChange2(int[] coins, int amount) {
+        int[] dp = new int[amount + 1];
+        dp[0] = 0;
+        Set<Integer> cache = new HashSet<>();
+        for (int i = 0; i < coins.length; i++) {
+            cache.add(coins[i]);
+        }
+        for (int i = 1; i <= amount; i++) {
+            // 计算直到amount的dp数组, dp[i]依赖于dp[0], dp[1]...
+            int min = Integer.MAX_VALUE;
+            for (int j = 0; j < i; j++) {
+                if (dp[j] != -1 && cache.contains(i-j)) {
+                    min = Math.min(min, dp[j] + 1);
+                }
+            }
+            if (min == Integer.MAX_VALUE) {
+                dp[i] = -1;
+            } else {
+                dp[i] = min;
+            }
+        }
+        return dp[amount];
+    }
+
+
+    /**
+     *  Bottom-Up 优化版，O(amount * len(coins))
+     *
+     *  Arrays.fill(dp, amount + 1) 的含义：
+     *  用 amount+1 作为"无穷大"标记，代替 Integer.MAX_VALUE。
+     *  理由：硬币最小面值 >= 1，最多需要 amount 枚硬币，
+     *  所以 amount+1 是一个安全的"不可能达到"的初始值，
+     *  同时避免 dp[i - coin] + 1 可能溢出 Integer.MAX_VALUE 的问题。
+     */
+    public int coinChange3(int[] coins, int amount) {
+        int[] dp = new int[amount + 1];
+        Arrays.fill(dp, amount + 1);
+        dp[0] = 0;
+        for (int i = 1; i <= amount; i++) {
+            for (int coin : coins) {
+                if (i >= coin) {
+                    dp[i] = Math.min(dp[i], dp[i - coin] + 1);
+                }
+            }
+        }
+        return dp[amount] > amount ? -1 : dp[amount];
+    }
 
     /**
      * <a href="https://leetcode.com/problems/maximum-subarray">...</a>
