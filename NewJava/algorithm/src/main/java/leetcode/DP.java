@@ -254,6 +254,7 @@ public class DP {
         if (text1.isEmpty()) return 0;
         if (text2.isEmpty()) return 0;
         int[][] dp = new int[text1.length() + 1][text2.length() + 1];
+        // 不用初始化，都是0
         for (int i = 1; i <= text1.length(); i++) {
             for (int j = 1; j <= text2.length(); j++) {
                 if (text1.charAt(i - 1) == text2.charAt(j - 1)) {
@@ -264,6 +265,110 @@ public class DP {
             }
         }
         return dp[text1.length()][text2.length()];
+    }
+
+    /**
+     * https://leetcode.com/problems/edit-distance
+     * 还是在dp[i][j]定义没有想清楚
+     * see NewJava/algorithm/src/main/java/leetcode/leetcode_summary/edit-distance.html for details.
+     */
+    public int minDistance(String word1, String word2) {
+        int[][] dp = new int[word1.length() + 1][word2.length() + 1];
+        dp[0][0] = 0;
+        // 初始化
+        for (int i = 0; i <= word1.length(); i++) {
+            dp[i][0] = i;
+        }
+        for (int j = 0; j <= word2.length(); j++) {
+            dp[0][j] = j;
+        }
+        for (int i = 1; i <= word1.length(); i++) {
+            for (int j = 1;  j <= word2.length(); j++) {
+                if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
+                    dp[i][j] = dp[i-1][j-1];
+                } else {
+                    // 分别对应插入，删除和替换操作
+                    dp[i][j] = Math.min(Math.min(dp[i-1][j] + 1, dp[i][j-1] + 1), dp[i-1][j-1] + 1);
+                }
+            }
+        }
+        return dp[word1.length()][word2.length()];
+    }
+
+    /**
+     * https://leetcode.com/problems/longest-palindromic-substring/
+     * 解法1，尝试中间点扩展
+     */
+    public int longestPalindrome(String s) {
+        int max = 0;
+        for (int i = 0; i < s.length(); i++) {
+            // 奇数
+            int length1 = expand(s, i, i);
+            // 偶数
+            int length2 = expand(s, i, i + 1);
+            int curMax = Math.max(length1, length2);
+            max = Math.max(curMax, max);
+        }
+        return max;
+    }
+
+    private int expand(String s, int loc1, int loc2) {
+        if (loc1 < 0 || loc1 >= s.length()) return 0;
+        if (loc2 < 0 || loc2 >= s.length()) return 0;
+        int i = loc1;
+        int j = loc2;
+        int len = 0;
+        while (i >= 0 && j < s.length() && s.charAt(i) == s.charAt(j)) {
+            i--;
+            j++;
+            len++;
+        }
+        // 不能返回len，问题在于 expand 统计的是匹配的"对"数（奇数时中心自己和自己算一对），而非实际长度。
+        return j - i - 1;
+    }
+
+    /**
+     * DP 算法
+     * dp[i][j] = s[i..j] 是否为回文 (i,j 为 0-based 索引)
+     * 按长度从小到大计算，dp[i][j] 依赖于 dp[i+1][j-1]
+     * 计算顺序: len=1 → len=2 → len=3 → ... → len=n
+     * 每个长度层内部: i 从 0 到 n-len 遍历，j = i+len-1
+     */
+    public String longestPalindrome2(String s) {
+        if (s == null || s.isEmpty()) return "";
+        int n = s.length();
+        boolean[][] dp = new boolean[n][n];
+        int maxLen = 1;
+        int start = 0;
+
+        // length = 1: 单个字符
+        for (int i = 0; i < n; i++) {
+            dp[i][i] = true;
+        }
+
+        // length = 2: 相邻字符
+        for (int i = 0; i < n - 1; i++) {
+            if (s.charAt(i) == s.charAt(i + 1)) {
+                dp[i][i + 1] = true;
+                maxLen = 2;
+                start = i;
+            }
+        }
+
+        // length >= 3: 依赖内部子串
+        for (int len = 3; len <= n; len++) {
+            for (int i = 0; i <= n - len; i++) {
+                int j = i + len - 1;
+                if (s.charAt(i) == s.charAt(j) && dp[i + 1][j - 1]) {
+                    dp[i][j] = true;
+                    if (len > maxLen) {
+                        maxLen = len;
+                        start = i;
+                    }
+                }
+            }
+        }
+        return s.substring(start, start + maxLen);
     }
 
 
