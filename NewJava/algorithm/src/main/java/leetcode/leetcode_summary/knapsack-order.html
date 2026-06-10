@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>416 分割等和子集：倒序的原因</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+    line-height: 1.45;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 16px 24px 60px;
+    color: #2d3a31;
+    background: #f5faf6;
+    font-size: 13px;
+  }
+  h1 { font-size: 1.35em; border-bottom: 3px solid #4a7c3f; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
+  h2 { font-size: 1.2em; color: #3d6b35; margin-top: 20px; padding-left: 8px; border-left: 4px solid #5a8f4c; }
+  h3 { font-size: 1.02em; color: #2d3a31; margin-top: 16px; }
+
+  p { margin: 6px 0; }
+  li { margin: 2px 0; }
+  ul { padding-left: 20px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 0.9em;
+  }
+  th, td {
+    border: 1px solid #c8d6c0;
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #4a7c3f;
+    color: #fff;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  tr:nth-child(even) { background: #f0f6eb; }
+  tr:hover { background: #e4eddb; }
+
+  pre {
+    background: #f5f0eb;
+    color: #3d3731;
+    padding: 16px 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.8em;
+    line-height: 1.45;
+    margin: 8px 0;
+  }
+  code {
+    font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+  }
+  p > code, li > code {
+    background: #e4eddb;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.88em;
+    color: #3d6b35;
+  }
+
+  .trace {
+    background: #2b2b2b;
+    color: #d4cfc6;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 8px 0;
+    font-size: 0.82em;
+    line-height: 1.6;
+    overflow-x: auto;
+    white-space: pre;
+    font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+  }
+  .trace .hl { color: #f87171; font-weight: bold; }
+  .trace .ok { color: #4ade80; }
+
+  .key {
+    background: #f0eeff;
+    border-left: 5px solid #6366f1;
+    padding: 10px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 12px 0;
+  }
+  .warn {
+    background: #fdf0ef;
+    border-left: 5px solid #d9534f;
+    padding: 10px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 12px 0;
+  }
+  .summary {
+    background: #edf7ed;
+    border-left: 5px solid #4caf50;
+    padding: 10px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 12px 0;
+  }
+
+  .comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .comparison > div {
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #c8d6c0;
+    background: #e8f5ec;
+  }
+  .comparison > div h4 { margin: 0 0 8px; }
+  @media (max-width: 640px) { .comparison { grid-template-columns: 1fr; } }
+
+  td:first-child { text-align: center; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<h1>416 分割等和子集：为什么内层循环必须倒序？</h1>
+
+<div class="summary">
+<strong>问题：</strong>给定数组，能否选出一些数，使它们的和 = 总和的一半？<br>
+<strong>性质：</strong>每个数只能用一次 → 0-1 背包 → 内层循环必须<strong>倒序</strong>
+</div>
+
+<h2>一、代码结构</h2>
+
+<pre>
+public boolean canPartition(int[] nums) {
+    int sum = 0;
+    for (int num : nums) sum += num;
+    if (sum % 2 != 0) return false;
+
+    int target = sum / 2;
+    boolean[] dp = new boolean[target + 1];
+    dp[0] = true;                           // 空集，和为 0
+
+    for (int num : nums) {                    // 外循环：逐个看每个数字
+        for (int s = target; s >= num; s--) { // 内循环：<strong>倒序</strong>
+            dp[s] = dp[s] || dp[s - num];     // 不取 || 取
+        }
+    }
+    return dp[target];
+}
+</pre>
+
+<p>关键就一行：<code>for (int s = target; s >= num; s--)</code>。<br>
+改成 <code>s = num; s &lt;= target; s++</code> 就是完全不同的语义——从 0-1 背包变完全背包。</p>
+
+<div class="tip" style="background:#fef9e7;border-left:5px solid #d4a017;padding:10px 16px;border-radius:0 8px 8px 0;margin:12px 0;">
+<strong>反直觉的规律：</strong>「每个数用一次」时内循环是<strong>倒序</strong>；「每个数可以用多次」时内循环反而是<strong>正序</strong>。
+这跟 coin change、word break 是同一个道理——那些题里每个单词/硬币可以重复用，所以 dp 是正着算的。
+</div>
+
+<h2>二、核心逻辑：dp[s] = dp[s] || dp[s - num]</h2>
+
+<p>这行代码的两个分支：</p>
+
+<ul>
+  <li><code>dp[s]</code>（旧值）→ 之前就能凑出 s，<strong>跳过</strong>当前 num</li>
+  <li><code>dp[s - num]</code> → 之前能凑出 s-num，<strong>带上</strong>当前 num 就是 s</li>
+</ul>
+
+<p>所以读 <code>dp[s - num]</code> 时，需要确保它是「还没考虑当前 num 的状态」，否则同一个 num 会被用多次。</p>
+
+<h2>三、为什么倒序能保证只用一次？</h2>
+
+<p>用 <code>nums = [2]</code>，target = 4 来演示，数组里只有一个 2：</p>
+
+<div class="comparison">
+  <div>
+    <h4>✅ 倒序（正确）</h4>
+    <div class="trace">
+dp = [T, F, F, F, F]
+
+num=2, s = 4→2 倒序:
+
+s=4: dp[4] = F || dp[2](F) = F
+s=3: dp[3] = F || dp[1](F) = F
+s=2: dp[2] = F || dp[0](T) = T
+
+结果: dp[4] = F ✅
+    </div>
+    <p>s=4 时读到的 dp[2] 还是 <strong>F</strong>（上一轮的值，没用过 2），所以 dp[4] = F。</p>
+  </div>
+  <div>
+    <h4>❌ 正序（错误）</h4>
+    <div class="trace">
+dp = [T, F, F, F, F]
+
+num=2, s = 2→4 正序:
+
+s=2: dp[2] = F || dp[0](T) = T   ← 用了 2
+s=3: dp[3] = F || dp[1](F) = F
+<span class="hl">s=4: dp[4] = F || dp[2](T) = T</span>
+                     ↑ 刚被更新为 T，又用了一次！
+
+结果: dp[4] = T ❌
+    </div>
+    <p>s=4 时读到的 dp[2] 已经是 <strong>T</strong>（这轮刚更新的，已经用了 2），等同于把 2 用了两次，2+2=4。但数组里只有一个 2！</p>
+  </div>
+</div>
+
+<div class="key">
+<strong>本质：</strong>倒序保证 <code>dp[s - num]</code> 始终是「上一轮」的值——当前数字还没参与过。<br>
+正序时 <code>dp[s - num]</code> 可能是「本轮刚更新」的值——当前数字已经被用过了。
+</div>
+
+<h2>四、把抽象变直觉</h2>
+
+<table>
+  <tr>
+    <th></th>
+    <th>倒序</th>
+    <th>正序</th>
+  </tr>
+  <tr>
+    <td><code>dp[s - num]</code></td>
+    <td>读的是旧值（没碰过当前 num）</td>
+    <td>读的可能是新值（已碰过当前 num）</td>
+  </tr>
+  <tr>
+    <td>效果</td>
+    <td>每个 num 最多用一次</td>
+    <td>同一个 num 可以累积</td>
+  </tr>
+  <tr>
+    <td>适用场景</td>
+    <td>每个数只能用一次</td>
+    <td>每个数可以用无限次</td>
+  </tr>
+  <tr>
+    <td>一句话</td>
+    <td>只能拿一次，不能贪心回头</td>
+    <td>可以反复拿，越滚越大</td>
+  </tr>
+</table>
+
+<div class="warn">
+<strong>自检：</strong>如果 416 误写成正序，对于 [1,2,3] 总和 6 → target=3，正序会把 1 重复用多次：dp[1]=T → dp[2]=T（1+1）→ dp[3]=T（1+1+1），直接返回 true，但实际上 [1,2,3] 里只有 1 个 1，不可能用三次。
+</div>
+
+<h2>五、延伸：什么题是正序？</h2>
+
+<p>反过来，<code>j++</code> 正序的场景：每个元素可以用无限次。</p>
+
+<table>
+  <tr>
+    <th>题目</th>
+    <th>复用特征</th>
+    <th>内层方向</th>
+  </tr>
+  <tr>
+    <td>416 分割等和子集</td>
+    <td>每个数只能用一次</td>
+    <td><strong>倒序</strong></td>
+  </tr>
+  <tr>
+    <td>322 零钱兑换</td>
+    <td>每个硬币无限取</td>
+    <td><strong>正序</strong></td>
+  </tr>
+  <tr>
+    <td>139 单词拆分</td>
+    <td>每个单词无限用</td>
+    <td><strong>正序</strong></td>
+  </tr>
+</table>
+
+<div class="tip" style="background:#fef9e7;border-left:5px solid #d4a017;padding:10px 16px;border-radius:0 8px 8px 0;margin:12px 0;">
+<strong>记忆窍门：</strong>「一次倒，多次正」——听起来反直觉，但想通了就很简单：<br>
+倒序 = 读旧值 = 当前元素还没参与 = 最多加一次<br>
+正序 = 读新值 = 当前元素已参与过 = 可以反复叠加
+</div>
+
+</body>
+</html>

@@ -152,6 +152,27 @@ public class DP {
     }
 
     /**
+     * https://leetcode.com/problems/word-break/
+     * 跟coin change极其类似
+     * 每个word都可以重复使用。
+     */
+    public boolean wordBreak(String s, List<String> wordDict) {
+        boolean[] dp = new boolean[s.length() + 1];
+        Arrays.fill(dp, false);
+        dp[0] = true;
+        for (int i = 1; i < dp.length; i++) {
+           for (String word : wordDict) {
+                int length = word.length();
+                if (i - length >= 0 && s.substring(i - length, i).equals(word) && dp[i - length]) {
+                    dp[i] = true;
+                    break;
+                }
+           }
+        }
+        return dp[s.length()];
+    }
+
+    /**
      * <a href="https://leetcode.com/problems/maximum-subarray">...</a>
      * dp[i] = 以i结尾的subarray的sum
      * dp[i] = max {nums[i], dp[i-1] + nums[i]}
@@ -225,7 +246,61 @@ public class DP {
     /**
      * https://leetcode.com/problems/longest-common-subsequence
      * LCS 及扩展类型
+     * dp[i][j] =
+     *  if a[i] == b[j],  dp[i-1][j-1] + 1
+     *  else max {dp[i][j-1], dp[i-1][j]}
      */
+    public int longestCommonSubsequence(String text1, String text2) {
+        if (text1.isEmpty()) return 0;
+        if (text2.isEmpty()) return 0;
+        int[][] dp = new int[text1.length() + 1][text2.length() + 1];
+        for (int i = 1; i <= text1.length(); i++) {
+            for (int j = 1; j <= text2.length(); j++) {
+                if (text1.charAt(i - 1) == text2.charAt(j - 1)) {
+                    dp[i][j] = dp[i-1][j-1] + 1;
+                } else {
+                    dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+                }
+            }
+        }
+        return dp[text1.length()][text2.length()];
+    }
+
+
+    /**
+     * 背包问题极其扩展
+     * https://leetcode.com/problems/partition-equal-subset-sum
+     * 每个元素只能用一次
+     * 转化为：给定数组，每个元素用一次，能否凑出 target？
+     *
+     * 白话：
+     * dp[s] → 当前数字中，能否凑出和 s？
+     * 每来一个 num，问自己：之前就能凑出 s？（跳过） 或 之前能凑出 s-num？（带上）
+     * 倒序更新 → 每个 num 只用一次（正序就变成完全背包了）
+     */
+    public boolean canPartition(int[] nums) {
+        int sum = 0;
+        for (int i = 0; i < nums.length; i++) {
+            sum += nums[i];
+        }
+        // 奇数和不能拆分
+        if (sum %2 != 0) return false;
+        int target = sum / 2;
+
+        boolean[] dp = new boolean[target + 1];
+        dp[0] = true;  // 空子集，和为 0
+
+        for (int num : nums) {
+            // 每来一个 num，问自己：之前就能凑出 s？（跳过） 或 之前能凑出 s-num？（带上）
+            for (int s = target; s >= num; s--) {
+                // 倒序保证 dp[s - num] 始终是「上一轮」的值——当前数字还没参与过。
+                // 正序时 dp[s - num] 可能是「本轮刚更新」的值——当前数字已经被用过了。
+                // 前面每个数字可以用多次，或者每个word可以用多次，循环就是反着的，且dp计算是正序计算的。- 本质区别
+                dp[s] = dp[s] || dp[s - num];     // 不取 || 取
+            }
+        }
+        return dp[target];
+    }
 
     /**
      *

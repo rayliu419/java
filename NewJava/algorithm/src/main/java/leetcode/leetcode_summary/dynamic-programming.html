@@ -212,15 +212,15 @@
   </tr>
   <tr><td><span class="star">★★★★★</span></td><td>53</td><td>Maximum Subarray</td><td>🟡 Medium</td><td>Kadane：dp[i] = max(dp[i-1] + n, n)</td><td><span class="done">✅</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>300</td><td>Longest Increasing Subsequence</td><td>🟡 Medium</td><td>O(n²) 基础 + O(nlogn) 二分优化（耐心排序）</td><td><span class="done">✅</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>1143</td><td>Longest Common Subsequence</td><td>🟡 Medium</td><td>dp[i][j]：相等取左上加1，不等取max左/上</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>1143</td><td>Longest Common Subsequence</td><td>🟡 Medium</td><td>dp[i][j]：相等取左上加1，不等取max左/上</td><td><span class="done">✅</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>70</td><td>Climbing Stairs</td><td>🟢 Easy</td><td>dp[i] = dp[i-1] + dp[i-2]，斐波那契</td><td><span class="done">✅</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>198</td><td>House Robber</td><td>🟡 Medium</td><td>dp[i] = max(dp[i-1], dp[i-2] + nums[i])</td><td><span class="done">✅</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>322</td><td>Coin Change</td><td>🟡 Medium</td><td>完全背包：dp[a] = min(dp[a], dp[a-c] + 1)</td><td><span class="done">✅</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>139</td><td>Word Break</td><td>🟡 Medium</td><td>dp[i] = dp[j] && wordDict.contains(s[j:i])</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>139</td><td>Word Break</td><td>🟡 Medium</td><td>dp[i] = dp[j] && wordDict.contains(s[j:i])</td><td><span class="done">✅</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>72</td><td>Edit Distance</td><td>🟡 Medium</td><td>dp[i][j]：增删改三操作取最小</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>5</td><td>Longest Palindromic Substring</td><td>🟡 Medium</td><td>区间DP：dp[i][j] = s[i]==s[j] && dp[i+1][j-1]</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>121</td><td>Best Time to Buy and Sell Stock</td><td>🟢 Easy</td><td>维护minPrice，dp[i] = max(dp[i-1], price-minPrice)</td><td><span class="done">✅</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>416</td><td>Partition Equal Subset Sum</td><td>🟡 Medium</td><td>0-1背包：dp[s] = dp[s] || dp[s - num]</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>416</td><td>Partition Equal Subset Sum</td><td>🟡 Medium</td><td>0-1背包：dp[s] = dp[s] || dp[s - num]</td><td><span class="done">✅</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>64</td><td>Minimum Path Sum</td><td>🟡 Medium</td><td>网格DP：dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1])</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>152</td><td>Maximum Product Subarray</td><td>🟡 Medium</td><td>维护max/min双状态（负负得正）</td><td><span class="done">✅</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>62</td><td>Unique Paths</td><td>🟡 Medium</td><td>dp[i][j] = dp[i-1][j] + dp[i][j-1]</td><td><span class="pending">⬜</span></td></tr>
@@ -292,6 +292,56 @@
 </ol>
 
 <blockquote>五步法中<strong>状态定义</strong>是最关键的一步，状态定义对了，转移往往自然而出。</blockquote>
+
+<div class="key">
+<strong>💡 初始化技巧：dp 多开一个维度，简化边界处理</strong>
+<p>这是 DP 编码中最实用也最容易被忽视的技巧。</p>
+<p><strong>核心思想：</strong>把 dp 数组的索引与问题数据的索引错开一位，让 <code>dp[i]</code> 对应 <code>data[0..i-1]</code>，<code>dp[0]</code> 自然代表「空集/空串」的 base case。这样循环体里不需要写 <code>if</code> 判断边界。</p>
+
+<h4>✅ LCS 的对比</h4>
+<pre>
+// ❌ 如果没有多开一位，代码会变成这样：
+// 需要手动处理 i=0 或 j=0 的情况
+int[][] dp = new int[m][n];
+for (int i = 0; i < m; i++) {
+    for (int j = 0; j < n; j++) {
+        if (text1.charAt(i) == text2.charAt(j)) {
+            dp[i][j] = (i==0 || j==0 ? 0 : dp[i-1][j-1]) + 1;
+            //          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 边界判断污染了核心逻辑
+        } else {
+            int up = i==0 ? 0 : dp[i-1][j];
+            int left = j==0 ? 0 : dp[i][j-1];
+            dp[i][j] = Math.max(up, left);
+        }
+    }
+}
+</pre>
+
+<pre>
+// ✅ 多开一位，base case 自然归零，循环从 1 开始
+int[][] dp = new int[m + 1][n + 1];
+for (int i = 1; i <= m; i++) {
+    for (int j = 1; j <= n; j++) {
+        if (text1.charAt(i-1) == text2.charAt(j-1)) {
+            dp[i][j] = dp[i-1][j-1] + 1;    // 干净
+        } else {
+            dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]); // 干净
+        }
+    }
+}
+</pre>
+
+<p><strong>这个模式在哪都适用：</strong></p>
+<ul>
+  <li><strong>LCS / Edit Distance</strong>：<code>dp[m+1][n+1]</code>，<code>dp[0][*]=dp[*][0]=0</code> 代表空串对齐</li>
+  <li><strong>416 分割等和子集</strong>：<code>dp[target+1]</code>，<code>dp[0]=true</code> 代表空集和为 0</li>
+  <li><strong>322 零钱兑换</strong>：<code>dp[amount+1]</code>，<code>dp[0]=0</code> 代表凑 0 元需要 0 枚</li>
+  <li><strong>72 Edit Distance</strong>：<code>dp[m+1][n+1]</code>，首行首列分别代表对空串的操作</li>
+  <li><strong>300 LIS</strong>：<code>dp[n]</code> 已足够，<code>dp[0]=1</code></li>
+</ul>
+
+<p><strong>通用原则：</strong>如果转移方程中依赖 <code>dp[i-1]</code> 或 <code>dp[i][j-1]</code>，多开一位让 base case 独立在 <code>dp[0]</code>，循环从 <code>1</code> 开始，就能消除所有边界 if 判断，让核心逻辑一目了然。</p>
+</div>
 
 <h4>用 DP 解决的问题特征</h4>
 
@@ -659,9 +709,10 @@ for (int coin : coins) {
 boolean[] dp = new boolean[target + 1];
 dp[0] = true;
 for (int num : nums) {
-    for (int s = target; s >= num; s--) {
-        dp[s] = dp[s] || dp[s - num];  // 不选 / 选
-    }
+    // 每来一个 num：之前就能凑出 s？（跳过）或之前能凑出 s-num？（带上）
+    for (int s = target; s >= num; s--) {    // 倒序 → 0-1（每个 num 只用一次）
+        dp[s] = dp[s] || dp[s - num];        // 不取 || 取
+    }                                        // 正序 → 完全（每个 num 无限复用）
 }
 return dp[target];
 </pre>
@@ -1201,8 +1252,12 @@ int target = total / 2;
 boolean[] dp = new boolean[target + 1];
 dp[0] = true;
 for (int num : nums) {
+    // 每来一个 num：之前就能凑出 s？（跳过）或之前能凑出 s-num？（带上）
     for (int s = target; s >= num; s--) {
-        dp[s] = dp[s] || dp[s - num];  // 不选/选
+        // 倒序保证 dp[s-num] 是「上一轮」的值——当前 num 还没参与过
+        // 正序时 dp[s-num] 可能是「本轮刚更新」的值——当前 num 已被用过
+        // 即：如果每个元素可用多次（coin change / word break），循环反过来正序
+        dp[s] = dp[s] || dp[s - num];     // 不取 || 取
     }
 }
 return dp[target];
