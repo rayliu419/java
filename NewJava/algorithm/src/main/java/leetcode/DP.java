@@ -32,6 +32,7 @@ public class DP {
     /**
      * https://leetcode.com/problems/climbing-stairs/
      * dp[n] = dp[n-1] + dp[n-2]
+     * 一维DP及系列
      */
     public int climbStairs(int n) {
         if (n == 1) return 1;
@@ -46,6 +47,24 @@ public class DP {
         }
         return cur;
     }
+
+    /**
+     * https://leetcode.com/problems/decode-ways/
+     * dp[n] = if condition dp[n-1] + dp[n-2]
+     *         else dp[n-1]
+     */
+    public int numDecodings(String s) {
+        int n = s.length();
+
+        return n;
+    }
+
+    private boolean isValid(String subString) {
+        int number = Integer.parseInt(subString);
+        if (number > )
+    }
+
+
 
     /**
      * https://leetcode.com/problems/house-robber
@@ -67,6 +86,63 @@ public class DP {
             prev1 = cur;
         }
         return max;
+    }
+
+    /**
+     * https://leetcode.com/problems/minimum-path-sum/
+     * 左上到右下最小值
+     * dp[i][j] = min {dp[i-1][j], dp[i][j-1]} + grid[i][j]
+     * 网格DP及其系列
+     */
+    public int minPathSum(int[][] grid) {
+        int[][] dp = new int[grid.length][grid[0].length];
+        int sum = 0;
+        for (int i = 0; i < grid.length; i++) {
+            sum += grid[i][0];
+            // 第一列初始化
+            dp[i][0] = sum;
+        }
+        sum = 0;
+        for (int j = 0; j < grid[0].length; j++) {
+            // 第一行初始化
+            sum += grid[0][j];
+            dp[0][j] = sum;
+        }
+        for (int i = 1; i < grid.length; i++) {
+            for (int j = 1; j < grid[0].length; j++) {
+                dp[i][j] = Math.min(dp[i-1][j], dp[i][j-1]) + grid[i][j];
+            }
+        }
+        return dp[grid.length - 1][grid[0].length - 1];
+    }
+
+    /**
+     * https://leetcode.com/problems/unique-paths/
+     * 太简单了，不做
+     */
+
+    /**
+     * <a href="https://leetcode.com/problems/maximal-square">...</a>
+     * 这道题要注意，矩阵dp，最主要的是递推公式比较难想一点
+     */
+    public int maximalSquare(char[][] matrix) {
+        if (matrix == null || matrix.length == 0 || matrix[0].length == 0) return 0;
+        int m = matrix.length, n = matrix[0].length;
+        int[][] dp = new int[m][n];
+        int max = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (matrix[i][j] == '1') {
+                    if (i == 0 || j == 0) {
+                        dp[i][j] = 1;
+                    } else {
+                        dp[i][j] = Math.min(dp[i-1][j], Math.min(dp[i][j-1], dp[i-1][j-1])) + 1;
+                    }
+                    max = Math.max(max, dp[i][j]);
+                }
+            }
+        }
+        return max * max;
     }
 
     /**
@@ -170,54 +246,6 @@ public class DP {
            }
         }
         return dp[s.length()];
-    }
-
-    /**
-     * <a href="https://leetcode.com/problems/maximum-subarray">...</a>
-     * dp[i] = 以i结尾的subarray的sum
-     * dp[i] = max {nums[i], dp[i-1] + nums[i]}
-     * 因为dp[i]仅仅依赖于dp[i-1]，所以空间复杂度可以优化到O(1)
-     * 同时max值可以边比边算
-     */
-    public int maxSubArray(int[] nums) {
-        // cur store dp[i]
-        int cur = nums[0];
-        int max = cur;
-        for (int i = 1; i < nums.length;i++) {
-            cur = Math.max(nums[i], cur + nums[i]);
-            max = Math.max(cur, max);
-        }
-        return max;
-    }
-
-    /**
-     * <a href="https://leetcode.com/problems/maximum-product-subarray">...</a>
-     * Kadane变体，维护双状态（max/min）
-     * 因为负负得正，所以同时跟踪当前最大和最小
-     */
-    public int maxProduct(int[] nums) {
-        int curMax = nums[0];
-        int curMin = nums[0];
-        int result = nums[0];
-
-        for (int i = 1; i < nums.length; i++) {
-            int num = nums[i];
-            int prevMax = curMax;
-
-            curMax = max3(num, prevMax * num, curMin * num);
-            curMin = min3(num, prevMax * num, curMin * num);
-
-            result = Math.max(result, curMax);
-        }
-        return result;
-    }
-
-    private int max3(int a, int b, int c) {
-        return Math.max(a, Math.max(b, c));
-    }
-
-    private int min3(int a, int b, int c) {
-        return Math.min(a, Math.min(b, c));
     }
 
     /**
@@ -371,7 +399,6 @@ public class DP {
         return s.substring(start, start + maxLen);
     }
 
-
     /**
      * 背包问题极其扩展
      * https://leetcode.com/problems/partition-equal-subset-sum
@@ -405,6 +432,54 @@ public class DP {
             }
         }
         return dp[target];
+    }
+
+    /**
+     * <a href="https://leetcode.com/problems/maximum-subarray">...</a>
+     * dp[i] = 以i结尾的subarray的sum
+     * dp[i] = max {nums[i], dp[i-1] + nums[i]}
+     * 因为dp[i]仅仅依赖于dp[i-1]，所以空间复杂度可以优化到O(1)
+     * 同时max值可以边比边算
+     */
+    public int maxSubArray(int[] nums) {
+        // cur store dp[i]
+        int cur = nums[0];
+        int max = cur;
+        for (int i = 1; i < nums.length;i++) {
+            cur = Math.max(nums[i], cur + nums[i]);
+            max = Math.max(cur, max);
+        }
+        return max;
+    }
+
+    /**
+     * <a href="https://leetcode.com/problems/maximum-product-subarray">...</a>
+     * Kadane变体，维护双状态（max/min）
+     * 因为负负得正，所以同时跟踪当前最大和最小
+     */
+    public int maxProduct(int[] nums) {
+        int curMax = nums[0];
+        int curMin = nums[0];
+        int result = nums[0];
+
+        for (int i = 1; i < nums.length; i++) {
+            int num = nums[i];
+            int prevMax = curMax;
+
+            curMax = max3(num, prevMax * num, curMin * num);
+            curMin = min3(num, prevMax * num, curMin * num);
+
+            result = Math.max(result, curMax);
+        }
+        return result;
+    }
+
+    private int max3(int a, int b, int c) {
+        return Math.max(a, Math.max(b, c));
+    }
+
+    private int min3(int a, int b, int c) {
+        return Math.min(a, Math.min(b, c));
     }
 
     /**

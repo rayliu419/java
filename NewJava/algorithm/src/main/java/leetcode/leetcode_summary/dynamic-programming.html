@@ -78,6 +78,7 @@
   .star { color: #f59e0b; font-weight: bold; }
   .done { color: #16a34a; font-weight: bold; }
   .pending { color: #94a3b8; }
+  .unskilled { color: #d9534f; font-weight: bold; }
 
   hr {
     border: none;
@@ -137,6 +138,7 @@
   td:nth-child(2), th:nth-child(2) { text-align: center; }
   td:nth-child(4), th:nth-child(4) { text-align: center; }
   td:nth-child(6), th:nth-child(6) { text-align: center; }
+  td:nth-child(7), th:nth-child(7) { text-align: center; white-space: nowrap; }
 
   .complexity { font-size: 0.85em; color: #64748b; }
 
@@ -208,55 +210,55 @@
 
 <table>
   <tr>
-    <th>频次</th><th>题号</th><th>题目</th><th>难度</th><th>核心思路</th><th>状态</th>
+    <th>频次</th><th>题号</th><th>题目</th><th>难度</th><th>核心思路</th><th>状态</th><th>掌握</th>
   </tr>
-  <tr><td><span class="star">★★★★★</span></td><td>53</td><td>Maximum Subarray</td><td>🟡 Medium</td><td>Kadane：dp[i] = max(dp[i-1] + n, n)</td><td><span class="done">✅</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>300</td><td>Longest Increasing Subsequence</td><td>🟡 Medium</td><td>O(n²) 基础 + O(nlogn) 二分优化（耐心排序）</td><td><span class="done">✅</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>1143</td><td>Longest Common Subsequence</td><td>🟡 Medium</td><td>dp[i][j]：相等取左上加1，不等取max左/上</td><td><span class="done">✅</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>70</td><td>Climbing Stairs</td><td>🟢 Easy</td><td>dp[i] = dp[i-1] + dp[i-2]，斐波那契</td><td><span class="done">✅</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>198</td><td>House Robber</td><td>🟡 Medium</td><td>dp[i] = max(dp[i-1], dp[i-2] + nums[i])</td><td><span class="done">✅</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>322</td><td>Coin Change</td><td>🟡 Medium</td><td>完全背包：dp[a] = min(dp[a], dp[a-c] + 1)</td><td><span class="done">✅</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>139</td><td>Word Break</td><td>🟡 Medium</td><td>dp[i] = dp[j] && wordDict.contains(s[j:i])</td><td><span class="done">✅</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>72</td><td>Edit Distance</td><td>🟡 Medium</td><td>dp[i][j]：增删改三操作取最小</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>5</td><td>Longest Palindromic Substring</td><td>🟡 Medium</td><td>区间DP：dp[i][j] = s[i]==s[j] && dp[i+1][j-1]</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>121</td><td>Best Time to Buy and Sell Stock</td><td>🟢 Easy</td><td>维护minPrice，dp[i] = max(dp[i-1], price-minPrice)</td><td><span class="done">✅</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>416</td><td>Partition Equal Subset Sum</td><td>🟡 Medium</td><td>0-1背包：dp[s] = dp[s] || dp[s - num]</td><td><span class="done">✅</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>64</td><td>Minimum Path Sum</td><td>🟡 Medium</td><td>网格DP：dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1])</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>152</td><td>Maximum Product Subarray</td><td>🟡 Medium</td><td>维护max/min双状态（负负得正）</td><td><span class="done">✅</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>62</td><td>Unique Paths</td><td>🟡 Medium</td><td>dp[i][j] = dp[i-1][j] + dp[i][j-1]</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>91</td><td>Decode Ways</td><td>🟡 Medium</td><td>一维DP：dp[i] = dp[i-1] + dp[i-2]（有条件）</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>221</td><td>Maximal Square</td><td>🟡 Medium</td><td>dp[i][j] = min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]) + 1</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>279</td><td>Perfect Squares</td><td>🟡 Medium</td><td>dp[i] = min(dp[i], dp[i - j*j] + 1)</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>494</td><td>Target Sum</td><td>🟡 Medium</td><td>0-1背包变形：dp[s] += dp[s - num]</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>518</td><td>Coin Change II</td><td>🟡 Medium</td><td>完全背包计数：dp[a] += dp[a - c]</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>647</td><td>Palindromic Substrings</td><td>🟡 Medium</td><td>同5回文DP，计数所有dp[i][j]==true</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>516</td><td>Longest Palindromic Subsequence</td><td>🟡 Medium</td><td>区间DP：s[i]==s[j]则+2，否则取max(i+1,j)和(i,j-1)</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>746</td><td>Min Cost Climbing Stairs</td><td>🟢 Easy</td><td>dp[i] = cost[i] + min(dp[i-1], dp[i-2])</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>740</td><td>Delete and Earn</td><td>🟡 Medium</td><td>转化为House Robber（值映射到score数组）</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>377</td><td>Combination Sum IV</td><td>🟡 Medium</td><td>排列背包：外层target内层nums</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>122</td><td>Best Time to Buy and Sell Stock II</td><td>🟡 Medium</td><td>可无限次交易，利润 = 累加所有上涨日差值</td><td><span class="done">✅</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>309</td><td>Best Time to Buy and Sell Stock with Cooldown</td><td>🟡 Medium</td><td>三状态机：hold/sold/cooldown</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>123</td><td>Best Time to Buy and Sell Stock III</td><td>🔴 Hard</td><td>五状态机或分割法：左→右/右→左</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>45</td><td>Jump Game II</td><td>🟡 Medium</td><td>贪心更优，DP：dp[i] = min(dp[j]+1) for reachable j</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★</span></td><td>10</td><td>Regular Expression Matching</td><td>🔴 Hard</td><td>二维DP：处理'*'匹配0次/多次，'.'通配</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★</span></td><td>97</td><td>Interleaving String</td><td>🟡 Medium</td><td>dp[i][j] = (dp[i-1][j] && match) || (dp[i][j-1] && match)</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★</span></td><td>115</td><td>Distinct Subsequences</td><td>🔴 Hard</td><td>dp[i][j] = dp[i-1][j] + (s[i]==t[j] ? dp[i-1][j-1] : 0)</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★</span></td><td>312</td><td>Burst Balloons</td><td>🔴 Hard</td><td>区间DP：最后戳的气球作为分割点</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★</span></td><td>354</td><td>Russian Doll Envelopes</td><td>🔴 Hard</td><td>LIS变体：先w升序w相同h降序，然后LIS on h</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★</span></td><td>376</td><td>Wiggle Subsequence</td><td>🟡 Medium</td><td>up/down双状态，差值为正up=down+1，负down=up+1</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★</span></td><td>650</td><td>2 Keys Keyboard</td><td>🟡 Medium</td><td>dp[i] = min(dp[j] + i/j) for i%j==0</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★</span></td><td>673</td><td>Number of LIS</td><td>🟡 Medium</td><td>dp[i] + count[i] 双数组统计</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★</span></td><td>718</td><td>Maximum Length of Repeated Subarray</td><td>🟡 Medium</td><td>dp[i][j] = dp[i-1][j-1] + 1（连续，相等时）</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★</span></td><td>813</td><td>Largest Sum of Averages</td><td>🟡 Medium</td><td>dp[k][i] = max(dp[k-1][j] + avg(j,i))</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★</span></td><td>877</td><td>Stone Game</td><td>🟡 Medium</td><td>区间DP：dp[i][j] = max(piles[i] - dp[i+1][j], piles[j] - dp[i][j-1])</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★</span></td><td>887</td><td>Super Egg Drop</td><td>🔴 Hard</td><td>dp[k][m] = dp[k-1][m-1] + dp[k][m-1] + 1（反向思维）</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★</span></td><td>935</td><td>Knight Dialer</td><td>🟡 Medium</td><td>dp[i][d] = sum(dp[i-1][prev])，prev能跳到d</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★</span></td><td>87</td><td>Scramble String</td><td>🔴 Hard</td><td>区间DP + 分割点枚举，含交换/不交换两路</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★</span></td><td>132</td><td>Palindrome Partitioning II</td><td>🔴 Hard</td><td>dp[i] = min(dp[j-1] + 1)，预计算回文表O(n²)</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★</span></td><td>174</td><td>Dungeon Game</td><td>🔴 Hard</td><td>从右下向左上递推，dp[i][j] = max(1, min(dp[i+1][j], dp[i][j+1]) - dungeon[i][j])</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★</span></td><td>486</td><td>Predict the Winner</td><td>🟡 Medium</td><td>同877，区间DP差值法</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★</span></td><td>664</td><td>Strange Printer</td><td>🔴 Hard</td><td>区间DP：s[i]==s[j]则dp[i][j]=dp[i][j-1]，否则枚举分割点</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★</span></td><td>688</td><td>Knight Probability in Chessboard</td><td>🟡 Medium</td><td>dp[step][i][j] = sum(dp[step-1][ni][nj]) / 8</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>53</td><td>Maximum Subarray</td><td>🟡 Medium</td><td>Kadane：dp[i] = max(dp[i-1] + n, n)</td><td><span class="done">✅</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>300</td><td>Longest Increasing Subsequence</td><td>🟡 Medium</td><td>O(n²) 基础 + O(nlogn) 二分优化（耐心排序）</td><td><span class="done">✅</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>1143</td><td>Longest Common Subsequence</td><td>🟡 Medium</td><td>dp[i][j]：相等取左上加1，不等取max左/上</td><td><span class="done">✅</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>70</td><td>Climbing Stairs</td><td>🟢 Easy</td><td>dp[i] = dp[i-1] + dp[i-2]，斐波那契</td><td><span class="done">✅</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>198</td><td>House Robber</td><td>🟡 Medium</td><td>dp[i] = max(dp[i-1], dp[i-2] + nums[i])</td><td><span class="done">✅</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>322</td><td>Coin Change</td><td>🟡 Medium</td><td>完全背包：dp[a] = min(dp[a], dp[a-c] + 1)</td><td><span class="done">✅</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>139</td><td>Word Break</td><td>🟡 Medium</td><td>dp[i] = dp[j] && wordDict.contains(s[j:i])</td><td><span class="done">✅</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>72</td><td>Edit Distance</td><td>🟡 Medium</td><td>dp[i][j]：增删改三操作取最小</td><td><span class="done">✅</span></td><td><span class="unskilled">不熟</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>5</td><td>Longest Palindromic Substring</td><td>🟡 Medium</td><td>区间DP：dp[i][j] = s[i]==s[j] && dp[i+1][j-1]</td><td><span class="done">✅</span></td><td><span class="unskilled">不熟</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>121</td><td>Best Time to Buy and Sell Stock</td><td>🟢 Easy</td><td>维护minPrice，dp[i] = max(dp[i-1], price-minPrice)</td><td><span class="done">✅</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>416</td><td>Partition Equal Subset Sum</td><td>🟡 Medium</td><td>0-1背包：dp[s] = dp[s] || dp[s - num]</td><td><span class="done">✅</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>64</td><td>Minimum Path Sum</td><td>🟡 Medium</td><td>网格DP：dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1])</td><td><span class="done">✅</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>152</td><td>Maximum Product Subarray</td><td>🟡 Medium</td><td>维护max/min双状态（负负得正）</td><td><span class="done">✅</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>62</td><td>Unique Paths</td><td>🟡 Medium</td><td>dp[i][j] = dp[i-1][j] + dp[i][j-1]</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>91</td><td>Decode Ways</td><td>🟡 Medium</td><td>一维DP：dp[i] = dp[i-1] + dp[i-2]（有条件）</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>221</td><td>Maximal Square</td><td>🟡 Medium</td><td>dp[i][j] = min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]) + 1</td><td><span class="done">✅</span></td><td><span class="unskilled">不熟</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>279</td><td>Perfect Squares</td><td>🟡 Medium</td><td>dp[i] = min(dp[i], dp[i - j*j] + 1)</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>494</td><td>Target Sum</td><td>🟡 Medium</td><td>0-1背包变形：dp[s] += dp[s - num]</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>518</td><td>Coin Change II</td><td>🟡 Medium</td><td>完全背包计数：dp[a] += dp[a - c]</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>647</td><td>Palindromic Substrings</td><td>🟡 Medium</td><td>同5回文DP，计数所有dp[i][j]==true</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>516</td><td>Longest Palindromic Subsequence</td><td>🟡 Medium</td><td>区间DP：s[i]==s[j]则+2，否则取max(i+1,j)和(i,j-1)</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>746</td><td>Min Cost Climbing Stairs</td><td>🟢 Easy</td><td>dp[i] = cost[i] + min(dp[i-1], dp[i-2])</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>740</td><td>Delete and Earn</td><td>🟡 Medium</td><td>转化为House Robber（值映射到score数组）</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>377</td><td>Combination Sum IV</td><td>🟡 Medium</td><td>排列背包：外层target内层nums</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>122</td><td>Best Time to Buy and Sell Stock II</td><td>🟡 Medium</td><td>可无限次交易，利润 = 累加所有上涨日差值</td><td><span class="done">✅</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>309</td><td>Best Time to Buy and Sell Stock with Cooldown</td><td>🟡 Medium</td><td>三状态机：hold/sold/cooldown</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>123</td><td>Best Time to Buy and Sell Stock III</td><td>🔴 Hard</td><td>五状态机或分割法：左→右/右→左</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>45</td><td>Jump Game II</td><td>🟡 Medium</td><td>贪心更优，DP：dp[i] = min(dp[j]+1) for reachable j</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>10</td><td>Regular Expression Matching</td><td>🔴 Hard</td><td>二维DP：处理'*'匹配0次/多次，'.'通配</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>97</td><td>Interleaving String</td><td>🟡 Medium</td><td>dp[i][j] = (dp[i-1][j] && match) || (dp[i][j-1] && match)</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>115</td><td>Distinct Subsequences</td><td>🔴 Hard</td><td>dp[i][j] = dp[i-1][j] + (s[i]==t[j] ? dp[i-1][j-1] : 0)</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>312</td><td>Burst Balloons</td><td>🔴 Hard</td><td>区间DP：最后戳的气球作为分割点</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>354</td><td>Russian Doll Envelopes</td><td>🔴 Hard</td><td>LIS变体：先w升序w相同h降序，然后LIS on h</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>376</td><td>Wiggle Subsequence</td><td>🟡 Medium</td><td>up/down双状态，差值为正up=down+1，负down=up+1</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>650</td><td>2 Keys Keyboard</td><td>🟡 Medium</td><td>dp[i] = min(dp[j] + i/j) for i%j==0</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>673</td><td>Number of LIS</td><td>🟡 Medium</td><td>dp[i] + count[i] 双数组统计</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>718</td><td>Maximum Length of Repeated Subarray</td><td>🟡 Medium</td><td>dp[i][j] = dp[i-1][j-1] + 1（连续，相等时）</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>813</td><td>Largest Sum of Averages</td><td>🟡 Medium</td><td>dp[k][i] = max(dp[k-1][j] + avg(j,i))</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>877</td><td>Stone Game</td><td>🟡 Medium</td><td>区间DP：dp[i][j] = max(piles[i] - dp[i+1][j], piles[j] - dp[i][j-1])</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>887</td><td>Super Egg Drop</td><td>🔴 Hard</td><td>dp[k][m] = dp[k-1][m-1] + dp[k][m-1] + 1（反向思维）</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>935</td><td>Knight Dialer</td><td>🟡 Medium</td><td>dp[i][d] = sum(dp[i-1][prev])，prev能跳到d</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★</span></td><td>87</td><td>Scramble String</td><td>🔴 Hard</td><td>区间DP + 分割点枚举，含交换/不交换两路</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★</span></td><td>132</td><td>Palindrome Partitioning II</td><td>🔴 Hard</td><td>dp[i] = min(dp[j-1] + 1)，预计算回文表O(n²)</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★</span></td><td>174</td><td>Dungeon Game</td><td>🔴 Hard</td><td>从右下向左上递推，dp[i][j] = max(1, min(dp[i+1][j], dp[i][j+1]) - dungeon[i][j])</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★</span></td><td>486</td><td>Predict the Winner</td><td>🟡 Medium</td><td>同877，区间DP差值法</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★</span></td><td>664</td><td>Strange Printer</td><td>🔴 Hard</td><td>区间DP：s[i]==s[j]则dp[i][j]=dp[i][j-1]，否则枚举分割点</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★</span></td><td>688</td><td>Knight Probability in Chessboard</td><td>🟡 Medium</td><td>dp[step][i][j] = sum(dp[step-1][ni][nj]) / 8</td><td><span class="pending">⬜</span></td><td></td></tr>
 </table>
 
 <p class="complexity">共 45 题 · 其中 ⭐⭐⭐⭐⭐ 12 题（必会）· ⭐⭐⭐⭐ 16 题（高频）· ⭐⭐⭐ 12 题（进阶）· ⭐⭐ 5 题（扩展）</p>
