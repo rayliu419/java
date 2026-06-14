@@ -59,12 +59,6 @@ public class DP {
         return n;
     }
 
-    private boolean isValid(String subString) {
-        int number = Integer.parseInt(subString);
-        if (number > )
-    }
-
-
 
     /**
      * https://leetcode.com/problems/house-robber

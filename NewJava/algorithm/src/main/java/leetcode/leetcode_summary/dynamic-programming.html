@@ -613,6 +613,22 @@ public int minPathSum(int[][] grid) {
 
 <blockquote>背包问题区分"组合"（外层物品内层容量）和"排列"（外层容量内层物品）。0-1背包容量倒序，完全背包正序。</blockquote>
 
+<h4>快速分类矩阵</h4>
+
+<table>
+  <tr><th></th><th>组合（外层物品）</th><th>排列（外层容量）</th></tr>
+  <tr><td><strong>0-1 背包（倒序）</strong></td><td>416, 494</td><td>—</td></tr>
+  <tr><td><strong>完全背包（正序）</strong></td><td>518, 322</td><td>377</td></tr>
+</table>
+
+<div class="key">
+<strong>💡 两个独立维度：</strong>
+<ul>
+  <li><strong>组合 vs 排列</strong> → 决定外层是<strong>物品</strong>还是<strong>容量</strong></li>
+  <li><strong>0-1 vs 完全</strong> → 决定内层是<strong>倒序</strong>还是<strong>正序</strong></li>
+</ul>
+</div>
+
 <h4>背包问题核心对照表</h4>
 
 <table>
@@ -690,6 +706,55 @@ for (int coin : coins) {
 // 这里组合/排列顺序不影响最值
 // 因为 min 操作交换律</pre>
   </div>
+</div>
+
+<hr style="border:none;border-top:1px dashed #c3dbcc;margin:12px 0;">
+<h4>背包重点详解</h4>
+
+<h5>一、倒序与正序（0-1 vs 完全）</h5>
+
+<blockquote>0-1 背包每件物品只能用一次 → 更新时需要"没有当前物品"的旧状态 → 倒序。完全背包每件物品无限复用 → 更新时需要"已经放入过当前物品"的新状态 → 正序。</blockquote>
+
+<p><strong>核心原理</strong></p>
+<ul>
+  <li><strong>0-1 背包</strong>：每件物品只能用一次。更新当前容量时，需要用到<strong>没有放入当前物品时</strong>的净容量状态（即上一轮的老数据）。</li>
+  <li><strong>完全背包</strong>：每件物品可以无限次使用。更新当前容量时，需要用到<strong>已经放入过当前物品的</strong>容量状态（即这一轮的新数据）。</li>
+</ul>
+
+<p><strong>0-1 背包为什么倒序 — 以 416 为例</strong></p>
+<p>防止当前计算的值被本轮刚刚算出来的新值污染，必须用上一轮的"干净"旧值。</p>
+<p>假设正在处理 <code>num = 3</code>，在此之前 <code>dp[3] = false</code>, <code>dp[0] = true</code>：</p>
+<ul>
+  <li><strong>正序计算</strong>：<code>dp[3] = dp[3] || dp[0] = true</code>（正确，3 没被用过）；<code>dp[6] = dp[6] || dp[3] = true</code>（<strong>错误</strong>，此 <code>dp[3]</code> 是本轮刚更新的，3 只能用一次，却被用了两次）</li>
+  <li><strong>倒序计算</strong>：<code>dp[6] = dp[6] || dp[3] = false</code>（<code>dp[3]</code> 还是旧值，还没算）；<code>dp[3] = dp[3] || dp[0] = true</code>（正确）</li>
+</ul>
+
+<p><strong>完全背包为什么正序 — 以 322 为例</strong></p>
+<p>由于硬币可以无限次使用，当我们计算 <code>dp[j]</code> 时，我们希望看到 <code>dp[j - coin]</code> 已经考虑过放入当前硬币后的情况了。正序保证了从小容量到大容量，前面算好的结果包含了<strong>已经使用过当前硬币</strong>的状态，从而实现无限复用。</p>
+
+<div class="key">
+<strong>💡 一句话总结：</strong>倒序 = 回头看旧版自己（0-1），正序 = 用新版自己继续叠（完全）。
+</div>
+
+<h5>二、组合 vs 排列（外层决定策略）</h5>
+
+<blockquote>组合：外层物品，天然去重。排列：外层容量，每个位置尝试所有物品作为最后一步。</blockquote>
+
+<p><strong>为什么组合要外层物品？</strong></p>
+<ul>
+  <li>外层遍历物品，相当于给所有组合加上一个硬性铁律：物品必须按照在数组中的先后顺序被放入背包。物品 1 一旦被讨论完，后面就再也没有机会把它放到物品 2 的后面去了。</li>
+  <li>这样天然去重：<code>[1, 2]</code> 和 <code>[2, 1]</code> 永远不会同时出现。</li>
+</ul>
+
+<p><strong>为什么排列要外层容量 — 以 377 为例</strong></p>
+<ul>
+  <li>题目要求的是排列数（<code>[1, 2]</code> 和 <code>[2, 1]</code> 算两个不同答案）。</li>
+  <li>当<strong>容量在外层</strong>时，我们一步步填满容量，对每一个固定容量都尝试<strong>最后一步</strong>放入哪一个物品。</li>
+  <li>这意味着每次都可以从物品集合中任选一个作为最后一步，顺序不同的组合自然会被分别计数。</li>
+</ul>
+
+<div class="warn">
+<strong>⚠️ 注意：</strong>当背包求<strong>最值</strong>（min/max）时，由于操作满足交换律，组合和排列的循环顺序不影响最终结果（如 322 Coin Change 用外物品内容量或外容量内物品都能得到正确答案）。只有<strong>计数</strong>问题才必须严格区分组合/排列的循环顺序。
 </div>
 
 <div class="warn">
