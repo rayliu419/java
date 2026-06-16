@@ -140,88 +140,6 @@ public class DP {
     }
 
     /**
-     * https://leetcode.com/problems/coin-change/
-     * 注意: 完全背包问题，每个硬币都可以重复使用。
-     * Top-Down的解题
-     */
-    public int coinChange(int[] coins, int amount) {
-        HashMap<Integer, Integer> cache = new HashMap<>();
-        return coinChange(coins, amount, cache);
-    }
-
-    private int coinChange(int[] coins, int amount, Map<Integer, Integer> cache) {
-        if (amount < 0) return -1;
-        if (amount == 0) return 0;
-        if (cache.containsKey(amount)) return cache.get(amount);
-        // 计算当前的amount的最小值。
-        int min = Integer.MAX_VALUE;
-        for (int i = 0; i < coins.length; i++) {
-            int cur = coinChange(coins, amount - coins[i], cache);
-            if (cur != -1) {
-                min = Math.min(min, cur + 1);
-            }
-        }
-        if (min == Integer.MAX_VALUE) {
-            // amount凑不了
-            cache.put(amount, -1);
-            return -1;
-        } else {
-            cache.put(amount, min);
-            return min;
-        }
-    }
-
-    // Bottom-Up
-    // dp[n] = dp[j] && dp[n-j]
-    public int coinChange2(int[] coins, int amount) {
-        int[] dp = new int[amount + 1];
-        dp[0] = 0;
-        Set<Integer> cache = new HashSet<>();
-        for (int i = 0; i < coins.length; i++) {
-            cache.add(coins[i]);
-        }
-        for (int i = 1; i <= amount; i++) {
-            // 计算直到amount的dp数组, dp[i]依赖于dp[0], dp[1]...
-            int min = Integer.MAX_VALUE;
-            for (int j = 0; j < i; j++) {
-                if (dp[j] != -1 && cache.contains(i-j)) {
-                    min = Math.min(min, dp[j] + 1);
-                }
-            }
-            if (min == Integer.MAX_VALUE) {
-                dp[i] = -1;
-            } else {
-                dp[i] = min;
-            }
-        }
-        return dp[amount];
-    }
-
-
-    /**
-     *  Bottom-Up 优化版，O(amount * len(coins))
-     *
-     *  Arrays.fill(dp, amount + 1) 的含义：
-     *  用 amount+1 作为"无穷大"标记，代替 Integer.MAX_VALUE。
-     *  理由：硬币最小面值 >= 1，最多需要 amount 枚硬币，
-     *  所以 amount+1 是一个安全的"不可能达到"的初始值，
-     *  同时避免 dp[i - coin] + 1 可能溢出 Integer.MAX_VALUE 的问题。
-     */
-    public int coinChange3(int[] coins, int amount) {
-        int[] dp = new int[amount + 1];
-        Arrays.fill(dp, amount + 1);
-        dp[0] = 0;
-        for (int i = 1; i <= amount; i++) {
-            for (int coin : coins) {
-                if (i >= coin) {
-                    dp[i] = Math.min(dp[i], dp[i - coin] + 1);
-                }
-            }
-        }
-        return dp[amount] > amount ? -1 : dp[amount];
-    }
-
-    /**
      * https://leetcode.com/problems/word-break/
      * 跟coin change极其类似
      * 每个word都可以重复使用。
@@ -394,14 +312,87 @@ public class DP {
     }
 
     /**
+     * https://leetcode.com/problems/coin-change/
+     * 322
+     * 注意: 完全背包问题，每个硬币都可以重复使用。
+     */
+    public int coinChange(int[] coins, int amount) {
+        HashMap<Integer, Integer> cache = new HashMap<>();
+        return coinChange(coins, amount, cache);
+    }
+
+    // Top-Down的解题。递归加备忘录
+    private int coinChange(int[] coins, int amount, Map<Integer, Integer> cache) {
+        if (amount < 0) return -1;
+        if (amount == 0) return 0;
+        if (cache.containsKey(amount)) return cache.get(amount);
+        // 计算当前的amount的最小值。
+        int min = Integer.MAX_VALUE;
+        for (int i = 0; i < coins.length; i++) {
+            int cur = coinChange(coins, amount - coins[i], cache);
+            if (cur != -1) {
+                min = Math.min(min, cur + 1);
+            }
+        }
+        if (min == Integer.MAX_VALUE) {
+            // amount凑不了
+            cache.put(amount, -1);
+            return -1;
+        } else {
+            cache.put(amount, min);
+            return min;
+        }
+    }
+
+    /**
+     * Bottom-Up，外层硬币，内层容量
+     * 跟 coinChange3 的区别：内外层循环交换——结果一样，因为求 min 不受顺序影响
+     *
+     * new int[amount + 1] 的原因：
+     * 1. dp[i] 表示"凑成金额 i 的最少硬币数"，需要访问 dp[amount] 作为最终答案
+     * 2. dp[0] 是基础 case（凑 0 元需要 0 枚硬币），多一个 slot
+     * 3. 数组长度为 amount + 1，索引 0..amount 正好覆盖所有状态
+     */
+    public int coinChange2(int[] coins, int amount) {
+        int[] dp = new int[amount + 1];
+        Arrays.fill(dp, amount + 1);
+        dp[0] = 0;
+        for (int coin : coins) {
+            for (int i = coin; i <= amount; i++) {
+                dp[i] = Math.min(dp[i], dp[i - coin] + 1);
+            }
+        }
+        return dp[amount] > amount ? -1 : dp[amount];
+    }
+
+    /**
+     *  Bottom-Up 优化版，O(amount * len(coins))
+     *  Arrays.fill(dp, amount + 1) 的含义：
+     *  用 amount+1 作为"无穷大"标记，代替 Integer.MAX_VALUE。
+     *  理由：硬币最小面值 >= 1，最多需要 amount 枚硬币，
+     *  所以 amount+1 是一个安全的"不可能达到"的初始值，
+     *  同时避免 dp[i - coin] + 1 可能溢出 Integer.MAX_VALUE 的问题。
+     */
+    public int coinChange3(int[] coins, int amount) {
+        int[] dp = new int[amount + 1];
+        Arrays.fill(dp, amount + 1);
+        dp[0] = 0;
+        // 外层容量，内层物品。某些题型都可以
+        for (int i = 1; i <= amount; i++) {
+            for (int coin : coins) {
+                if (i >= coin) {
+                    dp[i] = Math.min(dp[i], dp[i - coin] + 1);
+                }
+            }
+        }
+        return dp[amount] > amount ? -1 : dp[amount];
+    }
+
+    /**
      * 背包问题极其扩展
      * https://leetcode.com/problems/partition-equal-subset-sum
      * 每个元素只能用一次
      * 转化为：给定数组，每个元素用一次，能否凑出 target？
-     *
-     * 白话：
-     * dp[s] → 当前数字中，能否凑出和 s？
-     * 每来一个 num，问自己：之前就能凑出 s？（跳过） 或 之前能凑出 s-num？（带上）
      * 倒序更新 → 每个 num 只用一次（正序就变成完全背包了）
      */
     public boolean canPartition(int[] nums) {
@@ -415,7 +406,6 @@ public class DP {
 
         boolean[] dp = new boolean[target + 1];
         dp[0] = true;  // 空子集，和为 0
-
         for (int num : nums) {
             // 每来一个 num，问自己：之前就能凑出 s？（跳过） 或 之前能凑出 s-num？（带上）
             for (int s = target; s >= num; s--) {
@@ -423,6 +413,49 @@ public class DP {
                 // 正序时 dp[s - num] 可能是「本轮刚更新」的值——当前数字已经被用过了。
                 // 前面每个数字可以用多次，或者每个word可以用多次，循环就是反着的，且dp计算是正序计算的。- 本质区别
                 dp[s] = dp[s] || dp[s - num];     // 不取 || 取
+            }
+        }
+        return dp[target];
+    }
+
+    /**
+     * https://leetcode.com/problems/target-sum
+     * 解法一： 二维数组
+     * 解法而： 转化成背包问题
+     */
+
+    /**
+     * https://leetcode.com/problems/coin-change-ii
+     * 518
+     * 组合问题 - 外层物品
+     * 无限次 - 正序
+     */
+    public int change(int amount, int[] coins) {
+        int[] dp = new int[amount + 1];
+        dp[0] = 1;
+        for (int coin : coins) {
+            for (int i = coin; i <= amount; i++) {
+                dp[i] = dp[i] + dp[i - coin];
+            }
+        }
+        return dp[amount];
+    }
+
+    /**
+     * https://leetcode.com/problems/combination-sum-iv/
+     * 377
+     * 排列 - 内层物品，表示最后是某个物品
+     * 可以用多次 - 正序
+     * dp[]
+     */
+    public int combinationSum4(int[] nums, int target) {
+        int[] dp = new int[target + 1];
+        dp[0] = 1;
+        for (int i = 1; i <= target; i++) {
+            for (int num : nums) {
+                if (i - num >= 0) {
+                    dp[i] = dp[i] + dp[i - num];
+                }
             }
         }
         return dp[target];

@@ -230,12 +230,12 @@
   <tr><td><span class="star">★★★★</span></td><td>221</td><td>Maximal Square</td><td>🟡 Medium</td><td>dp[i][j] = min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]) + 1</td><td><span class="done">✅</span></td><td><span class="unskilled">不熟</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>279</td><td>Perfect Squares</td><td>🟡 Medium</td><td>dp[i] = min(dp[i], dp[i - j*j] + 1)</td><td><span class="pending">⬜</span></td><td></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>494</td><td>Target Sum</td><td>🟡 Medium</td><td>0-1背包变形：dp[s] += dp[s - num]</td><td><span class="pending">⬜</span></td><td></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>518</td><td>Coin Change II</td><td>🟡 Medium</td><td>完全背包计数：dp[a] += dp[a - c]</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>518</td><td>Coin Change II</td><td>🟡 Medium</td><td>完全背包计数：dp[a] += dp[a - c]</td><td><span class="done">✅</span></td><td></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>647</td><td>Palindromic Substrings</td><td>🟡 Medium</td><td>同5回文DP，计数所有dp[i][j]==true</td><td><span class="pending">⬜</span></td><td></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>516</td><td>Longest Palindromic Subsequence</td><td>🟡 Medium</td><td>区间DP：s[i]==s[j]则+2，否则取max(i+1,j)和(i,j-1)</td><td><span class="pending">⬜</span></td><td></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>746</td><td>Min Cost Climbing Stairs</td><td>🟢 Easy</td><td>dp[i] = cost[i] + min(dp[i-1], dp[i-2])</td><td><span class="pending">⬜</span></td><td></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>740</td><td>Delete and Earn</td><td>🟡 Medium</td><td>转化为House Robber（值映射到score数组）</td><td><span class="pending">⬜</span></td><td></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>377</td><td>Combination Sum IV</td><td>🟡 Medium</td><td>排列背包：外层target内层nums</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>377</td><td>Combination Sum IV</td><td>🟡 Medium</td><td>排列背包：外层target内层nums</td><td><span class="done">✅</span></td><td></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>122</td><td>Best Time to Buy and Sell Stock II</td><td>🟡 Medium</td><td>可无限次交易，利润 = 累加所有上涨日差值</td><td><span class="done">✅</span></td><td></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>309</td><td>Best Time to Buy and Sell Stock with Cooldown</td><td>🟡 Medium</td><td>三状态机：hold/sold/cooldown</td><td><span class="pending">⬜</span></td><td></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>123</td><td>Best Time to Buy and Sell Stock III</td><td>🔴 Hard</td><td>五状态机或分割法：左→右/右→左</td><td><span class="pending">⬜</span></td><td></td></tr>
@@ -1404,6 +1404,56 @@ return dp[target];
 // 注意 "0" 不能单独编码，但可以和前一位组成 "10" 或 "20"
 </pre>
 
+<!---- 377 ---->
+<hr>
+<h4>Combination Sum IV（377）⭐⭐⭐⭐</h4>
+<blockquote>排列背包：外层容量、内层物品，同一个物品可以在不同顺序中被多次选为"最后一步"</blockquote>
+<p><strong>dp[t] = 凑出目标 t 的排列数</strong>（不同顺序算不同答案）</p>
+<pre>
+// 排列背包模板 — 外层容量，内层物品
+int[] dp = new int[target + 1];
+dp[0] = 1;  // 空组合：凑 0 有 1 种方法
+for (int i = 1; i <= target; i++) {
+    for (int num : nums) {
+        if (i >= num) {
+            dp[i] += dp[i - num];
+        }
+    }
+}
+return dp[target];
+</pre>
+
+<div class="key">
+<strong>💡 dp[0] = 1 的含义：</strong>这不是"为了递推硬加的"——它表示<strong>空组合</strong>（什么都不选）计为 1 种方法。在集合论中空集是任何集合的子集，在组合计数中空组合是合法的起始状态。如果设 dp[0] = 0，那么 dp[num] = dp[num] + dp[0] = 0 + 0 = 0，递推永远无法启动。
+</div>
+
+<div class="warn">
+<strong>⚠️ 排列 vs 组合：</strong>377（排列）= 外层容量内层物品 → {1,2} 和 {2,1} 都算。518（组合）= 外层物品内层容量 → {1,2} 和 {2,1} 算同一个。377 缺失 dp[0] = 1 是最常见的新手错误。
+</div>
+
+<!---- 518 ---->
+<hr>
+<h4>Coin Change II（518）⭐⭐⭐⭐</h4>
+<blockquote>完全背包计数：求凑出目标金额的组合数（组合 = 顺序不同的算同一种）</blockquote>
+<p><strong>dp[a] = 凑出金额 a 的方法数（组合数）</strong></p>
+<pre>
+// 完全背包计数 — 外层物品，内层容量
+int[] dp = new int[amount + 1];
+dp[0] = 1;
+for (int coin : coins) {
+    for (int a = coin; a <= amount; a++) {
+        dp[a] += dp[a - coin];
+    }
+}
+return dp[amount];
+</pre>
+
+<ul>
+  <li><strong>外层硬币 → 组合</strong>：硬币 1 讨论完后，硬币 2 只能出现在硬币 1 之后，天然去重</li>
+  <li><strong>dp[0] = 1</strong>：空组合，1 种方法凑出 0 元——所有递推的起点</li>
+  <li><strong>和 322 区别</strong>：518 计数（+=），322 求最值（min），循环顺序对最值无影响但有更清晰的标准写法</li>
+</ul>
+
 <!---- 877 ---->
 <hr>
 <h4>Stone Game（877）⭐⭐⭐</h4>
@@ -1586,6 +1636,27 @@ return dp[amount] > amount ? -1 : dp[amount];
 // 很多题都可以从 O(n²) → O(n) → O(1)
 // 但不要一开始就写滚动数组，容易搞混边界
 // 策略：先 AC 标准版，再说"还可以优化到 O(1)"
+</pre>
+</div>
+
+<div class="warn">
+<strong>🚫 8. 计数类背包忘写 dp[0] = 1</strong>
+<pre>
+// 错误 — 缺少 dp[0] = 1，所有递推坍缩成 0
+int[] dp = new int[target + 1];
+// dp[0] = 1;  // ← 忘了这行！
+for (int num : nums) {
+    for (int s = target; s >= num; s--) {
+        dp[s] += dp[s - num];  // dp[0] 是 0，永远加不起来
+    }
+}
+return dp[target];  // 永远是 0
+
+// 正确 — dp[0] = 1 代表"空组合"（凑 0 有 1 种方法）
+dp[0] = 1;
+// 这不是"为递推硬加的"，而是数学上组合计数的 base case
+// 所有 dp[num] = dp[num] + dp[0] 才能启动递推
+// 适用：518 Coin Change II、377 Combination Sum IV、494 Target Sum
 </pre>
 </div>
 
