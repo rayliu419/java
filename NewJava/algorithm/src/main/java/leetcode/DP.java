@@ -50,13 +50,32 @@ public class DP {
 
     /**
      * https://leetcode.com/problems/decode-ways/
+     * dp[n]长度为n的可以decode成几种。
      * dp[n] = if condition dp[n-1] + dp[n-2]
      *         else dp[n-1]
      */
     public int numDecodings(String s) {
-        int n = s.length();
+        int[] dp = new int[s.length() + 1];
+        dp[1] = 1;
+        String ss = s.substring(0, 2);
+        if (valid(ss)) {
+            dp[2] = 2;
+        } else {
+            dp[2] = 1;
+        }
+        for (int i = 3; i <= s.length(); i++) {
+            if (i + 2 < s.length() && valid(s.substring(i, i + 2))) {
+                dp[i] = dp[i-1] + dp[i-2];
+            } else {
+                dp[i] = dp[i-1];
+            }
+        }
+        return dp[s.length()];
+    }
 
-        return n;
+    private boolean valid(String s) {
+        if (Integer.parseInt(s) > 26) return false;
+        return true;
     }
 
 

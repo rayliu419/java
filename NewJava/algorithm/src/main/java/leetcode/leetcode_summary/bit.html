@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>位操作总结</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif; line-height: 1.45; max-width: 960px; margin: 0 auto; padding: 16px 24px 60px; color: #2d3a31; background: #f5faf6; font-size: 13px; }
+  h1 { font-size: 1.35em; border-bottom: 3px solid #4a7c3f; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
+  h2 { font-size: 1.2em; color: #3d6b35; margin-top: 20px; padding-left: 8px; border-left: 4px solid #5a8f4c; }
+  h3 { font-size: 1.02em; color: #2d3a31; margin-top: 16px; }
+  h4 { font-size: 0.95em; color: #3a5235; margin-top: 12px; }
+  p { margin: 6px 0; } li { margin: 2px 0; } ol, ul { padding-left: 20px; }
+  blockquote { margin: 10px 0; padding: 12px 20px; background: #e8f5ec; border-left: 5px solid #5a8f4c; border-radius: 0 8px 8px 0; }
+  blockquote > p { margin: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9em; }
+  th, td { border: 1px solid #c3dbcc; padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: #4a7c3f; color: #fff; font-weight: 600; white-space: nowrap; }
+  tr:nth-child(even) { background: #e8f5ec; }
+  tr:hover { background: #ddf0e4; }
+  pre { background: #f5f0eb; color: #3d3731; padding: 12px 16px; border-radius: 8px; overflow-x: auto; font-size: 0.8em; line-height: 1.45; margin: 8px 0; }
+  code { font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace; }
+  p > code, li > code, td > code { background: #e4eddb; padding: 2px 6px; border-radius: 4px; font-size: 0.88em; color: #3d6b35; }
+  hr { border: none; border-top: 2px dashed #c3dbcc; margin: 16px 0; }
+  .core { background: #f0eeff; border-radius: 8px; border-left: 4px solid #6366f1; padding: 12px 16px; margin: 12px 0; }
+  .tip { background: #fef9e7; border-radius: 8px; border-left: 4px solid #d4a017; padding: 12px 16px; margin: 12px 0; }
+  .warn { background: #fdf0ef; border-radius: 8px; border-left: 4px solid #d9534f; padding: 12px 16px; margin: 12px 0; }
+  .summary { background: #edf7ed; border-radius: 8px; border-left: 4px solid #4caf50; padding: 12px 16px; margin: 12px 0; }
+  .truth-table { font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace; font-size: 0.85em; }
+  .truth-table td { text-align: center; }
+</style>
+</head>
+<body>
+
+<h1>位操作总结</h1>
+
+<blockquote><strong>核心思路：</strong>位操作是 CPU 最底层的运算，天然具有 O(1) 时间、O(1) 空间的优势。位运算的核心模式包括：<strong>用二进制编码压缩状态</strong>（如用 int 的 32 位表示 32 个布尔值）、<strong>利用位掩码跳过循环</strong>（如 n &amp; (n-1) 消除最低位的 1）、<strong>异或的对称抵消性质</strong>（a ^ a = 0, 0 ^ a = a）。掌握这些模式，可以在特定题目中实现惊人的常数优化。</blockquote>
+
+<h2>目录</h2>
+<ul>
+  <li><a href="#sec1">基本操作对照表</a></li>
+  <li><a href="#sec2">常用位技巧</a></li>
+  <li><a href="#sec3">判断 2 的幂</a></li>
+  <li><a href="#sec4">反转二进制位（Reverse Bits）</a></li>
+  <li><a href="#sec5">重复 DNA 序列（Repeated DNA Sequence）</a></li>
+  <li><a href="#sec6">数字范围按位与（Bitwise AND of Numbers Range）</a></li>
+  <li><a href="#sec7">题目汇总</a></li>
+</ul>
+
+<hr>
+
+<h2 id="sec1">基本操作对照表</h2>
+
+<table class="truth-table">
+  <tr><th>操作</th><th>C / C++ / Java 写法</th><th>说明</th></tr>
+  <tr><td>按位与</td><td><code>a &amp; b</code></td><td>同 1 为 1</td></tr>
+  <tr><td>按位或</td><td><code>a | b</code></td><td>有 1 为 1</td></tr>
+  <tr><td>按位异或</td><td><code>a ^ b</code></td><td>不同为 1</td></tr>
+  <tr><td>按位取反</td><td><code>~a</code></td><td>0 变 1，1 变 0</td></tr>
+  <tr><td>左移</td><td><code>a &lt;&lt; n</code></td><td>左移 n 位，低位补 0，等价于 ×2<sup>n</sup></td></tr>
+  <tr><td>右移</td><td><code>a &gt;&gt; n</code></td><td>右移 n 位，高位补符号位（算术右移）</td></tr>
+  <tr><td>无符号右移</td><td><code>a &gt;&gt;&gt; n</code></td><td>Java 特有，高位补 0</td></tr>
+</table>
+
+<hr>
+
+<h2 id="sec2">常用位技巧</h2>
+
+<h3>设置某位为 1</h3>
+<pre>
+bit_fld |= (1 &lt;&lt; n);   // 将第 n 位置 1
+</pre>
+
+<h3>清除某位（置 0）</h3>
+<pre>
+bit_fld &amp;= ~(1 &lt;&lt; n);  // 将第 n 位清零
+</pre>
+
+<h3>反转某位（Toggle）</h3>
+<pre>
+bit_fld ^= (1 &lt;&lt; n);   // 第 n 位 0 变 1，1 变 0
+</pre>
+
+<h3>测试某位</h3>
+<pre>
+bool isSet = bit_fld &amp; (1 &lt;&lt; n);   // 非 0 则第 n 位为 1
+</pre>
+
+<div class="tip">
+<strong>提示：</strong>测试某位时，是否需要 <code>1u</code>（无符号 1）取决于语言和位数。在 C/C++ 中，如果 <code>n == 31</code>，<code>1 &lt;&lt; 31</code> 在有符号 int 中是未定义行为（或得到负数）。Java 中 <code>1 &lt;&lt; 31</code> 是合法的，结果为 <code>Integer.MIN_VALUE</code>，且 <code>&amp;</code> 运算后判断 <code>!= 0</code> 即可，无需强转无符号。建议统一用 <code>!= 0</code> 判断。
+</div>
+
+<h3>常见位运算小技巧</h3>
+
+<table>
+  <tr><th>目的</th><th>写法</th><th>原理</th></tr>
+  <tr><td>去掉最低位的 1</td><td><code>x &amp; (x - 1)</code></td><td>x-1 将最低位 1 变为 0，其后所有 0 变为 1</td></tr>
+  <tr><td>取最低位的 1</td><td><code>x &amp; (-x)</code></td><td>-x = ~x + 1，与 x 只有最低位 1 重叠</td></tr>
+  <tr><td>判断奇偶</td><td><code>x &amp; 1</code></td><td>最低位为 1 是奇数</td></tr>
+  <tr><td>判断第 n 位</td><td><code>(x &gt;&gt; n) &amp; 1</code></td><td>右移后取最低位</td></tr>
+  <tr><td>异或交换</td><td><code>a ^= b; b ^= a; a ^= b;</code></td><td>三次异或实现交换，无需临时变量</td></tr>
+  <tr><td>取绝对值</td><td><code>(x ^ (x &gt;&gt; 31)) - (x &gt;&gt; 31)</code></td><td>符号位为 1 时补码转换</td></tr>
+  <tr><td>判断符号相同</td><td><code>(a ^ b) &gt;= 0</code></td><td>最高位相同则异或结果非负</td></tr>
+  <tr><td>用 int 的 32 位做布尔数组</td><td><code>flag |= (1 &lt;&lt; k)</code></td><td>用 1 个 int 存储 32 个布尔值</td></tr>
+</table>
+
+<hr>
+
+<h2 id="sec3">判断 2 的幂</h2>
+
+<div class="core">
+<strong>核心心法：</strong>2 的幂的二进制表示中恰好只有一个 1。<code>x &amp; (x - 1)</code> 去掉这个 1 后结果应为 0。
+</div>
+
+<pre>
+bool isPowerOfTwo = x &amp;&amp; !(x &amp; (x - 1));
+</pre>
+
+<p><strong>拆解：</strong></p>
+<ul>
+  <li><code>x &amp;&amp;</code> — 排除 <code>x == 0</code>（0 不是 2 的幂）。注意 <code>-2147483648</code>（即 <code>Integer.MIN_VALUE</code>）也不是 2 的幂，因为它只有一个 1 但表示的是负数。不过如果函数是处理有符号 int，<code>x &gt; 0 &amp;&amp; !(x &amp; (x-1))</code> 更安全。</li>
+  <li><code>!(x &amp; (x - 1))</code> — 如果二进制只有一个 1，去掉它后结果为 0。</li>
+</ul>
+
+<hr>
+
+<h2 id="sec4">反转二进制位（Reverse Bits）</h2>
+
+<div class="warn">
+<strong>注意：</strong>此题看似简单，但容易在细节上出错——特别是循环中的移位顺序和符号位处理。
+</div>
+
+<pre>
+int reverseBits(int n) {
+    int y = 0;
+    int digit = 0;
+    int x = n;
+    for (int i = 0; i &lt; 32; i++) {
+        y = y &lt;&lt; 1;          // 先腾出最低位
+        digit = x &amp; 1;       // 取 x 的最低位
+        y = y | digit;       // 写入 y 的最低位
+        x = x &gt;&gt; 1;         // x 右移，下一位进入最低位
+    }
+    return y;
+}
+</pre>
+
+<p><strong>关键细节：</strong></p>
+<ul>
+  <li><strong>为什么 <code>temp</code> 不行？</strong>——如果先把 <code>x</code> 保存到 <code>temp</code> 然后操作 <code>temp</code>，实际效果和直接操作 <code>x</code> 没有区别。问题一般不出在变量名上，而是出在移位顺序上：<code>y = y &lt;&lt; 1</code> 必须在 <code>y = y | digit</code> 之前，否则第一次循环会丢失第一个 bit。</li>
+  <li>有符号右移 <code>&gt;&gt;</code> 对负数会在高位补 1。但在 <code>reverseBits</code> 中，我们只需要取最低位，高位填 1 或 0 不影响 <code>x &amp; 1</code> 的结果。不过如果在意，可以用无符号右移 <code>&gt;&gt;&gt;</code>。</li>
+</ul>
+
+<hr>
+
+<h2 id="sec5">重复 DNA 序列（Repeated DNA Sequence）</h2>
+
+<div class="core">
+<strong>核心心法：</strong>题目要求找所有出现次数 &ge; 2 的长度为 10 的子串。直观上用 HashMap 会 MLE。关键优化：<strong>将 ACGT 编码为 2-bit 二进制</strong>，用 int 代替 String 作为 HashMap 的 key。
+</div>
+
+<h3>编码方案</h3>
+<pre>
+A -> 00
+C -> 01
+G -> 10
+T -> 11
+</pre>
+
+<p>一个长度为 10 的子串需要 20 个二进制位，恰好能放入一个 <code>int</code>（32 位）中：</p>
+<pre>
+例：ACGTACGTAC -> 00011011000110110001
+    AAAAAAAA   -> 00000000000000000000
+</pre>
+
+<h3>空间优化原理</h3>
+<ul>
+  <li>20 位二进制数共有 <strong>2<sup>20</sup> = 1,048,576</strong> 种可能。</li>
+  <li>可以用一个 <strong>bool 数组</strong> 代替 HashMap：<code>bool hashTable[1024 * 1024];</code></li>
+  <li>第一次遇到时设置为 <code>true</code>，第二次遇到时即为重复。</li>
+  <li>相比 HashMap（需要存完整字符串 + 哈希表开销），数组方式几乎零额外内存。</li>
+</ul>
+
+<div class="summary">
+<strong>总结：</strong>当数据空间有限（如本题 2<sup>20</sup> 种组合），用位编码 + 数组替代 HashMap 是经典的降低常数和内存的技巧。类似的思路在 <strong>布隆过滤器</strong> 和 <strong>BitSet</strong> 中也有应用。
+</div>
+
+<hr>
+
+<h2 id="sec6">数字范围按位与（Bitwise AND of Numbers Range）</h2>
+
+<p>给定范围 [m, n]（0 &le; m &le; n &le; 2<sup>31</sup> - 1），返回范围内所有数字的按位与。</p>
+
+<h3>解法 1：暴力法</h3>
+<pre>
+int res = m;
+for (int i = m + 1; i &lt;= n; i++) res &amp;= i;
+</pre>
+<p>时间 O(n - m)，当范围很大时（如 m = 1, n = 2<sup>31</sup> - 1）直接超时。</p>
+
+<h3>解法 2：找公共左前缀</h3>
+
+<div class="core">
+<strong>核心心法：</strong>从 m 到 n 的范围内，每个 bit 只要出现过 0，最终结果中该位就是 0。当二进制数从 <code>xxxx0zzzz</code> 跳到 <code>xxxx10000</code> 时，低位全部归零再向上增长——这意味着高位不变的公共前缀就是答案，低位全为 0。
+</div>
+
+<p>假设 m 和 n 的二进制分别是：</p>
+<pre>
+m = xxxx0zzzz...
+n = xxxx1yyyy...
+</pre>
+<p>当 <code>xxxx0zzzz</code> 不断 +1 直到变成 <code>xxxx10000</code> 时，所有低位都被 AND 成 0。因此最终结果是 <strong>m 和 n 的公共二进制左前缀 + 低位补 0</strong>。</p>
+
+<pre>
+int rangeBitwiseAnd(int m, int n) {
+    int shift = 0;
+    while (m != n) {
+        m &gt;&gt;&gt;= 1;   // 不断右移，直到 m 和 n 相等
+        n &gt;&gt;&gt;= 1;   // 注意用无符号右移避免符号位干扰
+        shift++;
+    }
+    return m &lt;&lt; shift;  // 左移回原来的位置，低位补 0
+}
+</pre>
+
+<div class="warn">
+<strong>易错点：</strong>如果 m 和 n 都是负数或有符号数，右移时要用 <code>&gt;&gt;&gt;</code>（无符号右移）以免符号位被复制。Java 中 int 是 32 位有符号，<code>&gt;&gt;</code> 对负数高位补 1 会破坏循环条件。
+</div>
+
+<hr>
+
+<h2 id="sec7">题目汇总</h2>
+
+<table>
+  <tr><th>题目</th><th>核心思路</th><th>难度</th></tr>
+  <tr><td>Single Number</td><td><code>a ^ a = 0</code>，全员异或剩下的就是落单的数</td><td>Easy</td></tr>
+  <tr><td>Number of 1 Bits</td><td><code>n &amp; (n - 1)</code> 循环，计数次数</td><td>Easy</td></tr>
+  <tr><td>Power of Two</td><td><code>n &gt; 0 &amp;&amp; (n &amp; (n - 1)) == 0</code></td><td>Easy</td></tr>
+  <tr><td>Reverse Bits</td><td>循环 32 次，从最低位逐位搬运</td><td>Easy</td></tr>
+  <tr><td>Single Number II</td><td>按位统计每个 bit 出现的次数 mod 3</td><td>Medium</td></tr>
+  <tr><td>Single Number III</td><td>全员异或得到 x ^ y，用最低不同位分组</td><td>Medium</td></tr>
+  <tr><td>Bitwise AND of Numbers Range</td><td>找 m 和 n 的公共左前缀 + 低位补 0</td><td>Medium</td></tr>
+  <tr><td>Repeated DNA Sequences</td><td>ACGT 用 2-bit 编码，数组代替 HashMap</td><td>Medium</td></tr>
+  <tr><td>Maximum XOR of Two Numbers</td><td>从高位到低位贪心构建，用 HashSet 检查可行性</td><td>Medium</td></tr>
+  <tr><td>Sum of Two Integers</td><td><code>a ^ b</code> 无进位加法 + <code>(a &amp; b) &lt;&lt; 1</code> 进位，迭代直到进位为 0</td><td>Medium</td></tr>
+  <tr><td>Counting Bits</td><td>DP：<code>f[i] = f[i &gt;&gt; 1] + (i &amp; 1)</code></td><td>Easy</td></tr>
+</table>
+
+<div class="summary">
+<strong>复习要点：</strong>
+<ol>
+  <li><strong>异或 (^)</strong> 是位运算中最"灵性"的操作——去重、交换、找不同，很多题目围绕它展开。</li>
+  <li><strong>n &amp; (n-1)</strong> 是位运算的"核武器"——清最低位的 1，用在计数、2 的幂判断、枚举子集等场景。</li>
+  <li><strong>编码压缩</strong>——当元素集合很小（如 ACGT 只有 4 种），用二进制编码代替字符串/对象来降低内存。</li>
+  <li><strong>找公共前缀</strong>——区间 AND 的本质是找二进制表示的共同前缀。</li>
+</ol>
+</div>
+
+</body>
+</html>
