@@ -226,7 +226,7 @@
   <tr><td><span class="star">★★★★★</span></td><td>64</td><td>Minimum Path Sum</td><td>🟡 Medium</td><td>网格DP：dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1])</td><td><span class="done">✅</span></td><td></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>152</td><td>Maximum Product Subarray</td><td>🟡 Medium</td><td>维护max/min双状态（负负得正）</td><td><span class="done">✅</span></td><td></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>62</td><td>Unique Paths</td><td>🟡 Medium</td><td>dp[i][j] = dp[i-1][j] + dp[i][j-1]</td><td><span class="pending">⬜</span></td><td></td></tr>
-  <tr><td><span class="star">★★★★</span></td><td>91</td><td>Decode Ways</td><td>🟡 Medium</td><td>一维DP：dp[i] = dp[i-1] + dp[i-2]（有条件）</td><td><span class="pending">⬜</span></td><td></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>91</td><td>Decode Ways</td><td>🟡 Medium</td><td>一维DP：dp[i] = dp[i-1] + dp[i-2]（有条件）</td><td><span class="done">✅</span></td><td><span class="unskilled">不熟</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>221</td><td>Maximal Square</td><td>🟡 Medium</td><td>dp[i][j] = min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]) + 1</td><td><span class="done">✅</span></td><td><span class="unskilled">不熟</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>279</td><td>Perfect Squares</td><td>🟡 Medium</td><td>dp[i] = min(dp[i], dp[i - j*j] + 1)</td><td><span class="pending">⬜</span></td><td></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>494</td><td>Target Sum</td><td>🟡 Medium</td><td>0-1背包变形：dp[s] += dp[s - num]</td><td><span class="pending">⬜</span></td><td></td></tr>
@@ -1395,14 +1395,77 @@ return dp[target];
 <!---- 91 ---->
 <hr>
 <h4>Decode Ways（91）⭐⭐⭐⭐</h4>
-<blockquote>有条件的一维DP，注意边界情况</blockquote>
-<pre>
-// dp[i] = decode ways of s[0:i]
-// 两种情况：
-// 1. s[i-1] != '0' → dp[i-1]（最后一位单独编码）
-// 2. s[i-2:i] in ["10","26"] → dp[i-2]（最后两位一起编码）
-// 注意 "0" 不能单独编码，但可以和前一位组成 "10" 或 "20"
-</pre>
+<blockquote>有 <strong>'0'</strong> 条件的一维DP，边界情况多，容易踩坑</blockquote>
+
+<p><strong>dp[i] = s[0:i] 的解码方法数</strong>（多开一位，dp[0]=1 代表空串）</p>
+
+<div class="comparison">
+  <div>
+    <h4>✅ 正确写法</h4>
+    <pre>
+public int numDecodings(String s) {
+    if (s == null || s.length() == 0) return 0;
+    int n = s.length();
+    int[] dp = new int[n + 1];
+    dp[0] = 1;
+    dp[1] = s.charAt(0) == '0' ? 0 : 1;
+    for (int i = 2; i &lt;= n; i++) {
+        // 单数字解码：s[i-1] 作为 '1'~'9'
+        if (s.charAt(i - 1) != '0')
+            dp[i] += dp[i - 1];
+        // 双数字解码：s[i-2..i] 在 10~26
+        int two = Integer.parseInt(
+            s.substring(i - 2, i));
+        if (two &gt;= 10 &amp;&amp; two &lt;= 26)
+            dp[i] += dp[i - 2];
+    }
+    return dp[n];
+}</pre>
+  </div>
+  <div>
+    <h4>⚠️ 常见错误</h4>
+    <pre>
+// ❌ 漏了 dp[1] 的零判断
+dp[1] = 1;  // s="0" 时应该返回 0
+
+// ❌ valid() 没检查前导零
+boolean valid(String s) {
+    return Integer.parseInt(s) &lt;= 26;
+    // "07" → 7 &lt;= 26 → true，但"07"不合法
+}
+
+// ❌ 单数字无条件累加 dp[i-1]
+dp[i] = dp[i-1];  // s[i]=='0' 时不能单独编码
+
+// ❌ 双数字只检查 &lt;=26 没检查 &gt;=10
+if (val &lt;= 26) dp[i] += dp[i-2];
+// "05" 也会被误加，但 "05" 不合法</pre>
+  </div>
+</div>
+
+<div class="key">
+<strong>💡 '0' 的处理是 Decode Ways 的核心考点</strong>
+<p>三个关键规则：</p>
+<ol>
+  <li><strong>'0' 不能单独解码</strong> — s 开头为 '0' 直接返回 0</li>
+  <li><strong>'0' 只能与前面一位组成 "10" 或 "20"</strong> — "30"、"40"…"90" 都不合法，遇到这种情况无论怎么分都无法解码，直接返回 0</li>
+  <li><strong>双数字必须是 [10, 26] 闭区间</strong> — 即 ≥10 且 ≤26，缺一不可</li>
+</ol>
+</div>
+
+<div class="warn">
+<strong>🚫 最隐蔽的 bug：连续两个零 "00" 或 "30"</strong>
+<p>s = "100"：答案是 0（唯一可能的是 "10"+"0"，但 '0' 不能单独解码），而不是 1。</p>
+<p>正确代码会自动处理：<br>
+dp[1] = 1（'1'），dp[2]（"10" 有效）= dp[0]+dp[1]=2，<br>
+dp[3]：'0' 不能单数字 → dp[3] 不加 dp[2]；"00" 不在 10~26 → 不加 dp[1] → dp[3]=0 ✅</p>
+</div>
+
+<div class="tip">
+<strong>💡 从 Climbing Stairs 看 Decode Ways 的区别</strong>
+<p>Climbing Stairs（70）的转移是 <code>dp[i] = dp[i-1] + dp[i-2]</code>，<strong>无条件的</strong>，因为一步和两步永远是合法的动作。</p>
+<p>Decode Ways 的转移 <code>dp[i] = dp[i-1](条件1) + dp[i-2](条件2)</code>，每一步都有前提条件——这使它比爬楼梯难了一个台阶。核心区别就在于<strong>条件判断</strong>。</p>
+</div>
 
 <!---- 377 ---->
 <hr>
@@ -1621,11 +1684,19 @@ return dp[amount] > amount ? -1 : dp[amount];
 </div>
 
 <div class="warn">
-<strong>🚫 6. Decode Ways 忽略 '0' 的特殊处理</strong>
+<strong>🚫 6. Decode Ways 状态转移方程结构错误</strong>
 <pre>
-// '0' 不能单独编码，只能和前一个数字组成 "10" 或 "20"
-// 当 s[i-1] == '0' 时，dp[i] 不能从 dp[i-1] 转移
-// 如果 s[0] == '0'，直接返回 0
+// ❌ 错误：把单数字和双数字当成互斥的二选一
+if (valid(temp)) {
+    dp[i] = dp[i - 2] + dp[i - 1];  // "双有效" 或 "双+单都有效"?
+} else {
+    dp[i] = dp[i - 1];  // 假设单数字一定有效
+}
+
+// ✅ 正确：两种解码方式是各自独立判断后累加
+// 单数字有效 → +dp[i-1]
+// 双数字有效 → +dp[i-2]
+// 两个条件可能同时满足（如 "12"），也可能都不满足（应返回 0）
 </pre>
 </div>
 

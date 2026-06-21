@@ -6,21 +6,21 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
-public class ObjectCompareTest extends TestCase {
+public class InterviewCommonTest extends TestCase {
 
-    private ObjectCompare.StudentComparators comparators;
+    private InterviewCommon.StudentComparators comparators;
 
     @Override
     protected void setUp() throws Exception {
-        comparators = new ObjectCompare.StudentComparators();
+        comparators = new InterviewCommon.StudentComparators();
     }
 
-    private ObjectCompare.Student s(String area, int age, double score) {
+    private InterviewCommon.Student s(String area, int age, double score) {
         return s(area, age, score, 0.0);
     }
 
-    private ObjectCompare.Student s(String area, int age, double score, double extraScore) {
-        ObjectCompare.Student student = new ObjectCompare.Student();
+    private InterviewCommon.Student s(String area, int age, double score, double extraScore) {
+        InterviewCommon.Student student = new InterviewCommon.Student();
         student.setArea(area);
         student.setAge(age);
         student.setScore(score);
@@ -30,7 +30,7 @@ public class ObjectCompareTest extends TestCase {
 
     @Test
     public void testByScoreThenByAgeComparator_scoreDescendingThenAgeAscending() {
-        List<ObjectCompare.Student> students = Arrays.asList(
+        List<InterviewCommon.Student> students = Arrays.asList(
             s("Beijing", 18, 85.0),
             s("Shanghai", 20, 90.0),
             s("Shenzhen", 18, 95.0),
@@ -48,7 +48,7 @@ public class ObjectCompareTest extends TestCase {
 
     @Test
     public void testByAreaThenByScoreComparator_areaOrderThenScoreDescending() {
-        List<ObjectCompare.Student> students = Arrays.asList(
+        List<InterviewCommon.Student> students = Arrays.asList(
             s("Shenzhen", 18, 95.0),
             s("Beijing", 19, 80.0),
             s("Shanghai", 20, 90.0),
@@ -68,7 +68,7 @@ public class ObjectCompareTest extends TestCase {
 
     @Test
     public void testByScoreThenByAreaComparator_scoreDescendingThenAreaOrder() {
-        List<ObjectCompare.Student> students = Arrays.asList(
+        List<InterviewCommon.Student> students = Arrays.asList(
             s("Shenzhen", 18, 85.0),
             s("Beijing", 19, 85.0),
             s("Shanghai", 20, 90.0)
@@ -84,7 +84,7 @@ public class ObjectCompareTest extends TestCase {
 
     @Test
     public void testByScoreThenByAreaComparator2_totalScoreDescendingThenAgeAscending() {
-        List<ObjectCompare.Student> students = Arrays.asList(
+        List<InterviewCommon.Student> students = Arrays.asList(
             s("Beijing", 19, 80.0, 5.0),   // total=85
             s("Shanghai", 18, 80.0, 5.0),   // total=85
             s("Shenzhen", 20, 80, 0.0)    // total=90

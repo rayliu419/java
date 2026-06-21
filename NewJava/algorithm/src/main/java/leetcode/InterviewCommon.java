@@ -2,7 +2,42 @@ package leetcode;
 
 import java.util.Comparator;
 
-public class ObjectCompare {
+public class InterviewCommon {
+
+    /**
+     * substring(i)      → [i, end)     从 i 到末尾
+     * substring(i, j)   → [i, j)       左闭右开！
+     */
+    public void stringOperations() {
+        String s = "hello world";
+
+        // substring(int beginIndex) — [beginIndex, end)
+        String sub1 = s.substring(6);    // "world"
+        System.out.println("s.substring(6):       \"" + sub1 + "\"");
+
+        // substring(int beginIndex, int endIndex) — 左闭右开 [beginIndex, endIndex)
+        String sub2 = s.substring(0, 5);  // "hello", [0,5)
+        String sub3 = s.substring(6, 8);  // "wo",    [6,8)
+        System.out.println("s.substring(0, 5):    \"" + sub2 + "\"");
+        System.out.println("s.substring(6, 8):    \"" + sub3 + "\"");
+
+        // j = length 不越界，等同于 s.substring(beginIndex)
+        String sub4 = s.substring(6, s.length());  // "world"
+        System.out.println("s.substring(6, len):  \"" + sub4 + "\"");
+
+        // LeetCode 常用模式
+        String text = "abcdef";
+        String first3 = text.substring(0, 3);                // "abc"  前 n 个
+        String last3  = text.substring(text.length() - 3);   // "def"  后 n 个
+        String mid    = text.substring(2, 4);                // "cd"   中间 [i,j)
+        System.out.println("前3: " + first3 + ", 后3: " + last3 + ", 中间[2,4): " + mid);
+
+        // 对比 substring 与 charAt
+        for (int i = 0; i < s.length(); i++) {
+            System.out.print(s.charAt(i) + " ");
+        }
+        System.out.println();
+    }
 
     public static class Student {
 

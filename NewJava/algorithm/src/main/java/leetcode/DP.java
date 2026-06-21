@@ -8,8 +8,7 @@ public class DP {
      * https://leetcode.cn/problems/permutations/ - 无重复的数
      *
      * @param root
-     * @return
-     * 排列的类DP解法，Bottom UP
+     * @return 排列的类DP解法，Bottom UP
      */
     public List<List<Integer>> permute(int[] nums) {
         List<List<Integer>> result = new ArrayList<>();
@@ -50,27 +49,31 @@ public class DP {
 
     /**
      * https://leetcode.com/problems/decode-ways/
-     * dp[n]长度为n的可以decode成几种。
-     * dp[n] = if condition dp[n-1] + dp[n-2]
-     *         else dp[n-1]
+     * dp[i] = s[0..i) 的解码方式数
+     * dp[i] = (s[i-1] != '0' ? dp[i-1] : 0) + (s[i-2..i] in [10..26] ? dp[i-2] : 0)
      */
     public int numDecodings(String s) {
-        int[] dp = new int[s.length() + 1];
-        dp[1] = 1;
-        String ss = s.substring(0, 2);
-        if (valid(ss)) {
-            dp[2] = 2;
-        } else {
-            dp[2] = 1;
-        }
-        for (int i = 3; i <= s.length(); i++) {
-            if (i + 2 < s.length() && valid(s.substring(i, i + 2))) {
-                dp[i] = dp[i-1] + dp[i-2];
-            } else {
-                dp[i] = dp[i-1];
+        if (s == null || s.length() == 0) return 0;
+        int n = s.length();
+        // n + 1 数组其实比较匹配substring的参数
+        int[] dp = new int[n + 1];
+        dp[0] = 1;
+        dp[1] = s.charAt(0) == '0' ? 0 : 1;
+        for (int i = 2; i <= n; i++) {
+            // 单数字解码：s[i-1] 作为 '1'~'9'
+            if (s.charAt(i - 1) != '0') {
+                dp[i] += dp[i - 1];
+            }
+            // 双数字解码：s[i-2..i] 在 10~26
+            String two = s.substring(i - 2, i);
+            if (two.charAt(0) != '0') {
+                int val = Integer.parseInt(two);
+                if (val >= 10 && val <= 26) {
+                    dp[i] += dp[i - 2];
+                }
             }
         }
-        return dp[s.length()];
+        return dp[n];
     }
 
     private boolean valid(String s) {
@@ -93,7 +96,7 @@ public class DP {
         int prev1 = Math.max(nums[0], nums[1]);
         int max = Integer.MIN_VALUE;
         for (int i = 3; i <= nums.length; i++) {
-            int cur = Math.max(prev1, prev2 + nums[i-1]);
+            int cur = Math.max(prev1, prev2 + nums[i - 1]);
             max = Math.max(cur, max);
             prev2 = prev1;
             prev1 = cur;
@@ -123,7 +126,7 @@ public class DP {
         }
         for (int i = 1; i < grid.length; i++) {
             for (int j = 1; j < grid[0].length; j++) {
-                dp[i][j] = Math.min(dp[i-1][j], dp[i][j-1]) + grid[i][j];
+                dp[i][j] = Math.min(dp[i - 1][j], dp[i][j - 1]) + grid[i][j];
             }
         }
         return dp[grid.length - 1][grid[0].length - 1];
@@ -149,7 +152,7 @@ public class DP {
                     if (i == 0 || j == 0) {
                         dp[i][j] = 1;
                     } else {
-                        dp[i][j] = Math.min(dp[i-1][j], Math.min(dp[i][j-1], dp[i-1][j-1])) + 1;
+                        dp[i][j] = Math.min(dp[i - 1][j], Math.min(dp[i][j - 1], dp[i - 1][j - 1])) + 1;
                     }
                     max = Math.max(max, dp[i][j]);
                 }
@@ -168,23 +171,23 @@ public class DP {
         Arrays.fill(dp, false);
         dp[0] = true;
         for (int i = 1; i < dp.length; i++) {
-           for (String word : wordDict) {
+            for (String word : wordDict) {
                 int length = word.length();
                 if (i - length >= 0 && s.substring(i - length, i).equals(word) && dp[i - length]) {
                     dp[i] = true;
                     break;
                 }
-           }
+            }
         }
         return dp[s.length()];
     }
 
     /**
-     *  <a href="https://leetcode.com/problems/longest-increasing-subsequence">...</a>
-     *  dp[i] 以i结尾的LIS的长度
-     *  dp[i] = max{dp[0]..dp[i-1]} + 1  -- if nums[k] < nums[i]
-     *        = 1                        -- if nums[k] < all
-     *  LIS及扩展题型
+     * <a href="https://leetcode.com/problems/longest-increasing-subsequence">...</a>
+     * dp[i] 以i结尾的LIS的长度
+     * dp[i] = max{dp[0]..dp[i-1]} + 1  -- if nums[k] < nums[i]
+     * = 1                        -- if nums[k] < all
+     * LIS及扩展题型
      */
     public int lengthOfLIS(int[] nums) {
         if (nums.length == 0) return 0;
@@ -194,7 +197,7 @@ public class DP {
         for (int i = 1; i < nums.length; i++) {
             for (int j = i - 1; j >= 0; j--) {
                 if (nums[i] > nums[j] && dp[j] + 1 > dp[i]) {
-                        dp[i] = dp[j] + 1;
+                    dp[i] = dp[j] + 1;
                 }
             }
             max = Math.max(dp[i], max);
@@ -206,8 +209,8 @@ public class DP {
      * https://leetcode.com/problems/longest-common-subsequence
      * LCS 及扩展类型
      * dp[i][j] =
-     *  if a[i] == b[j],  dp[i-1][j-1] + 1
-     *  else max {dp[i][j-1], dp[i-1][j]}
+     * if a[i] == b[j],  dp[i-1][j-1] + 1
+     * else max {dp[i][j-1], dp[i-1][j]}
      */
     public int longestCommonSubsequence(String text1, String text2) {
         if (text1.isEmpty()) return 0;
@@ -217,9 +220,9 @@ public class DP {
         for (int i = 1; i <= text1.length(); i++) {
             for (int j = 1; j <= text2.length(); j++) {
                 if (text1.charAt(i - 1) == text2.charAt(j - 1)) {
-                    dp[i][j] = dp[i-1][j-1] + 1;
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
                 } else {
-                    dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+                    dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
                 }
             }
         }
@@ -242,12 +245,12 @@ public class DP {
             dp[0][j] = j;
         }
         for (int i = 1; i <= word1.length(); i++) {
-            for (int j = 1;  j <= word2.length(); j++) {
+            for (int j = 1; j <= word2.length(); j++) {
                 if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
-                    dp[i][j] = dp[i-1][j-1];
+                    dp[i][j] = dp[i - 1][j - 1];
                 } else {
                     // 分别对应插入，删除和替换操作
-                    dp[i][j] = Math.min(Math.min(dp[i-1][j] + 1, dp[i][j-1] + 1), dp[i-1][j-1] + 1);
+                    dp[i][j] = Math.min(Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1), dp[i - 1][j - 1] + 1);
                 }
             }
         }
@@ -256,6 +259,8 @@ public class DP {
 
     /**
      * https://leetcode.com/problems/longest-palindromic-substring/
+     * 下面都是回文系列
+     * <p>
      * 解法1，尝试中间点扩展
      */
     public int longestPalindrome(String s) {
@@ -287,11 +292,14 @@ public class DP {
     }
 
     /**
-     * DP 算法
+     * https://leetcode.com/problems/longest-palindromic-substring/
+     * leetcode 5
+     * <p>
      * dp[i][j] = s[i..j] 是否为回文 (i,j 为 0-based 索引)
      * 按长度从小到大计算，dp[i][j] 依赖于 dp[i+1][j-1]
      * 计算顺序: len=1 → len=2 → len=3 → ... → len=n
      * 每个长度层内部: i 从 0 到 n-len 遍历，j = i+len-1
+     * 回文的计算了解计算顺序。
      */
     public String longestPalindrome2(String s) {
         if (s == null || s.isEmpty()) return "";
@@ -331,6 +339,38 @@ public class DP {
     }
 
     /**
+     * https://leetcode.com/problems/palindromic-substrings/
+     * leetcode 647
+     */
+    public int countPalindrome(String s) {
+        if (s == null || s.isEmpty()) return 0;
+        int count = 0;
+        boolean[][] dp = new boolean[s.length()][s.length()];
+        for (int i = 0; i < s.length(); i++) {
+            dp[i][i] = true;
+            count++;
+        }
+        for (int i = 0; i + 1 < s.length(); i++) {
+            if (s.charAt(i) == s.charAt(i + 1)) {
+                dp[i][i + 1] = true;
+                count++;
+            }
+        }
+        // dp[i][j] = if dp[i+1][j-1] == ture && s.charAt(i) == s.charAt(j)
+        // 回文只需要计算对角线
+        for (int l = 3; l <= s.length(); l++) {
+            for (int i = 0; i <= s.length() - l; i++) {
+                int j = i + l - 1;
+                if (s.charAt(i) == s.charAt(j) && dp[i + 1][j - 1]) {
+                    dp[i][j] = true;
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    /**
      * https://leetcode.com/problems/coin-change/
      * 322
      * 注意: 完全背包问题，每个硬币都可以重复使用。
@@ -366,7 +406,7 @@ public class DP {
     /**
      * Bottom-Up，外层硬币，内层容量
      * 跟 coinChange3 的区别：内外层循环交换——结果一样，因为求 min 不受顺序影响
-     *
+     * <p>
      * new int[amount + 1] 的原因：
      * 1. dp[i] 表示"凑成金额 i 的最少硬币数"，需要访问 dp[amount] 作为最终答案
      * 2. dp[0] 是基础 case（凑 0 元需要 0 枚硬币），多一个 slot
@@ -385,12 +425,12 @@ public class DP {
     }
 
     /**
-     *  Bottom-Up 优化版，O(amount * len(coins))
-     *  Arrays.fill(dp, amount + 1) 的含义：
-     *  用 amount+1 作为"无穷大"标记，代替 Integer.MAX_VALUE。
-     *  理由：硬币最小面值 >= 1，最多需要 amount 枚硬币，
-     *  所以 amount+1 是一个安全的"不可能达到"的初始值，
-     *  同时避免 dp[i - coin] + 1 可能溢出 Integer.MAX_VALUE 的问题。
+     * Bottom-Up 优化版，O(amount * len(coins))
+     * Arrays.fill(dp, amount + 1) 的含义：
+     * 用 amount+1 作为"无穷大"标记，代替 Integer.MAX_VALUE。
+     * 理由：硬币最小面值 >= 1，最多需要 amount 枚硬币，
+     * 所以 amount+1 是一个安全的"不可能达到"的初始值，
+     * 同时避免 dp[i - coin] + 1 可能溢出 Integer.MAX_VALUE 的问题。
      */
     public int coinChange3(int[] coins, int amount) {
         int[] dp = new int[amount + 1];
@@ -420,7 +460,7 @@ public class DP {
             sum += nums[i];
         }
         // 奇数和不能拆分
-        if (sum %2 != 0) return false;
+        if (sum % 2 != 0) return false;
         int target = sum / 2;
 
         boolean[] dp = new boolean[target + 1];
@@ -491,7 +531,7 @@ public class DP {
         // cur store dp[i]
         int cur = nums[0];
         int max = cur;
-        for (int i = 1; i < nums.length;i++) {
+        for (int i = 1; i < nums.length; i++) {
             cur = Math.max(nums[i], cur + nums[i]);
             max = Math.max(cur, max);
         }
@@ -529,9 +569,8 @@ public class DP {
     }
 
     /**
-     *
      * https://leetcode.com/problems/is-subsequence/
-     *
+     * <p>
      * 贪心算法
      *
      * @param s
@@ -539,7 +578,7 @@ public class DP {
      * @return
      */
     public boolean isSubsequence(String s, String t) {
-        if (s.length() == 0 ) {
+        if (s.length() == 0) {
             return true;
         }
         if (t.length() == 0) {
