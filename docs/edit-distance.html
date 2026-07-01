@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>编辑距离 Edit Distance</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    line-height: 1.8;
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 24px 32px 60px;
+    color: #2c3e2d;
+    background: #f2f7ed;
+    font-size: 14px;
+  }
+  h1 { font-size: 1.5em; border-bottom: 3px solid #4a7c3f; padding-bottom: 10px; margin-bottom: 20px; color: #2d5a27; }
+  h2 { font-size: 1.25em; color: #2d5a27; margin-top: 28px; padding-left: 10px; border-left: 4px solid #5a8f4c; }
+  h3 { font-size: 1.08em; color: #3d6b35; margin-top: 20px; }
+  h4 { font-size: 0.95em; color: #3a5235; margin-top: 16px; }
+
+  p { margin: 8px 0; }
+  li { margin: 4px 0; }
+  ol, ul { padding-left: 22px; }
+
+  /* 核心心法（靛蓝） */
+  .core-box {
+    margin: 14px 0;
+    padding: 14px 20px;
+    background: #f0eeff;
+    border-left: 5px solid #6366f1;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.95em;
+  }
+  .core-box > p { margin: 4px 0; }
+
+  /* 提示（琥珀） */
+  .tip-box {
+    margin: 14px 0;
+    padding: 14px 20px;
+    background: #fef9e7;
+    border-left: 5px solid #d4a017;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.95em;
+  }
+  .tip-box > p { margin: 4px 0; }
+
+  /* 警告/易错（红） */
+  .warn-box {
+    margin: 14px 0;
+    padding: 14px 20px;
+    background: #fdf0ef;
+    border-left: 5px solid #d9534f;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.95em;
+  }
+  .warn-box > p { margin: 4px 0; }
+
+  /* 总结（翠绿） */
+  .summary-box {
+    margin: 14px 0;
+    padding: 14px 20px;
+    background: #edf7ed;
+    border-left: 5px solid #4caf50;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.95em;
+  }
+  .summary-box > p { margin: 4px 0; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 0.9em;
+  }
+  th, td {
+    border: 1px solid #c8d6c0;
+    padding: 8px 12px;
+    text-align: center;
+    vertical-align: middle;
+  }
+  th {
+    background: #4a7c3f;
+    color: #fff;
+    font-weight: 600;
+  }
+  tr:nth-child(even) { background: #f4f8f2; }
+  tr:hover { background: #eaf3e5; }
+
+  pre {
+    background: #f5f0eb;
+    color: #3d3731;
+    padding: 16px 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.85em;
+    line-height: 1.55;
+    margin: 10px 0;
+  }
+  code {
+    font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+  }
+  p > code, li > code, td > code {
+    background: #e4eddb;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.88em;
+    color: #3d6b35;
+  }
+
+  .step-badge {
+    display: inline-block;
+    background: #4a7c3f;
+    color: #fff;
+    padding: 2px 12px;
+    border-radius: 12px;
+    font-size: 0.82em;
+    font-weight: 600;
+    margin-right: 8px;
+  }
+
+  .dp-cell-highlight {
+    background: #fff3cd !important;
+    font-weight: bold;
+  }
+  .dp-cell-path {
+    background: #d4edda !important;
+  }
+  .dp-cell-eq {
+    background: #d1ecf1 !important;
+  }
+  .dp-cell-min {
+    background: #f8d7da !important;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid #e2e8d8;
+    margin: 24px 0;
+  }
+
+  .matrix-caption {
+    font-size: 0.82em;
+    color: #6b7c6b;
+    text-align: center;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<h1>编辑距离 Edit Distance</h1>
+
+<p><strong>问题：</strong>给定两个单词 <code>word1</code> 和 <code>word2</code>，请计算将 <code>word1</code> 转换成 <code>word2</code> 所使用的最少操作数。你可以对一个单词进行以下三种操作：</p>
+<ul>
+  <li><strong>插入</strong>一个字符</li>
+  <li><strong>删除</strong>一个字符</li>
+  <li><strong>替换</strong>一个字符</li>
+</ul>
+
+<div class="core-box">
+  <strong>核心心法：</strong>编辑距离是经典的双序列 DP（Two-Sequence DP）问题。核心思想是：<code>word1[0..i]</code> 到 <code>word2[0..j]</code> 的最小编辑距离，只取决于两个字符串的最后一个字符是否相等，以及前一步的三个状态。
+</div>
+
+<hr>
+
+<h2>DP 五步法</h2>
+
+<!-- ============ 第一步 ============ -->
+<h3><span class="step-badge">Step 1</span> 确定 dp 数组及下标含义</h3>
+
+<p>定义 <code>dp[i][j]</code> 表示以下含义：</p>
+
+<div class="core-box">
+  <p><strong>dp[i][j]</strong> = 将 <code>word1[0..i-1]</code>（长度为 i 的前缀）转换成 <code>word2[0..j-1]</code>（长度为 j 的前缀）所需的最少操作数。</p>
+</div>
+
+<p>为什么是 <code>i-1</code> 和 <code>j-1</code> 而不是 <code>i</code> 和 <code>j</code>？因为这样可以让 dp 数组的下标 <code>0</code> 表示空串，方便处理边界条件。</p>
+
+<p>最终答案即 <code>dp[m][n]</code>，其中 <code>m = word1.length()</code>，<code>n = word2.length()</code>。</p>
+
+<!-- ============ 第二步 ============ -->
+<hr>
+
+<h3><span class="step-badge">Step 2</span> 确定递推公式</h3>
+
+<p>对于 <code>dp[i][j]</code>，我们考虑 <code>word1[i-1]</code> 和 <code>word2[j-1]</code> 的关系：</p>
+
+<h4>情况 1：<code>word1[i-1] == word2[j-1]</code></h4>
+<p>最后一个字符已经相等，不需要额外操作，直接继承 <code>dp[i-1][j-1]</code>：</p>
+<pre><code>dp[i][j] = dp[i-1][j-1]</code></pre>
+
+<h4>情况 2：<code>word1[i-1] != word2[j-1]</code></h4>
+<p>需要做一次操作，有三种选择，取最小值：</p>
+
+<table>
+  <tr>
+    <th style="width:100px">操作</th>
+    <th>转移方程</th>
+    <th>含义</th>
+  </tr>
+  <tr>
+    <td><strong>删除</strong></td>
+    <td><code>dp[i-1][j] + 1</code></td>
+    <td>删除 <code>word1[i-1]</code>，<code>word1[0..i-2]</code> 去匹配 <code>word2[0..j-1]</code></td>
+  </tr>
+  <tr>
+    <td><strong>插入</strong></td>
+    <td><code>dp[i][j-1] + 1</code></td>
+    <td>在 <code>word1[i-1]</code> 后插入 <code>word2[j-1]</code>，<code>word1[0..i-1]</code> 去匹配 <code>word2[0..j-2]</code></td>
+  </tr>
+  <tr>
+    <td><strong>替换</strong></td>
+    <td><code>dp[i-1][j-1] + 1</code></td>
+    <td>将 <code>word1[i-1]</code> 替换为 <code>word2[j-1]</code></td>
+  </tr>
+</table>
+
+<p>综合起来：</p>
+<pre><code>if (word1[i-1] == word2[j-1]) {
+    dp[i][j] = dp[i-1][j-1];
+} else {
+    dp[i][j] = min(
+        dp[i-1][j] + 1,    // 删除
+        dp[i][j-1] + 1,    // 插入
+        dp[i-1][j-1] + 1   // 替换
+    );
+}</code></pre>
+
+<div class="warn-box">
+  <strong>易错点：</strong>很多人会漏掉"替换"操作（只记得删除和插入）。替换是三种操作中最直观的，对应 <code>dp[i-1][j-1] + 1</code>——把 <code>word1[i-1]</code> 直接改成 <code>word2[j-1]</code>，然后看剩下的前缀。
+</div>
+
+<div class="tip-box">
+  <strong>为什么删除和插入是对称的？</strong>对 <code>word1</code> 做删除就等价于对 <code>word2</code> 做插入，所以 <code>dp[i-1][j]</code> 和 <code>dp[i][j-1]</code> 本质上是同一个操作的两种视角。二者都得考虑是因为我们只对 <code>word1</code> 操作。
+</div>
+
+<!-- ============ 第三步 ============ -->
+<hr>
+
+<h3><span class="step-badge">Step 3</span> 初始化 dp 数组</h3>
+
+<p>边界条件：当其中一个字符串为空时，编辑距离就是另一个字符串的长度（全部插入或全部删除）。</p>
+
+<table>
+  <tr>
+    <th>初始化项</th>
+    <th>含义</th>
+    <th>值</th>
+  </tr>
+  <tr>
+    <td><code>dp[0][j] = j</code></td>
+    <td>空串 → word2[0..j-1]</td>
+    <td>插入 j 个字符</td>
+  </tr>
+  <tr>
+    <td><code>dp[i][0] = i</code></td>
+    <td>word1[0..i-1] → 空串</td>
+    <td>删除 i 个字符</td>
+  </tr>
+  <tr>
+    <td><code>dp[0][0] = 0</code></td>
+    <td>空串 → 空串</td>
+    <td>不需要操作</td>
+  </tr>
+</table>
+
+<pre><code>// 初始化 (m+1) x (n+1) 矩阵
+int m = word1.length(), n = word2.length();
+int[][] dp = new int[m + 1][n + 1];
+
+// 第一行：空串变到 word2
+for (int j = 0; j <= n; j++) dp[0][j] = j;
+
+// 第一列：word1 变到空串
+for (int i = 0; i <= m; i++) dp[i][0] = i;</code></pre>
+
+<!-- ============ 第四步 ============ -->
+<hr>
+
+<h3><span class="step-badge">Step 4</span> 确定遍历顺序</h3>
+
+<p>从递推公式可以看出，<code>dp[i][j]</code> 依赖三个方向：</p>
+<ul>
+  <li>上方：<code>dp[i-1][j]</code></li>
+  <li>左方：<code>dp[i][j-1]</code></li>
+  <li>左上方：<code>dp[i-1][j-1]</code></li>
+</ul>
+
+<div class="core-box">
+  <p><strong>所以必须从上到下、从左到右遍历。</strong>保证计算 <code>dp[i][j]</code> 时，它的上面、左面、左上角都已经计算完毕。</p>
+</div>
+
+<pre><code>for (int i = 1; i <= m; i++) {
+    for (int j = 1; j <= n; j++) {
+        if (word1.charAt(i-1) == word2.charAt(j-1)) {
+            dp[i][j] = dp[i-1][j-1];
+        } else {
+            dp[i][j] = Math.min(dp[i-1][j-1],
+                         Math.min(dp[i-1][j], dp[i][j-1])) + 1;
+        }
+    }
+}
+return dp[m][n];</code></pre>
+
+<div class="tip-box">
+  <strong>能不能 j 在外层、i 在内层？</strong>可以。只要保证 <code>dp[i][j]</code> 依赖的三个方向已计算即可。先遍历 word1 还是 word2 不影响结果（对称性）。
+</div>
+
+<!-- ============ 第五步 ============ -->
+<hr>
+
+<h3><span class="step-badge">Step 5</span> 举例推导 dp 数组</h3>
+
+<p>以 <code>word1 = "horse"</code>，<code>word2 = "ros"</code> 为例，手动推导整个 dp 矩阵：</p>
+
+<div class="core-box">
+  <p><strong>完整 dp 表（7行 × 4列，dp[i][j] 索引从 0 开始）：</strong></p>
+</div>
+
+<table>
+  <tr>
+    <th></th><th></th><th colspan="4">j (word2)</th>
+  </tr>
+  <tr>
+    <th></th><th></th><th>0<br>""</th><th>1<br>r</th><th>2<br>o</th><th>3<br>s</th>
+  </tr>
+  <tr>
+    <th rowspan="7">i<br>(word1)</th>
+    <td style="text-align:left"><strong>0 ""</strong></td>
+    <td class="dp-cell-path">0</td>
+    <td>1</td>
+    <td>2</td>
+    <td>3</td>
+  </tr>
+  <tr>
+    <td style="text-align:left"><strong>1 h</strong></td>
+    <td>1</td>
+    <td class="dp-cell-min">1</td>
+    <td>2</td>
+    <td>3</td>
+  </tr>
+  <tr>
+    <td style="text-align:left"><strong>2 o</strong></td>
+    <td>2</td>
+    <td>2</td>
+    <td class="dp-cell-min">1</td>
+    <td>2</td>
+  </tr>
+  <tr>
+    <td style="text-align:left"><strong>3 r</strong></td>
+    <td>3</td>
+    <td class="dp-cell-eq">2</td>
+    <td>2</td>
+    <td>2</td>
+  </tr>
+  <tr>
+    <td style="text-align:left"><strong>4 s</strong></td>
+    <td>4</td>
+    <td>3</td>
+    <td>3</td>
+    <td class="dp-cell-min">2</td>
+  </tr>
+  <tr>
+    <td style="text-align:left"><strong>5 e</strong></td>
+    <td>5</td>
+    <td>4</td>
+    <td>4</td>
+    <td class="dp-cell-min">3</td>
+  </tr>
+</table>
+
+<p><strong>最终答案：</strong><code>dp[5][3] = <strong>3</strong></code>，即 horse → ros 最少需要 3 步。</p>
+
+<p class="matrix-caption">色标：<span class="dp-cell-path">绿色 = 初始化路径</span> · <span class="dp-cell-min">粉红 = 最小值位置</span> · <span class="dp-cell-eq">蓝色 = 字符相等</span></p>
+
+<h4>dp 回溯详解</h4>
+<p>从 <code>dp[5][3] = 3</code> 沿最优路径回推（从右下到左上），理解每一步的决策：</p>
+
+<table>
+  <tr><th>位置</th><th>比较</th><th>转移来源</th><th>操作</th></tr>
+  <tr>
+    <td><code>dp[5][3]=3</code></td>
+    <td><code>e</code> ≠ <code>s</code></td>
+    <td>上 <code>dp[4][3]=2</code>（最小）+1</td>
+    <td><strong>删除</strong> word1 的 <code>e</code></td>
+  </tr>
+  <tr>
+    <td><code>dp[4][3]=2</code></td>
+    <td><code>s</code> = <code>s</code></td>
+    <td><code>dp[3][2]</code>（继承左上角）</td>
+    <td><strong>跳过</strong>（无需操作）</td>
+  </tr>
+  <tr>
+    <td><code>dp[3][2]=2</code></td>
+    <td><code>r</code> ≠ <code>o</code></td>
+    <td>上 <code>dp[2][2]=1</code>（最小）+1</td>
+    <td><strong>删除</strong> word1 的 <code>r</code></td>
+  </tr>
+  <tr>
+    <td><code>dp[2][2]=1</code></td>
+    <td><code>o</code> = <code>o</code></td>
+    <td><code>dp[1][1]</code>（继承左上角）</td>
+    <td><strong>跳过</strong>（无需操作）</td>
+  </tr>
+  <tr>
+    <td><code>dp[1][1]=1</code></td>
+    <td><code>h</code> ≠ <code>r</code></td>
+    <td>左上 <code>dp[0][0]=0</code>（最小）+1</td>
+    <td><strong>替换</strong> <code>h</code> → <code>r</code></td>
+  </tr>
+  <tr>
+    <td><code>dp[0][0]=0</code></td>
+    <td colspan="3">初始空串 → 空串，基线条件</td>
+  </tr>
+</table>
+
+<h4>最优操作序列（将回溯结果正向执行）：</h4>
+<ol>
+  <li><strong>替换</strong> <code>h</code> → <code>r</code>：<code>horse</code> → <code>rorse</code>（对应 dp[1][1] 的替换决策）</li>
+  <li><strong>跳过</strong> <code>o</code>：无需操作，字符串不变</li>
+  <li><strong>删除</strong> 位置 2 的 <code>r</code>：<code>rorse</code> → <code>rose</code>（对应 dp[3][2] 的删除决策）</li>
+  <li><strong>跳过</strong> <code>s</code>：无需操作</li>
+  <li><strong>删除</strong> <code>e</code>：<code>rose</code> → <code>ros</code>（对应 dp[5][3] 的删除决策）</li>
+</ol>
+
+<p>共 <strong>3 步</strong>（替换 + 2 次删除），最终得到 <code>ros</code>。✔</p>
+
+<div class="tip-box">
+  <strong>关键领悟：</strong>dp 回溯是从问题的终点逆向推导到起点。在实际编程中，我们只需要 <code>dp[m][n]</code> 这个数值，不需要真的回溯出操作序列。但理解回溯过程能帮你深入理解编辑距离的递推逻辑。
+</div>
+
+<hr>
+
+<h2>完整代码（Java）</h2>
+
+<pre><code>public int minDistance(String word1, String word2) {
+    int m = word1.length(), n = word2.length();
+    int[][] dp = new int[m + 1][n + 1];
+
+    // 初始化
+    for (int j = 0; j <= n; j++) dp[0][j] = j;
+    for (int i = 0; i <= m; i++) dp[i][0] = i;
+
+    // 递推
+    for (int i = 1; i <= m; i++) {
+        for (int j = 1; j <= n; j++) {
+            if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
+                dp[i][j] = dp[i - 1][j - 1];
+            } else {
+                dp[i][j] = Math.min(Math.min(
+                    dp[i - 1][j],     // 删除
+                    dp[i][j - 1]),    // 插入
+                    dp[i - 1][j - 1]  // 替换
+                ) + 1;
+            }
+        }
+    }
+    return dp[m][n];
+}</code></pre>
+
+<!-- ============ 空间优化 ============ -->
+<hr>
+
+<h2>空间优化（滚动数组）</h2>
+
+<p>观察递推公式，<code>dp[i][j]</code> 只依赖 <code>dp[i-1][j]</code>（上一行）、<code>dp[i][j-1]</code>（当前行左边）和 <code>dp[i-1][j-1]</code>（左上角），所以可以用一维数组 + 一个变量记录左上角值。</p>
+
+<pre><code>public int minDistance(String word1, String word2) {
+    int m = word1.length(), n = word2.length();
+    int[] dp = new int[n + 1];
+
+    // 初始化第一行
+    for (int j = 0; j <= n; j++) dp[j] = j;
+
+    for (int i = 1; i <= m; i++) {
+        int prev = dp[0];     // 相当于 dp[i-1][j-1]
+        dp[0] = i;            // 相当于 dp[i][0] = i
+        for (int j = 1; j <= n; j++) {
+            int temp = dp[j]; // 暂存旧的 dp[j]（即 dp[i-1][j]）
+            if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
+                dp[j] = prev; // 继承左上角
+            } else {
+                dp[j] = Math.min(Math.min(
+                    temp,          // 删除：dp[i-1][j]
+                    dp[j - 1]),    // 插入：dp[i][j-1]
+                    prev           // 替换：dp[i-1][j-1]
+                ) + 1;
+            }
+            prev = temp;       // 下一轮的左上角就是当前的 dp[i-1][j]
+        }
+    }
+    return dp[n];
+}</code></pre>
+
+<div class="tip-box">
+  <strong>滚动数组的关键：</strong>左下角 <code>prev</code> 需要在被覆盖之前保存。每次更新 <code>dp[j]</code> 前，先把旧值存到 <code>temp</code>，然后赋值给 <code>prev</code>供下一列使用。
+</div>
+
+<!-- ============ 应用场景 ============ -->
+<hr>
+
+<h2>扩展与应用</h2>
+
+<ul>
+  <li><strong>拼写纠错</strong>：编辑距离最小的候选词作为建议</li>
+  <li><strong>DNA 序列对齐</strong>：衡量基因序列的相似度</li>
+  <li><strong>抄袭检测</strong>：两段文本的编辑距离越小，相似度越高</li>
+  <li><strong>版本差异 diff</strong>：基于编辑距离的思想计算最小变更</li>
+</ul>
+
+<div class="summary-box">
+  <p><strong>五步法总结：</strong></p>
+  <ol>
+    <li><strong>dp 定义</strong>：<code>dp[i][j]</code> = word1 前 i 个字符 → word2 前 j 个字符的最小编辑距离</li>
+    <li><strong>递推公式</strong>：字符相等则 <code>dp[i-1][j-1]</code>；不相等则 <code>min(删除, 插入, 替换) + 1</code></li>
+    <li><strong>初始化</strong>：第一行 <code>dp[0][j] = j</code>，第一列 <code>dp[i][0] = i</code></li>
+    <li><strong>遍历顺序</strong>：从上到下，从左到右（两层 for 循环）</li>
+    <li><strong>举例验证</strong>：horse → ros = 3 步</li>
+  </ol>
+</div>
+
+</body>
+</html>

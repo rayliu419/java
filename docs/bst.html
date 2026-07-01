@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BST (Binary Search Tree) 总结</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+    line-height: 1.45;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 16px 24px 60px;
+    color: #2d3a31;
+    background: #f5faf6;
+    font-size: 13px;
+  }
+  h1 { font-size: 1.35em; border-bottom: 3px solid #4a7c3f; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
+  h2 { font-size: 1.2em; color: #3d6b35; margin-top: 20px; padding-left: 8px; border-left: 4px solid #5a8f4c; }
+  h3 { font-size: 1.02em; color: #2d3a31; margin-top: 16px; }
+  h4 { font-size: 0.95em; color: #3a5235; margin-top: 12px; }
+
+  /* 核心心法高亮 */
+  p { margin: 6px 0; }
+  li { margin: 2px 0; }
+  ol, ul { padding-left: 20px; }
+  blockquote {
+    margin: 10px 0;
+    padding: 12px 20px;
+    background: #eaf3e5;
+    border-left: 5px solid #5a8f4c;
+    border-radius: 0 8px 8px 0;
+    font-size: 1.05em;
+  }
+  blockquote > p { margin: 0; }
+
+  /* 表格通用样式 */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 0.9em;
+  }
+  th, td {
+    border: 1px solid #c3dbcc;
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #4a7c3f;
+    color: #fff;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  tr:nth-child(even) { background: #f0f6eb; }
+  tr:hover { background: #e4eddb; }
+
+  /* 代码块 */
+  pre {
+    background: #f5f0eb;
+    color: #3d3731;
+    padding: 16px 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.8em;
+    line-height: 1.45;
+    margin: 8px 0;
+  }
+  code {
+    font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+  }
+  p > code, li > code, td > code {
+    background: #e4eddb;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.88em;
+    color: #3d6b35;
+  }
+
+  /* 题目列表星级 */
+  .star { color: #f59e0b; font-weight: bold; }
+
+  /* 状态标记 */
+  .done { color: #16a34a; font-weight: bold; }
+  .pending { color: #94a3b8; }
+
+  /* 分界线 */
+  hr {
+    border: none;
+    border-top: 2px dashed #c3dbcc;
+    margin: 16px 0;
+  }
+
+  /* 路线图卡片 */
+  .route {
+    background: linear-gradient(135deg, #2d5a27, #4a7c3f);
+    color: #fff;
+    padding: 16px 24px;
+    border-radius: 12px;
+    margin: 16px 0;
+    line-height: 1.8;
+    font-size: 0.95em;
+  }
+  .route strong { color: #fbbf24; }
+
+  /* 对照表双栏 */
+  .comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .comparison > div {
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #c3dbcc;
+    background: #e8f5ec;
+  }
+  .comparison > div h4 { margin: 0 0 8px; }
+  @media (max-width: 640px) { .comparison { grid-template-columns: 1fr; } }
+
+  /* 提示框 */
+  .tip {
+    background: #fef9e7;
+    border-left: 5px solid #d4a017;
+    padding: 10px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 12px 0;
+  }
+  .warn {
+    background: #fdf0ef;
+    border-left: 5px solid #d9534f;
+    padding: 10px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 12px 0;
+  }
+
+  /* 模式表格 */
+  .pattern-table th:first-child { min-width: 140px; }
+
+  /* 频次列居中 */
+  td:first-child, th:first-child { text-align: center; white-space: nowrap; }
+  td:nth-child(2), th:nth-child(2) { text-align: center; }
+  td:nth-child(4), th:nth-child(4) { text-align: center; }
+  td:nth-child(6), th:nth-child(6) { text-align: center; }
+</style>
+</head>
+<body>
+
+<h1>BST (Binary Search Tree)</h1>
+
+<blockquote><strong>核心性质：中序遍历 = 升序序列</strong></blockquote>
+
+<!-- ─── 题目列表 ─── -->
+<h2>题目列表（按面试频次降序）</h2>
+
+<table>
+  <tr>
+    <th>频次</th><th>题号</th><th>题目</th><th>难度</th><th>核心思路</th><th>状态</th>
+  </tr>
+  <tr><td><span class="star">★★★★★</span></td><td>98</td><td>Validate Binary Search Tree</td><td>🟡 Medium</td><td>① 中序遍历检查递增 ② 区间约束 (min, max)</td><td><span class="done">✅ BST.java</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>230</td><td>Kth Smallest Element in a BST</td><td>🟡 Medium</td><td>中序遍历到第 K 个即停止</td><td><span class="done">✅ BST.java</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>450</td><td>Delete Node in a BST</td><td>🟡 Medium</td><td>三种情况：叶子 / 单子 / 双子（后继替换）</td><td><span class="done">✅ BST.java</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>108</td><td>Convert Sorted Array to BST</td><td>🟢 Easy</td><td>二分递归构建</td><td><span class="done">✅ BST.java</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>235</td><td>Lowest Common Ancestor of a BST</td><td>🟡 Medium</td><td>利用大小关系剪枝：p &lt; root &lt; q → root 就是 LCA</td><td><span class="done">✅ BST.java</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>96</td><td>Unique BST</td><td>🟡 Medium</td><td>DP / 卡特兰数</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>297</td><td>Serialize and Deserialize Binary Tree</td><td>🔴 Hard</td><td>前序序列化 + # 空标记递归反序列化</td><td><span class="done">✅ BST.java</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>173</td><td>BST Iterator</td><td>🟡 Medium</td><td>栈模拟非递归中序遍历</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>700</td><td>Search in a BST</td><td>🟢 Easy</td><td>递归/迭代比较 val 决定左右方向</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>701</td><td>Insert into a BST</td><td>🟡 Medium</td><td>搜索到空位插入，返回值挂接</td><td><span class="done">✅ BST.java</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>530</td><td>Min Absolute Difference in BST</td><td>🟢 Easy</td><td>中序遍历相邻差值取最小</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>501</td><td>Find Mode in BST</td><td>🟢 Easy</td><td>中序遍历统计连续出现次数</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>99</td><td>Recover Binary Search Tree</td><td>🟡 Medium</td><td>中序遍历找两个错位节点</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>95</td><td>Unique BST II</td><td>🟡 Medium</td><td>递归构造所有可能的 BST</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>938</td><td>Range Sum of BST</td><td>🟢 Easy</td><td>DFS + 根据 val 范围剪枝</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>669</td><td>Trim a BST</td><td>🟡 Medium</td><td>区间递归修剪：val&lt;low 剪左，val&gt;high 剪右</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>538</td><td>Convert BST to Greater Tree</td><td>🟡 Medium</td><td>逆中序遍历（右→根→左）累加</td><td><span class="pending">⬜</span></td></tr>
+</table>
+
+<!-- ─── 核心套路 ─── -->
+<h2>核心套路</h2>
+
+<pre>
+验证 BST      → 中序递增 / 区间约束
+第 K 小       → 中序遍历到第 K 个
+删除          → 找到节点 → 三种情况处理
+构建 BST      → 有序数组二分递归
+LCA           → 利用 BST 大小关系直接判断
+DP/计数       → 卡特兰数 / 区间 DP
+迭代器        → 栈模拟中序遍历
+搜索/插入     → 比较大小决定方向
+中序统计类    → 中序遍历 + 相邻比较（最小差/众数）
+恢复          → 中序遍历找逆序对
+修剪          → 区间递归裁剪
+累加树        → 逆中序遍历累加
+	序列化/反序列化 → 前序递归序 + # 空标记
+</pre>
+
+<!-- ─── 刷题路线 ─── -->
+<h2>刷题路线</h2>
+
+<div class="route">
+  <strong>第一梯队（必会）：</strong>98 → 230 → 108 → 235 → 450<br>
+  <strong>第二梯队（高频）：</strong>96 → 173 → 297 → 530 → 501 → 700/701<br>
+  <strong>第三梯队（进阶）：</strong>99 → 95 → 938 → 669 → 538
+</div>
+
+<!-- ─── 一、核心心法 ─── -->
+<h2>学习笔记</h2>
+<hr>
+
+<h3>一、核心心法</h3>
+
+<blockquote>树题的核心是 <strong>递归语义</strong> — 想清楚你的函数"返回什么、做什么"，剩下的就是把这个语义翻译成代码。</blockquote>
+
+<h4>递归的三个层次</h4>
+
+<table>
+  <tr><th>难度</th><th>遍历方式</th><th>适用场景</th></tr>
+  <tr><td>基础</td><td><strong>前序 / 中序 / 后序</strong></td><td>带 pre 的递归，三种遍历都是"三板斧"</td></tr>
+  <tr><td>进阶</td><td><strong>定义清晰语义的递归函数</strong></td><td>根据语义实现，不必纠结遍历顺序</td></tr>
+  <tr><td>困难</td><td><strong>后序 + 融合计算</strong></td><td>需要同时算两个结果（如高度+直径），合并到一个递归中。其实还是定义递归语义，怎么得到需要这么定义是个难点</td></tr>
+</table>
+
+<h4>怎么解复杂的树题</h4>
+<ol>
+  <li><strong>test case 驱动</strong> — 树的节点用不同的值，方便追踪递归栈</li>
+  <li><strong>把要做的 N 件事先列出来</strong> — 复杂的后序往往要同时做多件事，列清楚再写</li>
+  <li><strong>融合计算</strong> — 性能优化的关键手法（见下方 543/124 详解）</li>
+</ol>
+
+<h4>几个重要的识别模式</h4>
+
+<table class="pattern-table">
+  <tr><th>模式</th><th>说明</th></tr>
+  <tr><td><strong>后序修正解</strong></td><td>递归函数的返回值只有在根调用时才是最终结果（LCA 高效解法）</td></tr>
+  <tr><td><strong>直径型问题</strong></td><td>答案可能跨越左右子树，也可能在单侧子树中 — 需要同时往上传和全局记</td></tr>
+  <tr><td><strong>双节点问题</strong></td><td>先检查两个目标节点是否存在</td></tr>
+  <tr><td><strong>非递归遍历</strong></td><td>面试很少考，<strong>重点放递归</strong></td></tr>
+</table>
+
+<h4>非递归实现树的遍历</h4>
+<p>非递归主要是用栈。其转换方法可以考虑联系 <code>recursive-to-iteration.md</code>。尤其是前序和中序。复杂后序问题用非递归有点复杂了。</p>
+
+<hr>
+
+<!-- ─── 二、实现细节 ─── -->
+<h3>二、实现细节</h3>
+
+<ul>
+  <li>可以用 <strong>数组包装 int</strong> 传进去，变相实现引用传递（Java 递归中保持读写）</li>
+</ul>
+
+<hr>
+
+<!-- ─── 三、各题要点 ─── -->
+<h3>三、各题要点</h3>
+
+<!---------- 98 ---------->
+<h4>Validate BST（98）⭐⭐⭐⭐⭐</h4>
+<blockquote>两种解法都得会</blockquote>
+
+<div class="comparison">
+  <div>
+    <h4>✅ pre 节点法</h4>
+    <p>中序遍历，检查当前值是否 &gt; pre</p>
+    <p><code>Java 需要数组包装才能在递归中保持 pre 的读写</code></p>
+  </div>
+  <div>
+    <h4>✅ 区间约束法</h4>
+    <p>递归传 (min, max)，左子树缩上限，右子树缩下限</p>
+    <p><strong>更推荐</strong>，简洁且不易出错</p>
+  </div>
+</div>
+
+<hr>
+
+<!---------- 701 / 450 ---------->
+<h4>Insert into a BST（701）⭐⭐⭐ / Delete Node in a BST（450）⭐⭐⭐⭐</h4>
+<blockquote>核心：<strong>递归函数语义 = "返回调整好的子树根"</strong> 定义完成后，考虑在不同层次需要做的事情。<code>root.left/right = recursive_method</code> 是关键。这种写法普遍用于复杂的树问题。</blockquote>
+
+<p><code>insertIntoBST</code> 和 <code>deleteNode</code> 都是同一个语义。为什么要这么设计？<br>
+<strong>树的父子关系通过 left/right 指针维系，任何增删操作都可能改变这个指针的指向。</strong><br>
+用返回值让每一层自动重新挂接子节点，就不需要传 parent 引用、判断方向、处理根节点无父节点的边界。</p>
+
+<div class="tip">
+<strong>💡</strong> 这是一个需要明确定义递归函数语义才能很容易写的典型例子。
+</div>
+
+<hr>
+
+<!---------- 230 ---------->
+<h4>Kth Smallest Element in a BST（230）⭐⭐⭐⭐⭐</h4>
+<ul>
+  <li>中序遍历 + 计数器，遍历到第 K 个时停止</li>
+</ul>
+
+<hr>
+
+<!---------- 99 ---------->
+<h4>Recover BST（99）⭐⭐⭐</h4>
+<blockquote>注意两种 case 的区别</blockquote>
+
+<table>
+  <tr><th>Case</th><th>中序序列特征</th></tr>
+  <tr><td><strong>两个紧邻节点交换</strong></td><td>只有 <strong>一次</strong> 波峰（逆序对）</td></tr>
+  <tr><td><strong>非紧邻节点交换</strong></td><td>会有 <strong>两次</strong> 波峰（逆序对）</td></tr>
+</table>
+
+<hr>
+
+<!---------- 101 / 100 ---------->
+<h4>Symmetric Tree（101）/ Same Tree（100）⭐⭐⭐</h4>
+<ul>
+  <li>都是 <strong>两个根节点比较</strong></li>
+  <li>关键：定义好递归函数的语义（"这两个子树是否相同/对称"）</li>
+</ul>
+
+<hr>
+
+<!---------- 173 ---------->
+<h4>BST Iterator（173）⭐⭐⭐</h4>
+<ul>
+  <li>核心：把 in-order 迭代拆成三步</li>
+  <li><code>pushLeft(root)</code> — 一路向左入栈</li>
+  <li><code>hasNext()</code> — 栈非空</li>
+  <li><code>next()</code> — 出栈，对右孩子执行 pushLeft</li>
+</ul>
+
+<hr>
+
+<!---------- 110 ---------->
+<h4>Balanced Tree（110）⭐⭐</h4>
+
+<table>
+  <tr><th>做法</th><th>复杂度</th><th>说明</th></tr>
+  <tr><td>depth / balance 分开计算</td><td>O(n log n)</td><td>递归中套递归，重复计算</td></tr>
+  <tr><td><strong>depth + balance 融合计算</strong></td><td><strong>O(n)</strong></td><td>平衡时返回高度，不平衡返回 -1</td></tr>
+</table>
+
+<hr>
+
+<!---------- 链接叶子 ---------->
+<h4>链接二叉树的所有叶子节点</h4>
+<ul>
+  <li>不限于前序，<strong>中序也可以</strong> — 只要从左至右访问叶子节点即可</li>
+</ul>
+
+<hr>
+
+<!---------- 构造树序列 ---------->
+<h4>构造树序列</h4>
+
+<table>
+  <tr><th>题目</th><th>方法</th><th>注意</th></tr>
+  <tr><td><strong>108. Convert Sorted Array to BST</strong></td><td>后序构造：先建子树再连根向上返回</td><td>—</td></tr>
+  <tr><td><strong>105 / 106. 前序+中序 / 中序+后序</strong></td><td>找根 → 分割左右 → 递归</td><td><strong>下标处理要非常小心</strong></td></tr>
+</table>
+
+<hr>
+
+<!---------- Arithmetic Expression Tree ---------->
+<h4>Arithmetic Expression Tree</h4>
+<div class="warn"><strong>🚧</strong> 还不熟，需要练习</div>
+
+<hr>
+
+<!---------- 114 ---------->
+<h4>Flatten Binary Tree to Linked List（114）</h4>
+<ul>
+  <li>和 701/450 同样的模式：<strong>定义递归函数语义 → 用 <code>root.left/right = recursive()</code> 挂接结果</strong></li>
+</ul>
+
+<p>递归语义：<strong><code>flattenTree(root)</code> — 展平以 <code>root</code> 为根的子树，并返回展平后的根（即 root 本身）</strong></p>
+
+<p>调用完成后保证：</p>
+<ol>
+  <li>子树已按<strong>前序遍历</strong>顺序展平成一条右斜链</li>
+  <li>所有节点的 <code>left = null</code></li>
+  <li><code>right</code> 指向前序的下一个节点</li>
+  <li>返回值永远等于入参 <code>root</code>（和 deleteNode 不同，deleteNode 可能返回新根）</li>
+</ol>
+
+<pre>
+flattenTree(root):
+  root.left = flattenTree(root.left)   ← 左子树已展平，结果接回来
+  root.right = flattenTree(root.right) ← 右子树已展平，结果接回来
+  // 处理当前节点：三种情况
+  // 叶子 / 只有右子树 → 直接返回
+  // 只有左子树 → 移到右边，left 置 null
+  // 左右都有 → 左子树的最右节点接右子树，左移右，left 置 null
+</pre>
+
+<div class="tip">
+<strong>💡</strong> 与 deleteNode/insertIntoBST 的区别：它们的返回值可能是新根（删除/插入改变了根），而 flatten 的根不会变。但"用返回值让上层重新挂接"的手法一样。
+</div>
+
+<hr>
+
+<!---------- 543 ---------->
+<h4>二叉树的直径（543）⭐⭐⭐⭐</h4>
+<p>直径可能来源于三个地方：</p>
+
+<pre>
+直径 = max(左子树直径, 右子树直径, 左高度 + 右高度)
+</pre>
+
+<table>
+  <tr><th>做法</th><th>复杂度</th><th>问题</th></tr>
+  <tr><td>分别写函数算高度和直径</td><td>O(n²)</td><td>递归中套递归，大量重复</td></tr>
+  <tr><td><strong>融合到一个递归函数</strong></td><td><strong>O(n)</strong></td><td>同时返回高度，更新全局直径</td></tr>
+</table>
+
+<div class="warn"><strong>⚠️ Same Tree</strong> 例外：主函数是比较两棵树，递归是比较两个节点 — 语义不同，无法融合</div>
+
+<hr>
+
+<!---------- 124 ---------->
+<h4>Binary Tree Maximum Path Sum（124）⭐⭐⭐⭐⭐</h4>
+<blockquote>思路类似树的直径，<strong>务必仔细看负值处理！</strong></blockquote>
+
+<p>递归函数的语义：</p>
+<ul>
+  <li><strong>当前节点返回</strong>：以 x 子树中某节点为起点，到 x 结束的最大路径和（只能走一侧）</li>
+  <li><strong>全局更新</strong>：路径可能横跨 x 的左右子树（左+根+右），但这种情况<strong>不能往上接了</strong></li>
+  <li>负值贡献 → 直接舍弃（<code>max(0, leftGain)</code>）</li>
+</ul>
+
+<hr>
+
+<!---------- 572 ---------->
+<h4>Subtree of Another Tree（572）⭐⭐</h4>
+<p>将树<strong>编码成字符串</strong>，后序遍历：</p>
+
+<pre>
+encode(root) = encode(root.left) + height(root) + encode(root.right)
+encode(leaf) = "0"
+</pre>
+
+<ul>
+  <li>先对小树编码，再对大树后序遍历编码</li>
+  <li>发现编码一致 → 有同构子树</li>
+</ul>
+
+<hr>
+
+<!---------- LCA ---------->
+<h3>LCA（Lowest Common Ancestor）— 两种实现对比</h3>
+
+<blockquote>BST 中的 LCA 很简单（利用大小关系剪枝），但<strong>普通二叉树的 LCA</strong> 有两种不同的实现思路，理解其差异有助于掌握递归语义的设计。</blockquote>
+
+<div class="warn">
+<strong>⚠️ 重要前提：</strong>如果不是确定 p、q 一定在树中，需要先遍历一次确认它们存在，再执行 LCA 算法。否则「直接返回 + 混合语义」的 <strong>修正解思路</strong>（版本二）可能返回错误的 LCA（例如 q 不存在却返回了 p）。这个前提对 <strong>二叉树</strong> 和 <strong>K-ary 树</strong> 的修正解都适用。
+</div>
+
+<p>两个实现都在 <code>BST.java</code> 中：</p>
+
+<div class="comparison">
+  <div>
+    <h4>版本一：result 包装器 + 剪枝</h4>
+    <pre>
+TreeNode lowestCommonAncestor(root, p, q) {
+    TreeNode[] result = new TreeNode[1];
+    LCA(root, p, q, result);
+    return result[0];
+}
+
+TreeNode LCA(root, p, q, result) {
+    if (root == null || result[0] != null)
+        return null;
+    TreeNode left = LCA(root.left, p, q, result);
+    TreeNode right = LCA(root.right, p, q, result);
+    boolean foundSelf = root.val==p.val
+                     || root.val==q.val;
+    if (foundSelf && (left!=null||right!=null))
+      { result[0]=root; return root; }
+    if (left!=null && right!=null)
+      { result[0]=root; return root; }
+    if (foundSelf) return root;
+    return left != null ? left : right;
+}
+    </pre>
+    <ul>
+      <li>递归语义纯粹：返回值 = "是否找到 p/q"</li>
+      <li><code>result[0]</code> 独立存 LCA</li>
+      <li>p/q 缺失时 result[0] 保持 null</li>
+      <li><code>result[0] != null</code> 后整树剪枝</li>
+    </ul>
+  </div>
+  <div>
+    <h4>版本二：直接返回 + 混合语义</h4>
+    <pre>
+TreeNode lowestCommonAncestor2(root, p, q) {
+    if (root == null) return null;
+    if (root.val == p.val) return root;
+    if (root.val == q.val) return root;
+
+    TreeNode left = lowestCommonAncestor2(
+        root.left, p, q);
+    TreeNode right = lowestCommonAncestor2(
+        root.right, p, q);
+    if (left!=null && right!=null) return root;
+    if (left != null) return left;
+    if (right != null) return right;
+    return null;
+}
+    </pre>
+    <ul>
+      <li>返回值混合：可能是 p/q 也可能是 LCA</li>
+      <li>依赖 p/q 一定存在</li>
+      <li>找到 p/q 后只剪下方，兄弟仍需遍历</li>
+      <li>代码简洁，适合竞赛/刷题场景</li>
+    </ul>
+  </div>
+</div>
+
+<h4>核心对比</h4>
+
+<table>
+  <tr><th>维度</th><th>result 包装器版</th><th>直接返回版</th></tr>
+  <tr><td>递归语义</td><td>单一：返回值 = 是否找到 p/q</td><td>混合：可能是 p/q 也可能是 LCA</td></tr>
+  <tr><td>结果存取</td><td><code>result[0]</code> 独立存储</td><td>直接用返回值传递</td></tr>
+  <tr><td>p/q 缺失</td><td><span style="color:#16a34a;font-weight:bold;">正确</span>（result[0] = null）</td><td><span style="color:#dc2626;font-weight:bold;">错误</span>（返回已找到的节点）</td></tr>
+  <tr><td>剪枝时机</td><td><span style="color:#16a34a;font-weight:bold;">result[0] 赋值后整树剪枝</span></td><td><span style="color:#d97706;">找到 p/q 后只剪下方子树</span></td></tr>
+  <tr><td>遍历范围</td><td>找到 LCA 后立即停止</td><td>找到 p/q 后仍需遍历兄弟子树</td></tr>
+  <tr><td>代码复杂度</td><td>稍高（需要包装器）</td><td>简洁</td></tr>
+  <tr><td>适用场景</td><td>安全性优先，需处理异常情况</td><td>竞赛/刷题，假设 p/q 一定存在</td></tr>
+</table>
+
+<hr>
+
+<!---------- K-ary Tree LCA ---------->
+<h3>K-ary Tree LCA（多叉树最近公共祖先）</h3>
+
+<blockquote>BST 和二叉树的 LCA 思路推广到多叉树：每个节点有 <code>List&lt;KTreeNode&gt; children</code>，本质是"在 N 个分支中寻找 p 和 q"。</blockquote>
+
+<p>多叉树的 LCA 是二叉树 LCA 的直接推广。二叉树只有两个分支（left / right），多叉树则有 N 个分支（children）。</p>
+
+<h4>节点定义</h4>
+
+<pre>
+class KTreeNode {
+    int val;
+    List&lt;KTreeNode&gt; children;
+    KTreeNode(int val) { this.val = val; this.children = new ArrayList&lt;&gt;(); }
+}</pre>
+
+<h4>代码实现</h4>
+
+<pre>
+KTreeNode lowestCommonAncestor(KTreeNode root, KTreeNode p, KTreeNode q) {
+    if (root == null) return null;
+    if (root.val == p.val || root.val == q.val) return root;
+
+    List&lt;KTreeNode&gt; candidates = new ArrayList&lt;&gt;();
+    for (KTreeNode child : root.children) {
+        KTreeNode result = lowestCommonAncestor(child, p, q);
+        if (result != null) candidates.add(result);
+    }
+
+    if (candidates.size() &gt;= 2) return root;        // p 和 q 在不同子树
+    if (candidates.size() == 1) return candidates.get(0);  // 单侧返回
+    return null;  // 没找到
+}</pre>
+
+<h4>算法逻辑</h4>
+
+<ol>
+  <li><strong>递归语义</strong>：返回值 = 在该子树中找到的 p/q/LCA。与二叉树 LCA 版二（直接返回版）完全一致。</li>
+  <li><strong>当前节点就是 p 或 q</strong> → 直接返回自己，它是潜在的 LCA。</li>
+  <li><strong>遍历所有孩子</strong>：统计所有孩子返回的非 null 结果。</li>
+  <li><strong>≥ 2 个非 null</strong>：p 和 q 分布在不同的孩子子树中 → 当前节点就是 LCA。</li>
+  <li><strong>恰好 1 个非 null</strong>：把该孩子的结果往上传递。</li>
+  <li><strong>全为 null</strong>：该子树不存在 p 或 q，返回 null。</li>
+</ol>
+
+<h4>与二叉树 LCA 的对比</h4>
+
+<table>
+  <tr><th>维度</th><th>二叉树 LCA</th><th>K-ary 树 LCA</th></tr>
+  <tr><td>分支数量</td><td>固定 2（left / right）</td><td>N（children 列表）</td></tr>
+  <tr><td>判断条件</td><td>left != null &amp;&amp; right != null → 当前是 LCA</td><td>candidates.size() &gt;= 2 → 当前是 LCA</td></tr>
+  <tr><td>返回值逻辑</td><td>三目运算符 / if-else 链</td><td>收集 candidates 列表统一判断</td></tr>
+  <tr><td>复杂度</td><td>O(n)</td><td>O(n)（每个节点仍只访问一次）</td></tr>
+</table>
+
+<div class="tip">
+<strong>💡</strong> 核心洞察：二叉树 LCA 的 <code>left != null &amp;&amp; right != null → return root</code> 本质是"在两个分支中各找到了目标"。在多叉树中推广为"在至少两个孩子子树中各找到了目标"。
+</div>
+
+<h4>解法二：路径比较法</h4>
+
+<blockquote>另一种思路：分别找出 root → p 和 root → q 的路径，两条路径最后一个相同节点即为 LCA。</blockquote>
+
+<pre>
+KTreeNode lowestCommonAncestor2(KTreeNode root, KTreeNode p, KTreeNode q) {
+    List&lt;KTreeNode&gt; pathP = new ArrayList&lt;&gt;();
+    List&lt;KTreeNode&gt; pathQ = new ArrayList&lt;&gt;();
+    if (!findPath(root, p, pathP) || !findPath(root, q, pathQ)) {
+        return null;
+    }
+    int i = 0;
+    while (i &lt; pathP.size() &amp;&amp; i &lt; pathQ.size()
+           &amp;&amp; pathP.get(i) == pathQ.get(i)) {
+        i++;
+    }
+    return pathP.get(i - 1);
+}
+
+boolean findPath(KTreeNode root, KTreeNode target, List&lt;KTreeNode&gt; path) {
+    if (root == null) return false;
+    path.add(root);
+    if (root.val == target.val) return true;
+    for (KTreeNode child : root.children) {
+        if (findPath(child, target, path)) return true;
+    }
+    path.remove(path.size() - 1);
+    return false;
+}</pre>
+
+<p><strong>算法步骤</strong>：</p>
+<ol>
+  <li><code>findPath</code> 做 DFS 查找 target，用 path 记录沿途节点，找到后返回 true</li>
+  <li>没找到时回溯：<code>path.remove(path.size() - 1)</code> 移除当前节点</li>
+  <li>得到两条路径后，从头遍历直到遇到第一个不同节点，其前一个就是 LCA</li>
+</ol>
+
+<table>
+  <tr><th>维度</th><th>解法一（递归搜索）</th><th>解法二（路径比较）</th></tr>
+  <tr><td>时间复杂度</td><td>O(n)</td><td>O(n)</td></tr>
+  <tr><td>空间复杂度</td><td>O(h)（递归栈深度）</td><td>O(n)（两条路径，最差 O(n)）</td></tr>
+  <tr><td>第一次遍历找到 p/q 后</td><td>直接返回，不再往下递归</td><td>DFS 仍在回溯，但已找到 target 时兄弟子树不遍历</td></tr>
+  <tr><td>代码可读性</td><td>高度抽象，递归语义需理解</td><td>直观，路径比较易于理解</td></tr>
+  <tr><td>适用场景</td><td>只需 LCA，无需路径信息</td><td>额外需要路径信息的场景</td></tr>
+</table>
+
+<hr>
+
+<!---------- 297 ---------->
+<h3>二叉树序列化（LeetCode 297）⭐⭐⭐⭐</h3>
+
+<blockquote>序列化是将二叉树编码为字符串，反序列化是从字符串还原出原树。面试高频题。</blockquote>
+
+<h4>1. 前序遍历序列化</h4>
+
+<p><strong>序列化过程</strong>：按前序（根→左→右）递归遍历，节点值用 <code>,</code> 分隔，空节点标记为 <code>#</code>。</p>
+
+<pre>
+    30
+   /  \
+  10   20
+ /    /  \
+50   45  35
+</pre>
+<p>→ <code>"30,10,50,#,#,#,20,45,#,#,35,#,#"</code></p>
+
+<p><strong>反序列化核心</strong>：维护一个全局索引，按前序顺序消费字符串数组。</p>
+
+<table>
+  <tr><th>当前元素</th><th>操作</th></tr>
+  <tr><td><code>#</code></td><td>返回 null，索引+1（空子树）</td></tr>
+  <tr><td>数字</td><td>创建节点，索引+1，递归构建左右子树</td></tr>
+</table>
+
+<div class="tip">
+<strong>💡</strong> 关键 insight：序列化时，当前元素的下一个和下两个一定是当前节点的左孩子和右孩子（只要当前不为 #）。前序遍历的顺序天然保证了这一点。
+</div>
+
+<h4>反序列化递归语义——怎么理解才好写</h4>
+
+	<p>反序列化的递归函数定义这个<strong>契约</strong>：</p>
+
+	<pre>
+	deserialize(指针):
+	  从指针当前位置开始，恰好消费掉「一棵树」的序列化数据
+	  返回这棵树的根节点（或 null）
+	  指针停在「这棵树」之后的位置
+	</pre>
+
+	<p>它和 <code>serialize</code> 是<strong>完全对称</strong>的——序列化是先写根再递归左右，反序列化就是先读根再递归左右，<strong>代码结构一模一样</strong>：</p>
+
+	<div class="comparison">
+	  <div>
+	    <h4>序列化</h4>
+	    <pre>
+	void serialize(Node root, sb) {
+	    if (root == null) {
+	        sb.append("#,");
+	        return;
+	    }
+	    sb.append(root.val).append(",");
+	    serialize(root.left, sb);
+	    serialize(root.right, sb);
+	}
+	    </pre>
+	  </div>
+	  <div>
+	    <h4>反序列化</h4>
+	    <pre>
+	Node deserialize(arr, c) {
+	    if (arr[c.index].equals("#")) {
+	        c.index++;
+	        return null;
+	    }
+	    Node node = new Node(arr[c.index]);
+	    c.index++;
+	    node.left = deserialize(arr, c);
+	    node.right = deserialize(arr, c);
+	    return node;
+	}
+	    </pre>
+	  </div>
+	</div>
+
+	<p>理解方式——把数组看成<strong>嵌套括号</strong>，每个 <code>deserialize()</code> 调用吃掉自己的一对括号：</p>
+
+	<pre>
+	原始:  30, 10, 50, #, #, #, 20, 45, #, #, 35, #, #
+	括号:  30, [10, [50, #, #], #],  [20, [45, #, #], [35, #, #]]
+	            ├──左子树──┤            ├─────右子树────────┤
+	</pre>
+
+	<ul>
+	  <li><code>#</code> 是递归终止信号：遇到就返回 null，指针+1</li>
+	  <li>不是 <code>#</code>：当前值就是<strong>子树的根</strong>，创建节点，指针+1，递归两次——第一次<strong>自动消费左子树的所有元素</strong>，第二次<strong>自动消费右子树的所有元素</strong></li>
+	  <li><strong>不用关心递归内部怎么停的</strong>，只要相信：<code>deserialize(left)</code> 会恰好消费掉左子树的所有元素，指针停在正确位置</li>
+	</ul>
+
+	<div class="warn">
+	<strong>❓ 为什么中序不行？</strong> 前序序列化是 <code>[根, 左子树..., 右子树...]</code>，反序列化一上来就读到根，然后递归消费左右——顺序一致。中序是 <code>[左子树..., 根, 右子树...]</code>，反序列化一上来不知道哪里是根，无法唯一确定。
+	</div>
+
+	<h4>2. 层序遍历序列化</h4>
+
+<p>BFS 逐层遍历，用占位符标记空位，逐层推进直到下一层全为空。</p>
+
+<pre>
+    1
+   / \
+  2   3
+ /
+4
+</pre>
+<p>→ <code>"1,2,3,4,#,#,#"</code></p>
+
+<p><strong>反序列化</strong>：用数组索引映射，<code>globalIndex</code> 指向左右孩子位置，遇到 <code>#</code> 跳过。</p>
+
+<h4>3. 为什么中序遍历不行？</h4>
+
+<p>两种不同形态的树可能产生完全相同的中序序列：</p>
+
+<div class="comparison">
+  <div>
+    <h4>树 A</h4>
+    <pre>
+  1
+ /
+2
+    </pre>
+  </div>
+  <div>
+    <h4>树 B</h4>
+    <pre>
+2
+ \
+  1
+    </pre>
+  </div>
+</div>
+
+<p>中序遍历都是 <code>"2,1"</code>，无法确定根的位置 → <strong>反序列化不唯一</strong>。</p>
+
+<h4>4. 两种方案对比</h4>
+
+<table>
+  <tr><th>维度</th><th>前序序列化</th><th>层序序列化</th></tr>
+  <tr><td>实现难度</td><td>简单（递归）</td><td>中等（BFS + 占位符）</td></tr>
+  <tr><td>反序列化</td><td>递归消费数组</td><td>索引映射建树</td></tr>
+  <tr><td>空间</td><td>O(n) 递归栈</td><td>O(n) 队列 + 缓存</td></tr>
+  <tr><td>空节点标记</td><td><code>#</code></td><td><code>#</code> 或占位符对象</td></tr>
+  <tr><td>LeetCode 297</td><td>✅ 可解</td><td>✅ 可解</td></tr>
+  <tr><td>单节点树</td><td><code>val,#,#</code>（略冗余）</td><td><code>val</code>（更紧凑）</td></tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Two Pointer (双指针) 总结</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif; line-height: 1.45; max-width: 960px; margin: 0 auto; padding: 16px 24px 60px; color: #2d3a31; background: #f5faf6; font-size: 13px; }
+  h1 { font-size: 1.35em; border-bottom: 3px solid #4a7c3f; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
+  h2 { font-size: 1.2em; color: #3d6b35; margin-top: 20px; padding-left: 8px; border-left: 4px solid #5a8f4c; }
+  h3 { font-size: 1.02em; color: #2d3a31; margin-top: 16px; }
+  h4 { font-size: 0.95em; color: #3a5235; margin-top: 12px; }
+  p { margin: 6px 0; } li { margin: 2px 0; } ol, ul { padding-left: 20px; }
+  blockquote { margin: 10px 0; padding: 12px 20px; background: #e8f5ec; border-left: 5px solid #5a8f4c; border-radius: 0 8px 8px 0; }
+  blockquote > p { margin: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9em; }
+  th, td { border: 1px solid #c3dbcc; padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: #4a7c3f; color: #fff; font-weight: 600; white-space: nowrap; }
+  tr:nth-child(even) { background: #e8f5ec; }
+  pre { background: #f5f0eb; color: #3d3731; padding: 12px 16px; border-radius: 8px; overflow-x: auto; font-size: 0.8em; line-height: 1.45; margin: 8px 0; }
+  code { font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace; }
+  p > code, li > code, td > code { background: #e4eddb; padding: 2px 6px; border-radius: 4px; font-size: 0.88em; color: #3d6b35; }
+  .star { color: #d4a017; font-weight: bold; }
+  .done { color: #16a34a; font-weight: bold; }
+  .pending { color: #94a3b8; }
+  hr { border: none; border-top: 2px dashed #c3dbcc; margin: 16px 0; }
+  .route { background: linear-gradient(135deg, #2d5a27, #4a7c3f); color: #fff; padding: 12px 20px; border-radius: 12px; margin: 12px 0; line-height: 1.7; font-size: 0.9em; }
+  .route strong { color: #fbbf24; }
+  td:first-child, th:first-child { text-align: center; white-space: nowrap; }
+  td:nth-child(2), th:nth-child(2) { text-align: center; }
+  td:nth-child(4), th:nth-child(4) { text-align: center; }
+  td:nth-child(6), th:nth-child(6) { text-align: center; }
+</style>
+</head>
+<body>
+
+<h1>Two Pointer (双指针)</h1>
+
+<blockquote><strong>核心性质：</strong>双指针通过两个变量的协同移动来缩小解空间；与滑动窗口的区别在于不要求连续</blockquote>
+
+<h2>题目列表（按面试频次降序）</h2>
+
+<table>
+  <tr><th>频次</th><th>题号</th><th>题目</th><th>难度</th><th>核心思路</th><th>状态</th></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>11</td><td>Container With Most Water</td><td>🟡 Medium</td><td>左右指针，每次移动短板</td><td><span class="done">✅ TwoPointer.java</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>15</td><td>3Sum</td><td>🟡 Medium</td><td>固定 i + 左右指针，注意去重三连</td><td><span class="done">✅ TwoPointer.java</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>121</td><td>Best Time to Buy and Sell Stock</td><td>🟢 Easy</td><td>正向扫描，记录历史最低价</td><td><span class="done">✅ TwoPointer.java</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>42</td><td>Trapping Rain Water</td><td>🔴 Hard</td><td>左右指针 + 左右最大高度 / 单调栈</td><td><span class="done">✅ StackS.java</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>16</td><td>3Sum Closest</td><td>🟡 Medium</td><td>固定 i + 左右指针，唯一解无需去重</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>122</td><td>Best Time to Buy and Sell Stock II</td><td>🟡 Medium</td><td>贪心累加正差价</td><td><span class="done">✅ TwoPointer.java</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>844</td><td>Backspace String Compare</td><td>🟢 Easy</td><td>逆向扫描 + skip 计数</td><td><span class="done">✅ TwoPointer.java</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>75</td><td>Sort Colors</td><td>🟡 Medium</td><td>三指针（red/white/blue）</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>581</td><td>Shortest Unsorted Continuous Subarray</td><td>🟡 Medium</td><td>正反指针找备选区间再扩展</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>134</td><td>Gas Station</td><td>🟡 Medium</td><td>贪心剪枝，跳过中间不可能起点</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>455</td><td>Assign Cookies</td><td>🟢 Easy</td><td>双数组排序 + 双指针</td><td><span class="done">✅ TwoPointer.java</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>123</td><td>Best Time to Buy and Sell Stock III</td><td>🔴 Hard</td><td>双向分割：left[i] + right[i]</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>167</td><td>Two Sum II - Input Array Is Sorted</td><td>🟡 Medium</td><td>左右指针，和大了动 high，小了动 low</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>26</td><td>Remove Duplicates from Sorted Array</td><td>🟢 Easy</td><td>快慢指针，慢指针维护不重复区</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>283</td><td>Move Zeroes</td><td>🟢 Easy</td><td>快慢指针，非零元素前移</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★</span></td><td>188</td><td>Best Time to Buy and Sell Stock IV</td><td>🔴 Hard</td><td>三维 DP，面试一般不考</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★</span></td><td>962</td><td>Maximum Width Ramp</td><td>🟡 Medium</td><td>LMin/RMax 双指针 / 单调栈</td><td><span class="pending">⬜</span></td></tr>
+</table>
+
+<h2>核心套路</h2>
+
+<pre>
+左右指针 (Two Ends)     → i=0, j=n-1，向中间逼近，移动哪侧取决于比较 a[i] 和 a[j]
+固定 i + 左右指针       → 排序后固定一个，另外两个左右逼近（3Sum 系列）
+快慢指针 (同向)         → 快慢同时前进，慢指针维护符合条件的区间
+正反指针 (Two Pass)     → 正向扫一遍 + 逆向扫一遍，组合结果（Stock III / 最短无序子数组）
+逆向扫描               → 当正向需要栈/队列记住"未来"的信息时，逆向直接"看到未来"
+双数组指针              → 各指一个已排序数组，按条件移动
+三指针                 → 三种颜色的荷兰国旗问题
+</pre>
+
+<h2>刷题路线</h2>
+
+<div class="route">
+  <strong>第一梯队（必会）：</strong>11 → 15 → 121 → 42 → 167<br>
+  <strong>第二梯队（高频）：</strong>16 → 122 → 844 → 75 → 581<br>
+  <strong>第三梯队（进阶）：</strong>134 → 455 → 123 → 26 → 283<br>
+  <strong>第四梯队（扩展）：</strong>188
+</div>
+
+<h2>实现文件</h2>
+<ul>
+  <li><code>algorithm/src/main/java/leetcode/TwoPointer.java</code> — 主实现</li>
+  <li><code>algorithm/src/main/java/leetcode/StackS.java</code> — Trapping Rain Water（单调栈版）</li>
+</ul>
+
+<hr>
+
+<h2>详细分析</h2>
+
+<h3>1. Container With Most Water (11)</h3>
+<p><strong>思路</strong>：两个指针从最左和最右开始，逐步缩小宽度，每次只移动<strong>短板</strong>。</p>
+<pre>
+面积 = min(height[i], height[j]) * (j - i)
+</pre>
+<p><strong>为什么移动长板不行？</strong>宽度减小，新高度 ≤ 原短板高度 → 面积不可能增大。</p>
+<pre>
+if (height[i] &lt; height[j]) i++;
+else if (height[i] &gt; height[j]) j--;
+else { i++; j--; }
+</pre>
+
+<hr>
+
+<h3>2. 3Sum (15)</h3>
+<p><strong>思路</strong>：先排序，固定 i，low = i+1，high = n-1，移动 low/high 寻找 <code>nums[i] + nums[low] + nums[high] == 0</code>。</p>
+<p><strong>去重三连</strong>：</p>
+<pre>
+if (i &gt; 0 && nums[i] == nums[i-1]) continue;     // i 去重
+while (j &lt; k && nums[j] == nums[j+1]) j++;         // j 去重
+while (j &lt; k && nums[k] == nums[k-1]) k--;         // k 去重
+</pre>
+
+<hr>
+
+<h3>3. Best Time to Buy and Sell Stock I (121)</h3>
+<p><strong>思路</strong>：正向扫描，记录历史最低价格，每天计算如果当天卖出能赚多少，更新最大利润。不需要逆向扫描。</p>
+
+<hr>
+
+<h3>4. Trapping Rain Water (42)</h3>
+<p><strong>思路</strong>：左右指针 + 维护左右最大高度。当 <code>height[left] &lt; height[right]</code> 时，<code>left</code> 位置的接水量仅取决于左侧最大值。</p>
+
+<hr>
+
+<h3>5. Best Time to Buy and Sell Stock II (122)</h3>
+<p><strong>思路</strong>：累加所有正差价，无限次交易可以把一次长持有拆成多段短持有，总和不变。</p>
+<pre>
+for (int i = 1; i &lt; prices.length; i++) {
+    if (prices[i] &gt; prices[i-1]) profit += prices[i] - prices[i-1];
+}
+</pre>
+
+<hr>
+
+<h3>6. Backspace String Compare (844)</h3>
+<p><strong>思路</strong>：逆向扫描时，# 代表跳过下一个有效字符，天然适合从后往前处理。</p>
+
+<hr>
+
+<h3>7. Sort Colors (75)</h3>
+<p><strong>思路</strong>：三指针（荷兰国旗问题）。</p>
+<pre>
+int red = 0, blue = nums.length - 1, i = 0;
+while (i &lt;= blue) {
+    if (nums[i] == 0) swap(nums, red++, i++);
+    else if (nums[i] == 1) i++;
+    else swap(nums, blue--, i);
+}
+</pre>
+
+<hr>
+
+<h3>8. Shortest Unsorted Continuous Subarray (581)</h3>
+<p><strong>思路</strong>：找备选区间 → 扩展备选区间（根据 min/max 向外扩展）→ 最终 [s, e] 即为答案。</p>
+
+<hr>
+
+<h3>9. Gas Station (134)</h3>
+<p><strong>思路</strong>：从点 i 出发到 k 走不下去，则 i 到 k 之间的任意点都不需要尝试，直接跳过从 k+1 开始。</p>
+
+<hr>
+
+<h3>10. Assign Cookies (455)</h3>
+<p><strong>思路</strong>：两个数组各排一次序，两个指针分别扫描。标准双数组指针模板。</p>
+
+<hr>
+
+<h3>11. Best Time to Buy and Sell Stock III (123)</h3>
+<p><strong>思路</strong>：双向分割。left[i] = prices[0..i] 范围内一次交易的最大利润，right[i] = prices[i..n-1] 范围内一次交易的最大利润，ans = max(left[i] + right[i])。</p>
+
+<hr>
+
+<h3>12. Two Sum II - Input Array Is Sorted (167)</h3>
+<p><strong>思路</strong>：已排序数组，左右指针。<code>sum &lt; target → low++</code>，<code>sum &gt; target → high--</code>。</p>
+
+<hr>
+
+<h3>13. Remove Duplicates from Sorted Array (26)</h3>
+<p><strong>思路</strong>：慢指针 i 维护不重复区的末尾，快指针 j 扫描。遇到新元素就放到 i+1。</p>
+
+<hr>
+
+<h3>14. Move Zeroes (283)</h3>
+<p><strong>思路</strong>：慢指针指向当前非零元素应放置的位置，快指针扫描。非零元素前移，最后末尾补零。</p>
+
+<hr>
+
+<h3>15. Maximum Width Ramp (962)</h3>
+<p><strong>思路</strong>：预处理 LMin[i] = a[0..i] 的最小值，RMax[j] = a[j..n-1] 的最大值。双指针贪心扩展 j。</p>
+
+</body>
+</html>

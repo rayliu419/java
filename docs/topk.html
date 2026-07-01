@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Top K (第 K 大/小) 总结</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif; line-height: 1.45; max-width: 960px; margin: 0 auto; padding: 16px 24px 60px; color: #2d3a31; background: #f5faf6; font-size: 13px; }
+  h1 { font-size: 1.35em; border-bottom: 3px solid #4a7c3f; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
+  h2 { font-size: 1.2em; color: #3d6b35; margin-top: 20px; padding-left: 8px; border-left: 4px solid #5a8f4c; }
+  h3 { font-size: 1.02em; color: #2d3a31; margin-top: 16px; }
+  h4 { font-size: 0.95em; color: #3a5235; margin-top: 12px; }
+  p { margin: 6px 0; } li { margin: 2px 0; } ol, ul { padding-left: 20px; }
+  blockquote { margin: 10px 0; padding: 12px 20px; background: #e8f5ec; border-left: 5px solid #5a8f4c; border-radius: 0 8px 8px 0; }
+  blockquote > p { margin: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9em; }
+  th, td { border: 1px solid #c3dbcc; padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: #4a7c3f; color: #fff; font-weight: 600; white-space: nowrap; }
+  tr:nth-child(even) { background: #e8f5ec; }
+  pre { background: #f5f0eb; color: #3d3731; padding: 12px 16px; border-radius: 8px; overflow-x: auto; font-size: 0.8em; line-height: 1.45; margin: 8px 0; }
+  code { font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace; }
+  p > code, li > code, td > code { background: #e4eddb; padding: 2px 6px; border-radius: 4px; font-size: 0.88em; color: #3d6b35; }
+  .star { color: #d4a017; font-weight: bold; }
+  .done { color: #16a34a; font-weight: bold; }
+  .pending { color: #94a3b8; }
+  hr { border: none; border-top: 2px dashed #c3dbcc; margin: 16px 0; }
+  .route { background: linear-gradient(135deg, #2d5a27, #4a7c3f); color: #fff; padding: 12px 20px; border-radius: 12px; margin: 12px 0; line-height: 1.7; font-size: 0.9em; }
+  .route strong { color: #fbbf24; }
+  td:first-child, th:first-child { text-align: center; white-space: nowrap; }
+  td:nth-child(2), th:nth-child(2) { text-align: center; }
+  td:nth-child(4), th:nth-child(4) { text-align: center; }
+  td:nth-child(6), th:nth-child(6) { text-align: center; }
+</style>
+</head>
+<body>
+
+<h1>Top K (第 K 大/小)</h1>
+
+<blockquote><strong>核心性质：</strong>求无序数组中第 K 大/小 → QuickSelect 平均 O(n)；涉及"前 K 个高频/最近" → 堆 O(n log k)</blockquote>
+
+<h2>题目列表（按面试频次降序）</h2>
+
+<table>
+  <tr><th>频次</th><th>题号</th><th>题目</th><th>难度</th><th>核心思路</th><th>状态</th></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>215</td><td>Kth Largest Element in an Array</td><td>🟡 Medium</td><td>QuickSelect O(n) / 堆 O(n log k)</td><td><span class="done">✅ Kth.java</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>347</td><td>Top K Frequent Elements</td><td>🟡 Medium</td><td>频率统计 + 堆或桶排序</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>703</td><td>Kth Largest Element in a Stream</td><td>🟢 Easy</td><td>最小堆维护 Top K，堆顶即第 K 大</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>973</td><td>K Closest Points to Origin</td><td>🟡 Medium</td><td>最大堆 / QuickSelect / 排序</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>378</td><td>Kth Smallest Element in a Sorted Matrix</td><td>🟡 Medium</td><td>K路最小堆 / 值域二分</td><td><span class="done">✅ KSortedListMerge.java</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>692</td><td>Top K Frequent Words</td><td>🟡 Medium</td><td>频率统计 + 堆（按频率+字典序排序）</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>658</td><td>Find K Closest Elements</td><td>🟡 Medium</td><td>二分找到左边界 + 双指针扩展</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>373</td><td>Find K Pairs with Smallest Sums</td><td>🟡 Medium</td><td>K路最小堆，每行=1个有序链表</td><td><span class="done">✅ KSortedListMerge.java</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>451</td><td>Sort Characters By Frequency</td><td>🟡 Medium</td><td>频率统计 + 堆/bucket，相当于 TopK 的全排序版</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>23</td><td>Merge k Sorted Lists</td><td>🔴 Hard</td><td>最小堆 / 分治两两合并</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>414</td><td>Third Maximum Number</td><td>🟢 Easy</td><td>三个变量模拟小顶堆，O(n)</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>264</td><td>Ugly Number II</td><td>🟡 Medium</td><td>DP 三指针 / 最小堆</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>295</td><td>Find Median from Data Stream</td><td>🔴 Hard</td><td>大顶堆+小顶堆，第k大的特化版（k=n/2）</td><td><span class="pending">⬜</span></td></tr>
+</table>
+
+<h2>核心套路</h2>
+
+<pre>
+无序数组第K大           → QuickSelect（原地分区）或最小堆
+数据流第K大             → 最小堆维护 K 个元素，堆顶即答案
+前K个高频元素           → 频率 Map + 最小堆（保持 K 个最高频）
+最近K个点               → 最大堆（容量 K，淘汰最远的）/ QuickSelect
+有序矩阵/多路第K小      → K路最小堆（每行/每序列一个指针）
+频率排序               → 频率 Map + 桶排序 / 堆全部弹
+
+QuickSelect 模板       → partition + 根据 rank 递归一侧，平均 O(n)，最坏 O(n²)
+最小堆模板             → 容量 K，堆满后每次与堆顶比，更大的入堆、堆顶弹出
+最大堆模板             → 容量 K，堆满后每次与堆顶比，更小的入堆、堆顶弹出
+</pre>
+
+<h2>刷题路线</h2>
+
+<div class="route">
+  <strong>第一梯队（必会）：</strong>215 → 347 → 703 → 973 → 378<br>
+  <strong>第二梯队（高频）：</strong>692 → 658 → 373 → 451<br>
+  <strong>第三梯队（进阶）：</strong>23 → 414 → 264 → 295
+</div>
+
+<h2>实现文件</h2>
+<ul>
+  <li><code>algorithm/src/main/java/leetcode/Kth.java</code> — QuickSelect 核心实现</li>
+  <li><code>algorithm/src/main/java/leetcode/KSortedListMerge.java</code> — K路合并求第K小</li>
+</ul>
+
+<hr>
+
+<h2>详细分析</h2>
+
+<h3>1. Kth Largest Element in an Array (215)</h3>
+
+<table>
+  <tr><th>解法</th><th>复杂度</th><th>空间</th><th>适用场景</th></tr>
+  <tr><td>排序</td><td>O(n log n)</td><td>O(1)</td><td>实现最简单</td></tr>
+  <tr><td>最小堆</td><td>O(n log k)</td><td>O(k)</td><td>数据流/海量数据，k 较小时</td></tr>
+  <tr><td>QuickSelect</td><td>平均 O(n)</td><td>O(1)</td><td>数据在内存中，要求最高性能</td></tr>
+  <tr><td>插入排序</td><td>O(n·k)</td><td>O(1)</td><td>k 非常小时</td></tr>
+</table>
+
+<p><strong>QuickSelect 详解</strong>：</p>
+<pre>
+算法流程：
+1. 随机选 pivot，分区（partition）
+2. 左区所有元素 ≤ pivot，右区所有元素 &gt; pivot
+3. pivot 最终位置 = p，则 pivot 是第 (p - low + 1) 小的元素（相对排名）
+4. 比较排名与 k，递归进入左区或右区
+</pre>
+
+<p><strong>第 K 大 ↔ 第 K 小 转换</strong>：</p>
+<pre>
+// 第 K 大 = 第 (n - K + 1) 小
+int kthLargest = findKthElement(array, array.length - k + 1);
+</pre>
+
+<p><strong>SQL 风格 TopK 模板</strong>：</p>
+<pre>
+// ============ 1. 直接排序 ============
+Arrays.sort(nums);
+return nums[n - k];
+
+// ============ 2. 最小堆（第K大） ============
+PriorityQueue&lt;Integer&gt; minHeap = new PriorityQueue&lt;&gt;(k);
+for (int n : nums) {
+    if (minHeap.size() &lt; k) minHeap.offer(n);
+    else if (n &gt; minHeap.peek()) { minHeap.poll(); minHeap.offer(n); }
+}
+return minHeap.peek();
+
+// ============ 3. 最大堆（第K小 / K个最近） ============
+PriorityQueue&lt;Integer&gt; maxHeap = new PriorityQueue&lt;&gt;((a,b) -> b - a);
+
+// ============ 4. QuickSelect（无序数组最优） ============
+// 见 Kth.java findKthElement 实现
+</pre>
+
+<hr>
+
+<h3>2. Top K Frequent Elements (347)</h3>
+<p><strong>思路</strong>：</p>
+<ul>
+  <li><strong>最小堆</strong>：频率 Map + 最小堆维护 Top K（堆大小为 k）</li>
+  <li><strong>桶排序</strong>：频率 Map + 将数字按频率放入桶中（下标 = 频率），从高到低取 K 个</li>
+  <li><strong>QuickSelect</strong>：频率 Map + 对频率数组做 QuickSelect 找到第 K 高的频率</li>
+</ul>
+
+<hr>
+
+<h3>3. Kth Largest Element in a Stream (703)</h3>
+<p><strong>思路</strong>：维护一个容量为 k 的最小堆，堆中始终保持当前数据流中最大的 k 个元素，堆顶就是第 k 大的元素。</p>
+<pre>
+class KthLargest {
+    PriorityQueue&lt;Integer&gt; minHeap;
+    int k;
+    public KthLargest(int k, int[] nums) {
+        this.k = k;
+        this.minHeap = new PriorityQueue&lt;&gt;(k);
+        for (int n : nums) add(n);
+    }
+    public int add(int val) {
+        if (minHeap.size() &lt; k) minHeap.offer(val);
+        else if (val &gt; minHeap.peek()) { minHeap.poll(); minHeap.offer(val); }
+        return minHeap.peek();
+    }
+}
+</pre>
+
+<hr>
+
+<h3>4. K Closest Points to Origin (973)</h3>
+<p><strong>思路</strong>：要找最近的 K 个点（即第 K 小的距离）。距离 = x² + y²。</p>
+<ul>
+  <li><strong>最大堆</strong>：堆中保持 K 个最近的点（堆顶是当前最远的），新点距离 &lt; 堆顶距离则替换</li>
+  <li><strong>QuickSelect</strong>：计算所有距离，在距离数组上做 QuickSelect</li>
+</ul>
+
+<hr>
+
+<h3>5. Kth Smallest in Sorted Matrix (378)</h3>
+<p>每行是一个有序数组 → m 个有序数组求第 K 小。</p>
+<ul>
+  <li><strong>堆解法</strong>：每行第一个元素入堆，poll K 次</li>
+  <li><strong>二分法</strong>：值域二分，统计 ≤ mid 的元素个数</li>
+</ul>
+
+<hr>
+
+<h3>6. Top K Frequent Words (692)</h3>
+<p>347 进阶版：频率相同时按字典序排序。堆的比较器先按频率升序，频率相同则按字典序降序（字典序大的在堆顶会被优先淘汰）。</p>
+
+<hr>
+
+<h3>7. Find K Closest Elements (658)</h3>
+<p><strong>思路</strong>：数组已排序，找到离 x 最近的 K 个元素。</p>
+<ol>
+  <li>二分找到 x 在数组中的插入位置</li>
+  <li>左指针 = idx，右指针 = idx + 1</li>
+  <li>双指针向两侧扩展，比较 arr[left] 和 arr[right] 谁离 x 更近，扩展 K 次即可</li>
+</ol>
+
+</body>
+</html>

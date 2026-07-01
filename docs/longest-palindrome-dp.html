@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>最长回文子串 - DP 计算顺序可视化</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    line-height: 1.8;
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 24px 32px 60px;
+    color: #2c3e2d;
+    background: #f2f7ed;
+    font-size: 14px;
+  }
+  h1 { font-size: 1.5em; border-bottom: 3px solid #4a7c3f; padding-bottom: 10px; margin-bottom: 20px; color: #2d5a27; }
+  h2 { font-size: 1.25em; color: #2d5a27; margin-top: 28px; padding-left: 10px; border-left: 4px solid #5a8f4c; }
+
+  p { margin: 8px 0; }
+  li { margin: 4px 0; }
+  ol, ul { padding-left: 22px; }
+
+  .core-box {
+    margin: 14px 0;
+    padding: 14px 20px;
+    background: #f0eeff;
+    border-left: 5px solid #6366f1;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.95em;
+  }
+  .tip-box {
+    margin: 14px 0;
+    padding: 14px 20px;
+    background: #fef9e7;
+    border-left: 5px solid #d4a017;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.95em;
+  }
+  .warn-box {
+    margin: 14px 0;
+    padding: 14px 20px;
+    background: #fdf0ef;
+    border-left: 5px solid #d9534f;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.95em;
+  }
+  .summary-box {
+    margin: 14px 0;
+    padding: 14px 20px;
+    background: #edf7ed;
+    border-left: 5px solid #4caf50;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.95em;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 0.9em;
+  }
+  th, td {
+    border: 1px solid #c8d6c0;
+    padding: 8px 12px;
+    text-align: center;
+    vertical-align: middle;
+  }
+  th { background: #4a7c3f; color: #fff; font-weight: 600; }
+
+  hr { border: none; border-top: 1px solid #e2e8d8; margin: 24px 0; }
+
+  /* ===== Matrix visualization ===== */
+  #vis-container {
+    text-align: center;
+    margin: 18px 0;
+    position: relative;
+  }
+  #status-bar {
+    font-size: 1.02em;
+    margin-bottom: 10px;
+    color: #2c3e2d;
+  }
+  #status-bar strong { color: #2d5a27; }
+
+  #dp-table {
+    border-collapse: collapse;
+    margin: 0 auto;
+    table-layout: fixed;
+  }
+  #dp-table td {
+    width: 50px;
+    height: 50px;
+    border: 1px solid #c8d6c0;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    font-size: 0.9em;
+    padding: 0;
+  }
+  #dp-table td.row-header {
+    background: #4a7c3f;
+    color: #fff;
+    font-weight: 700;
+    width: 52px;
+    font-size: 0.82em;
+    padding: 0 4px;
+  }
+  #dp-table td.col-header {
+    background: #4a7c3f;
+    color: #fff;
+    font-weight: 700;
+    height: 50px;
+    font-size: 0.82em;
+    padding: 0 4px;
+  }
+  #dp-table td.corner {
+    background: transparent;
+    border: none;
+    width: 10px;
+    height: 10px;
+  }
+
+  #dp-table td.invalid {
+    background: #eef2ea;
+    color: #d0d8cb;
+    border-color: #dce4d5;
+  }
+  #dp-table td.computed-false {
+    background: #fef0f0;
+    color: #c0392b;
+    border-color: #f5c6cb;
+  }
+  #dp-table td.pending {
+    background: #fff;
+    color: #ccc;
+  }
+  #dp-table td.computing {
+    background: #fff3cd;
+    color: #856404;
+    box-shadow: inset 0 0 0 3px #d4a017;
+    z-index: 2;
+    position: relative;
+  }
+  #dp-table td.done {
+    background: #d4edda;
+    color: #155724;
+  }
+  #dp-table td.dependency {
+    background: #cce5ff;
+    color: #004085;
+    box-shadow: inset 0 0 0 2px #5a8fdc;
+    animation: pulse-dep 0.8s ease-in-out infinite alternate;
+    position: relative;
+    z-index: 1;
+  }
+  @keyframes pulse-dep {
+    from { box-shadow: inset 0 0 0 2px #5a8fdc; }
+    to   { box-shadow: inset 0 0 0 4px #1a73e8; }
+  }
+  #dp-table td.result {
+    background: #c3e6cb;
+    color: #0a3d12;
+    box-shadow: inset 0 0 0 3px #28a745;
+    font-weight: 800;
+  }
+
+  /* SVG arrow */
+  #dp-arrow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  /* Controls */
+  #controls {
+    margin: 12px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+  #controls button {
+    background: #f0f7ee;
+    border: 1px solid #a0bf98;
+    color: #2d5a27;
+    padding: 6px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 600;
+    transition: background 0.15s;
+  }
+  #controls button:hover:not(:disabled) { background: #d4e8ce; }
+  #controls button:disabled { opacity: 0.4; cursor: not-allowed; }
+  #controls #speed-label { font-size: 0.82em; color: #6b7c6b; margin-left: 12px; }
+  #controls input[type=range] { width: 80px; vertical-align: middle; }
+  #step-indicator { font-size: 0.88em; color: #6b7c6b; margin-left: 12px; min-width: 48px; text-align: center; }
+
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin: 10px 0 4px;
+    font-size: 0.82em;
+    color: #3d5a3e;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch { display: inline-block; width: 18px; height: 18px; border: 1px solid #c8d6c0; border-radius: 3px; }
+
+  /* Formula panel */
+  #formula-panel {
+    margin: 12px auto 10px;
+    padding: 10px 20px;
+    background: #fff;
+    border: 1px solid #c8d6c0;
+    border-radius: 8px;
+    display: inline-block;
+    font-size: 0.95em;
+    text-align: left;
+    line-height: 1.6;
+  }
+  #formula-panel .highlight { color: #d4a017; font-weight: 700; }
+  #formula-panel .dep-highlight { color: #1a73e8; font-weight: 700; }
+  #formula-panel .arrow { color: #6b7c6b; font-size: 1.2em; margin: 0 4px; }
+
+  /* Dependency notice */
+  #dep-notice {
+    margin: 6px auto 10px;
+    padding: 8px 18px;
+    background: #e8f0fe;
+    border: 1px solid #a8c7fa;
+    border-radius: 6px;
+    display: inline-block;
+    font-size: 0.9em;
+    font-weight: 600;
+    color: #1a73e8;
+  }
+  #dep-notice.none {
+    background: #f4f8f2;
+    border-color: #c8d6c0;
+    color: #6b7c6b;
+  }
+</style>
+</head>
+<body>
+
+<h1>最长回文子串 · DP 计算顺序可视化</h1>
+
+<div class="core-box">
+  <strong>核心心法：</strong>定义 <code>dp[i][j] = s[i..j]</code> 是否为回文（<code>i ≤ j</code>）。
+  <code>dp[i][j]</code> 依赖 <code>dp[i+1][j-1]</code>（去掉首尾后的内部子串），所以<strong>必须按子串长度从小到大计算</strong>——同一长度的子串之间互不依赖。
+</div>
+
+<h2>交互演示</h2>
+
+<div id="vis-container">
+  <div id="status-bar">
+    当前: <strong id="len-label">len = 1</strong>
+    &nbsp;·&nbsp; 字符串: <code id="input-str" style="font-size:1.15em;letter-spacing:2px;color:#2d5a27">b a b a d</code>
+  </div>
+
+  <div id="formula-panel"></div>
+  <div id="dep-notice"></div>
+  <div id="matrix-wrapper" style="position:relative;display:inline-block"></div>
+
+  <div id="controls">
+    <button id="btn-reset" title="重置">⟲</button>
+    <button id="btn-prev" title="上一步">◀</button>
+    <button id="btn-play" title="播放/暂停">▶</button>
+    <button id="btn-next" title="下一步">▶▶</button>
+    <button id="btn-skip-to-result" title="跳到结果">⏭</button>
+    <span id="speed-label">速度</span>
+    <input type="range" id="speed-range" min="100" max="2000" value="800">
+    <span id="step-indicator">0/0</span>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item"><span class="legend-swatch" style="background:#fff;border:1px solid #ccc"></span> 未计算</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#fff3cd;box-shadow:inset 0 0 0 2px #d4a017"></span> 正在计算</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#cce5ff;box-shadow:inset 0 0 0 2px #5a8fdc"></span> 依赖值</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#d4edda"></span> 回文 ✓</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#fef0f0;color:#c0392b;border:1px solid #f5c6cb"></span> 非回文 ✗</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#eef2ea;color:#d0d8cb"></span> 无效区域</span>
+  </div>
+</div>
+
+<h2>计算顺序详解</h2>
+
+<p>动画展示字符串 <code>"babad"</code> 的 DP 计算过程。<strong>按对角线方向、从短到长</strong>逐层填充：</p>
+
+<div class="core-box">
+  <ol style="margin:0">
+    <li><strong>len=1</strong>：主对角线，所有单个字符 → 全为回文（base case）</li>
+    <li><strong>len=2</strong>：第二条对角线，相邻字符 → 直接比较 <code>s[i]==s[i+1]</code>（base case）</li>
+    <li><strong>len≥3</strong>：后续对角线 → 依赖 <code>dp[i+1][j-1]</code>（内层结果）</li>
+  </ol>
+</div>
+
+<div class="warn-box">
+  <strong>关键：</strong>为什么不能按行扫描？计算 <code>dp[0][3]</code>（len=4）需要 <code>dp[1][2]</code>（len=2）；如果按行优先，<code>dp[1][2]</code> 还没算。
+  必须<strong>外层按长度 len 递增，内层按起点 i 遍历</strong>。
+</div>
+
+<hr>
+
+<h2>扩展：区间 DP 的共同特征</h2>
+
+<table>
+  <tr><th>问题</th><th>dp[i][j] 定义</th><th>计算方向</th></tr>
+  <tr><td>最长回文子串</td><td><code>s[i..j]</code> 是回文？</td><td>按长度 ↗↘</td></tr>
+  <tr><td>最长回文子序列</td><td><code>s[i..j]</code> 的 LPS 长度</td><td>按长度 ↗↘</td></tr>
+  <tr><td>石子合并</td><td><code>a[i..j]</code> 合并最小成本</td><td>按区间长度</td></tr>
+  <tr><td>Burst Balloons</td><td><code>(i,j)</code> 区间最大硬币</td><td>按区间长度</td></tr>
+</table>
+
+<div class="summary-box">
+  <strong>总结：</strong>大区间依赖内部小区间 → 按长度从小到大递推，每条对角线对应一个长度。
+</div>
+
+<script>
+const str = "babad";
+const n = str.length;
+let steps = [];
+let currentStep = -1;
+let timer = null;
+let isPlaying = false;
+
+// ========== 构建步骤 ==========
+function buildSteps() {
+  steps = [];
+  const dp = Array.from({length: n}, () => Array(n).fill(undefined));
+
+  // step 0: init
+  steps.push({ type: 'init', dp: copyDp(dp), len: 0 });
+
+  // len = 1
+  for (let i = 0; i < n; i++) {
+    dp[i][i] = true;
+    steps.push({ type: 'compute', i, j: i, dp: copyDp(dp), len: 1, result: true, depI: -1, depJ: -1 });
+  }
+
+  // len = 2
+  for (let i = 0; i < n - 1; i++) {
+    let j = i + 1;
+    let ok = str[i] === str[j];
+    dp[i][j] = ok;
+    steps.push({ type: 'compute', i, j, dp: copyDp(dp), len: 2, result: ok, depI: -1, depJ: -1 });
+  }
+
+  // len >= 3
+  for (let len = 3; len <= n; len++) {
+    for (let i = 0; i <= n - len; i++) {
+      let j = i + len - 1;
+      let ok = str[i] === str[j] && dp[i+1][j-1] === true;
+      dp[i][j] = ok;
+      steps.push({ type: 'compute', i, j, dp: copyDp(dp), len, result: ok, depI: i+1, depJ: j-1 });
+    }
+  }
+
+  // result step: find longest palindrome
+  let maxLen = 1, startIdx = 0;
+  for (let len = n; len >= 1; len--) {
+    let found = false;
+    for (let i = 0; i <= n - len; i++) {
+      if (dp[i][i+len-1]) { maxLen = len; startIdx = i; found = true; break; }
+    }
+    if (found) break;
+  }
+  steps.push({ type: 'result', dp: copyDp(dp), start: startIdx, end: startIdx + maxLen - 1, maxLen });
+}
+
+function copyDp(dp) {
+  return dp.map(row => [...row]);
+}
+
+// ========== 渲染矩阵和依赖箭头 ==========
+function render() {
+  const step = steps[currentStep];
+  if (!step) return;
+  const dp = step.dp;
+
+  // === 矩阵 ===
+  let html = '<table id="dp-table">';
+  // header row
+  html += '<tr><td class="corner"></td>';
+  for (let j = 0; j < n; j++) {
+    html += `<td class="col-header">${j}<br><span style="font-weight:400;font-size:0.85em">${str[j]}</span></td>`;
+  }
+  html += '</tr>';
+
+  for (let i = 0; i < n; i++) {
+    html += '<tr>';
+    html += `<td class="row-header">${i}<br><span style="font-weight:400;font-size:0.85em">${str[i]}</span></td>`;
+    for (let j = 0; j < n; j++) {
+      let cls = '', label = '';
+      if (j < i) {
+        cls = 'invalid'; label = '';
+      } else if (step.type === 'init') {
+        cls = 'pending'; label = '?';
+      } else if (step.type === 'result') {
+        if (dp[i][j] === true) {
+          cls = (i === step.start && j === step.end) ? 'result' : 'done';
+          label = 'T';
+        } else if (dp[i][j] === false) {
+          cls = 'computed-false'; label = 'F';
+        } else {
+          cls = 'invalid'; label = '';
+        }
+      } else {
+        // compute step
+        if (i === step.i && j === step.j) {
+          cls = 'computing'; label = step.result ? 'T' : 'F';
+        } else if (step.depI >= 0 && i === step.depI && j === step.depJ) {
+          cls = 'dependency'; label = dp[i][j] === true ? 'T' : (dp[i][j] === false ? 'F' : '?');
+        } else if (dp[i][j] === true) {
+          cls = 'done'; label = 'T';
+        } else if (dp[i][j] === false) {
+          cls = 'computed-false'; label = 'F';
+        } else {
+          cls = 'pending'; label = '?';
+        }
+      }
+      html += `<td class="${cls}" data-i="${i}" data-j="${j}">${label}</td>`;
+    }
+    html += '</tr>';
+  }
+  html += '</table>';
+
+  document.getElementById('matrix-wrapper').innerHTML = html;
+
+  // === 状态栏 ===
+  document.getElementById('len-label').textContent =
+    step.type === 'init' ? '初始' : step.type === 'result' ? '结果' : `len = ${step.len}`;
+  document.getElementById('step-indicator').textContent = `${currentStep}/${steps.length - 1}`;
+  document.getElementById('btn-prev').disabled = currentStep <= 0;
+  document.getElementById('btn-next').disabled = currentStep >= steps.length - 1;
+
+  // === 公式面板 ===
+  const formulaEl = document.getElementById('formula-panel');
+  const noticeEl = document.getElementById('dep-notice');
+
+  if (step.type === 'init') {
+    formulaEl.innerHTML = '初始状态，5×5 DP 矩阵等待填充';
+    noticeEl.className = 'none';
+    noticeEl.textContent = '点击 ▶ 开始演示';
+  } else if (step.type === 'result') {
+    formulaEl.innerHTML = `<strong>结果：</strong>最长回文子串 = "${str.substring(step.start, step.end + 1)}" (起点 ${step.start}，长度 ${step.maxLen})`;
+    noticeEl.className = 'none';
+    noticeEl.textContent = '🎯 找到最长回文！';
+  } else {
+    const i = step.i, j = step.j;
+    const ch_i = str[i], ch_j = str[j];
+    const sub = str.substring(i, j + 1);
+    if (step.len === 1) {
+      formulaEl.innerHTML = `<strong>dp[${i}][${j}]</strong> = true &nbsp;(单个字符 "<span class="highlight">${sub}</span>" 自身回文)`;
+      noticeEl.className = 'none';
+      noticeEl.textContent = '✓ base case：长度为 1，无需依赖';
+    } else if (step.len === 2) {
+      const eq = ch_i === ch_j;
+      formulaEl.innerHTML = `<strong>dp[${i}][${j}]</strong> = (s[${i}] == s[${j}]) = (<span class="highlight">${ch_i}</span> == <span class="highlight">${ch_j}</span>) = <strong>${eq}</strong>`;
+      noticeEl.className = 'none';
+      noticeEl.textContent = '✓ base case：长度为 2，直接比较首尾字符';
+    } else {
+      const dep = dp[step.depI][step.depJ];
+      const eq = ch_i === ch_j;
+      formulaEl.innerHTML =
+        `<strong>dp[${i}][${j}]</strong> = (s[${i}] == s[${j}]) && dp[${step.depI}][${step.depJ}]<br>` +
+        `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= (<span class="highlight">${ch_i}</span> == <span class="highlight">${ch_j}</span>) && <span class="dep-highlight">${dep === true ? 'T' : 'F'}</span><br>` +
+        `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <strong>${step.result}</strong> &nbsp;(子串 "<span class="highlight">${sub}</span>")`;
+      noticeEl.className = '';
+      noticeEl.innerHTML = `⬅ 依赖 <span class="dep-highlight">dp[${step.depI}][${step.depJ}]</span> = ${dep === true ? 'T' : 'F'}`;
+    }
+  }
+
+  // === SVG 依赖箭头 ===
+  renderArrow();
+}
+
+function renderArrow() {
+  const wrapper = document.getElementById('matrix-wrapper');
+  let old = document.getElementById('dp-arrow');
+  if (old) old.remove();
+
+  const step = steps[currentStep];
+  if (!step || step.type !== 'compute' || step.depI < 0) return;
+
+  const compCell = wrapper.querySelector(`td[data-i="${step.i}"][data-j="${step.j}"]`);
+  const depCell  = wrapper.querySelector(`td[data-i="${step.depI}"][data-j="${step.depJ}"]`);
+  if (!compCell || !depCell) return;
+
+  const wrapperRect = wrapper.getBoundingClientRect();
+  const compRect = compCell.getBoundingClientRect();
+  const depRect  = depCell.getBoundingClientRect();
+
+  const cx1 = depRect.left - wrapperRect.left + depRect.width / 2;
+  const cy1 = depRect.top - wrapperRect.top + depRect.height / 2;
+  const cx2 = compRect.left - wrapperRect.left + compRect.width / 2;
+  const cy2 = compRect.top - wrapperRect.top + compRect.height / 2;
+
+  // arrow from dep -> comp: offset to avoid overlap
+  const dx = cx2 - cx1, dy = cy2 - cy1;
+  const len = Math.sqrt(dx*dx + dy*dy);
+  if (len < 1) return;
+  const ux = dx / len, uy = dy / len;
+  const inset = 20; // pull back from cell centers
+  const x1 = cx1 + ux * inset;
+  const y1 = cy1 + uy * inset;
+  const x2 = cx2 - ux * inset;
+  const y2 = cy2 - uy * inset;
+
+  // mid point for label + arc control point
+  const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+  const ox = -uy * 10, oy = ux * 10; // perpendicular offset
+
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.id = 'dp-arrow';
+  svg.style.position = 'absolute';
+  svg.style.top = '0';
+  svg.style.left = '0';
+  svg.style.width = '100%';
+  svg.style.height = '100%';
+  svg.style.overflow = 'visible';
+  svg.style.pointerEvents = 'none';
+  svg.style.zIndex = '10';
+
+  // curved line
+  const path = document.createElementNS(svgNS, 'path');
+  const d = `M ${x1} ${y1} Q ${mx + ox} ${my + oy} ${x2} ${y2}`;
+  path.setAttribute('d', d);
+  path.setAttribute('stroke', '#1a73e8');
+  path.setAttribute('stroke-width', '2');
+  path.setAttribute('fill', 'none');
+  path.setAttribute('stroke-dasharray', '6,3');
+  svg.appendChild(path);
+
+  // arrowhead
+  const angle = Math.atan2(y2 - (my + oy), x2 - (mx + ox));
+  const headLen = 10, headAngle = Math.PI / 6;
+  const ax1 = x2 - headLen * Math.cos(angle - headAngle);
+  const ay1 = y2 - headLen * Math.sin(angle - headAngle);
+  const ax2 = x2 - headLen * Math.cos(angle + headAngle);
+  const ay2 = y2 - headLen * Math.sin(angle + headAngle);
+  const arrow = document.createElementNS(svgNS, 'polygon');
+  arrow.setAttribute('points', `${x2},${y2} ${ax1},${ay1} ${ax2},${ay2}`);
+  arrow.setAttribute('fill', '#1a73e8');
+  svg.appendChild(arrow);
+
+  // label
+  const label = document.createElementNS(svgNS, 'text');
+  label.setAttribute('x', mx + ox * 1.8);
+  label.setAttribute('y', my + oy * 1.8);
+  label.setAttribute('text-anchor', 'middle');
+  label.setAttribute('font-size', '11');
+  label.setAttribute('fill', '#1a73e8');
+  label.setAttribute('font-weight', 'bold');
+  label.textContent = '依赖';
+  svg.appendChild(label);
+
+  wrapper.appendChild(svg);
+}
+
+// ========== 控制 ==========
+function goToStep(idx) {
+  if (idx < 0 || idx >= steps.length) return;
+  currentStep = idx;
+  render();
+}
+
+function nextStep() {
+  if (currentStep < steps.length - 1) goToStep(currentStep + 1);
+  else if (isPlaying) stopPlay();
+}
+
+function prevStep() { if (currentStep > 0) goToStep(currentStep - 1); }
+
+function skipToResult() { stopPlay(); goToStep(steps.length - 1); }
+function resetPlay() { stopPlay(); goToStep(0); }
+
+function togglePlay() {
+  isPlaying ? stopPlay() : startPlay();
+}
+
+function startPlay() {
+  if (currentStep >= steps.length - 1) goToStep(0);
+  isPlaying = true;
+  document.getElementById('btn-play').textContent = '⏸';
+  const speed = parseInt(document.getElementById('speed-range').value);
+  timer = setInterval(() => {
+    if (currentStep >= steps.length - 1) { stopPlay(); return; }
+    goToStep(currentStep + 1);
+  }, speed);
+}
+
+function stopPlay() {
+  isPlaying = false;
+  document.getElementById('btn-play').textContent = '▶';
+  if (timer) { clearInterval(timer); timer = null; }
+}
+
+document.getElementById('speed-range').addEventListener('change', function() {
+  if (isPlaying) { stopPlay(); startPlay(); }
+});
+
+// ========== Init ==========
+buildSteps();
+goToStep(0);
+
+document.getElementById('btn-next').addEventListener('click', nextStep);
+document.getElementById('btn-prev').addEventListener('click', prevStep);
+document.getElementById('btn-play').addEventListener('click', togglePlay);
+document.getElementById('btn-reset').addEventListener('click', resetPlay);
+document.getElementById('btn-skip-to-result').addEventListener('click', skipToResult);
+
+document.addEventListener('keydown', function(e) {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight') nextStep();
+  if (e.key === 'ArrowLeft') prevStep();
+  if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+});
+</script>
+</body>
+</html>

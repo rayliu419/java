@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>String &amp; Array 总结</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif; line-height: 1.45; max-width: 960px; margin: 0 auto; padding: 16px 24px 60px; color: #2d3a31; background: #f5faf6; font-size: 13px; }
+  h1 { font-size: 1.35em; border-bottom: 3px solid #4a7c3f; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
+  h2 { font-size: 1.2em; color: #3d6b35; margin-top: 20px; padding-left: 8px; border-left: 4px solid #5a8f4c; }
+  h3 { font-size: 1.02em; color: #2d3a31; margin-top: 16px; }
+  h4 { font-size: 0.95em; color: #3a5235; margin-top: 12px; }
+  p { margin: 6px 0; } li { margin: 2px 0; } ol, ul { padding-left: 20px; }
+  blockquote { margin: 10px 0; padding: 12px 20px; background: #e8f5ec; border-left: 5px solid #5a8f4c; border-radius: 0 8px 8px 0; }
+  blockquote > p { margin: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9em; }
+  th, td { border: 1px solid #c3dbcc; padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: #4a7c3f; color: #fff; font-weight: 600; white-space: nowrap; }
+  tr:nth-child(even) { background: #e8f5ec; }
+  pre { background: #f5f0eb; color: #3d3731; padding: 12px 16px; border-radius: 8px; overflow-x: auto; font-size: 0.8em; line-height: 1.45; margin: 8px 0; }
+  code { font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace; }
+  p > code, li > code, td > code { background: #e4eddb; padding: 2px 6px; border-radius: 4px; font-size: 0.88em; color: #3d6b35; }
+  .star { color: #d4a017; font-weight: bold; }
+  .done { color: #16a34a; font-weight: bold; }
+  .pending { color: #94a3b8; }
+  hr { border: none; border-top: 2px dashed #c3dbcc; margin: 16px 0; }
+  .route { background: linear-gradient(135deg, #2d5a27, #4a7c3f); color: #fff; padding: 12px 20px; border-radius: 12px; margin: 12px 0; line-height: 1.7; font-size: 0.9em; }
+  .route strong { color: #fbbf24; }
+  td:first-child, th:first-child { text-align: center; white-space: nowrap; }
+  td:nth-child(2), th:nth-child(2) { text-align: center; }
+  td:nth-child(4), th:nth-child(4) { text-align: center; }
+  td:nth-child(6), th:nth-child(6) { text-align: center; }
+</style>
+</head>
+<body>
+
+<h1>String &amp; Array（字符串与数组基本操作）</h1>
+
+<blockquote><strong>核心性质：</strong>边界条件处理 + 位置映射 + 原地操作</blockquote>
+
+<h2>题目列表（按面试频次降序）</h2>
+
+<table>
+  <tr><th>频次</th><th>题号</th><th>题目</th><th>难度</th><th>核心思路</th><th>状态</th></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>151</td><td>Reverse Words in a String</td><td>🟡 Medium</td><td>去多余空格 → 整体反转 → 逐单词反转</td><td><span class="done">✅ ArrayStringOperation.java</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>189</td><td>Rotate Array</td><td>🟡 Medium</td><td>三次翻转：整体 → 前 k → 后 n-k</td><td><span class="done">✅ ArrayStringOperation.java</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>415</td><td>Add Strings</td><td>🟢 Easy</td><td>双指针 + carry 模拟，循环条件带 <code>|| carry &gt; 0</code></td><td><span class="done">✅ ArrayStringOperation.java</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>43</td><td>Multiply Strings</td><td>🟡 Medium</td><td>竖式乘法，结果数组 len = m+n，从后往前累加</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>344</td><td>Reverse String</td><td>🟢 Easy</td><td>双指针交换</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>125</td><td>Valid Palindrome</td><td>🟢 Easy</td><td>双指针 + Character.isLetterOrDigit</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>20</td><td>Valid Parentheses</td><td>🟢 Easy</td><td>栈匹配</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>268</td><td>Missing Number</td><td>🟢 Easy</td><td>求和 / 异或</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>41</td><td>First Missing Positive</td><td>🔴 Hard</td><td>原地置换：将数字放到正确位置</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>5</td><td>Longest Palindromic Substring</td><td>🟡 Medium</td><td>中心扩展 / DP</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>448</td><td>Find All Numbers Disappeared</td><td>🟢 Easy</td><td>原地标记：下标对应值</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>287</td><td>Find the Duplicate Number</td><td>🟡 Medium</td><td>快慢指针（看作有环链表）</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>442</td><td>Find All Duplicates in Array</td><td>🟡 Medium</td><td>原地标记：值→下标取反</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>242</td><td>Valid Anagram</td><td>🟢 Easy</td><td>字符计数数组</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>14</td><td>Longest Common Prefix</td><td>🟢 Easy</td><td>纵向比较所有字符串</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>28</td><td>Find the Index of First Occurrence</td><td>🟢 Easy</td><td>KMP / 暴力</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>3</td><td>Longest Substring Without Repeating</td><td>🟡 Medium</td><td>滑动窗口 + 哈希</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>49</td><td>Group Anagrams</td><td>🟡 Medium</td><td>排序+哈希 / 计数+哈希</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>67</td><td>Add Binary</td><td>🟢 Easy</td><td>同字符串相加，二进制 carry=sum/2</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★★</span></td><td>8</td><td>String to Integer (atoi)</td><td>🟡 Medium</td><td>去空格 → 判正负 → 溢出处理</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>186</td><td>Reverse Words in a String II</td><td>🟡 Medium</td><td>整体反转 + 逐单词反转（原地，无多余空格）</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>13</td><td>Roman to Integer</td><td>🟢 Easy</td><td>哈希 + 逆序遍历减法</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>217</td><td>Contains Duplicate</td><td>🟢 Easy</td><td>哈希 / 排序</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>136</td><td>Single Number</td><td>🟢 Easy</td><td>异或</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>345</td><td>Reverse Vowels of a String</td><td>🟢 Easy</td><td>双指针 + 元音判断</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>392</td><td>Is Subsequence</td><td>🟢 Easy</td><td>双指针扫描</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>6</td><td>Zigzag Conversion</td><td>🟡 Medium</td><td>行模拟 / flag 方向控制</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>38</td><td>Count and Say</td><td>🟡 Medium</td><td>递归生成，双指针统计连续相同</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>647</td><td>Palindromic Substrings</td><td>🟡 Medium</td><td>中心扩展法</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>12</td><td>Integer to Roman</td><td>🟡 Medium</td><td>贪心匹配</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>168</td><td>Excel Sheet Column Title</td><td>🟢 Easy</td><td>26 进制（注意从 1 开始）</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>171</td><td>Excel Sheet Column Number</td><td>🟢 Easy</td><td>26 进制转十进制</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>76</td><td>Minimum Window Substring</td><td>🔴 Hard</td><td>滑动窗口 + 计数数组</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>68</td><td>Text Justification</td><td>🔴 Hard</td><td>贪心分配空格</td><td><span class="pending">⬜</span></td></tr>
+</table>
+
+<h2>核心套路</h2>
+
+<pre>
+反转单词         → 去多余空格 + 整体反转 + 逐单词反转
+字符串相加/乘     → 双指针 + carry 模拟竖式
+旋转数组         → 三次翻转（整体→前k→后n-k）
+回文串           → 中心扩展 / 双指针
+缺失/重复数字    → 原地置换 / 异或 / 求和
+有效括号         → 栈匹配
+最长公共前缀      → 纵向比较
+滑动窗口         → 双指针维护窗口 + 哈希/计数数组
+异位词           → 排序后比较 / 字符计数
+atoi            → 去空格 → 判正负 → 逐位累加 → 溢出处理
+atoi 溢出处理    → result = result * 10 + digit, 用 long 或提前判断 &gt; MAX/10
+</pre>
+
+<h2>刷题路线</h2>
+
+<div class="route">
+  <strong>第一梯队（必会）：</strong>151 → 189 → 415 → 43 → 344 → 125 → 20 → 268 → 41<br>
+  <strong>第二梯队（高频）：</strong>448 → 287 → 442 → 242 → 14 → 28 → 3 → 49 → 67 → 8<br>
+  <strong>第三梯队（进阶）：</strong>186 → 13 → 217 → 136 → 345 → 392 → 647 → 76
+</div>
+
+<h2>实现文件</h2>
+<ul>
+  <li><code>algorithm/src/main/java/leetcode/ArrayStringOperation.java</code> — 主实现</li>
+  <li><code>algorithm/src/test/java/leetcode/ArrayStringOperationTest.java</code> — 测试</li>
+</ul>
+
+<hr>
+
+<h2>我的笔记</h2>
+
+<h3>概览</h3>
+<p>数组或者字符串的基本操作。</p>
+<ul>
+  <li>String 主要是各种边界情况的处理或者位置的处理。</li>
+  <li>数组包含给定范围内的数字，查找丢失或重复的数字。这里的通常要求是只能是 O(1) 空间。将数字放到它应该放到的位置，然后继续。</li>
+</ul>
+
+<h3>String 原地删除多余空格</h3>
+<p>核心实现：外层循环用 <code>fast</code> 过滤空格，内层 <code>while</code> 拷贝实际单词。<code>slow != 0</code> 时先加一个空格分隔。</p>
+<pre>
+for (int fast = 0; fast &lt; s.length(); fast++) {
+    if (chars[fast] != ' ') {
+        if (slow != 0) chars[slow++] = ' ';
+        while (fast &lt; s.length() && chars[fast] != ' ')
+            chars[slow++] = chars[fast++];
+    }
+}
+</pre>
+
+<h3>Reverse Word</h3>
+<ol>
+  <li><code>removeSpace(s)</code> — 去除多余空格</li>
+  <li><code>reverse(chars, 0, len-1)</code> — 整体反转</li>
+  <li>逐单词 <code>reverse(chars, slow, fast-1)</code> — 恢复单词顺序</li>
+</ol>
+
+<h3>字符串相乘</h3>
+<p>竖式乘法：m 位 × n 位结果最多 m+n 位，用数组存储，双层循环从后往前累加。</p>
+
+<h3>旋转数组</h3>
+<p><code>rotate([1,2,3,4,5,6,7], k=3)</code> → <code>[5,6,7,1,2,3,4]</code></p>
+<ul>
+  <li><code>k &gt; n</code> 时：<code>k = k % n</code></li>
+  <li>三次翻转，O(n) 时间，O(1) 空间</li>
+</ul>
+<pre>
+① 整体翻转: [1,2,3,4,5,6,7] → [7,6,5,4,3,2,1]
+② 翻转前 k: [7,6,5,4,3,2,1] → [5,6,7,4,3,2,1]
+③ 翻转后 n-k: [5,6,7,4,3,2,1] → [5,6,7,1,2,3,4] ✓
+</pre>
+
+<h3>查找丢失或重复的数字</h3>
+<p><strong>题型特点</strong>：数组包含 <code>[1, n]</code> 范围内的数字，查找丢失或重复，要求 O(1) 空间。</p>
+<p><strong>核心思路</strong>：将数字放到它应该放到的位置（<code>nums[i]</code> 应该放到 <code>nums[nums[i]-1]</code>），然后遍历检查。</p>
+<ul>
+  <li><strong>Missing Number</strong>（268）：<code>[0, n]</code> 中缺失的数 → 求和 / 异或</li>
+  <li><strong>First Missing Positive</strong>（41）：未排序数组找缺失的最小正整数 → 原地置换（只处理 <code>[1, n]</code> 范围的数）</li>
+  <li><strong>Find All Numbers Disappeared</strong>（448）：<code>[1, n]</code> 中缺失的数 → 原地标记（出现过的下标对应值取负）</li>
+  <li><strong>Find the Duplicate Number</strong>（287）：<code>[1, n]</code> 中重复的数 → 快慢指针判环入口</li>
+  <li><strong>Find All Duplicates</strong>（442）：<code>[1, n]</code> 中出现两次的数 → 原地标记（值→下标取反，已负则说明重复）</li>
+</ul>
+
+</body>
+</html>
