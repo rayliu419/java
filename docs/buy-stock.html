@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>股票买卖系列（状态机 DP）</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, "Noto Sans SC", sans-serif; line-height: 1.45; max-width: 960px; margin: 0 auto; padding: 16px 24px; color: #2d3a31; background: #f5faf6; font-size: 13px; }
+h1 { font-size: 1.35em; border-bottom: 2px solid #4a7c3f; padding-bottom: 8px; color: #2d5a27; }
+h2 { font-size: 1.2em; margin-top: 20px; color: #3d6b35; }
+h3 { font-size: 1.02em; margin-top: 16px; }
+h4 { font-size: 0.95em; margin-top: 12px; color: #3d6b35; }
+p { margin: 6px 0; }
+li { margin: 2px 0; }
+table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 0.9em; }
+th, td { border: 1px solid #c3dbcc; padding: 6px 10px; text-align: left; }
+th { background: #4a7c3f; color: #fff; font-weight: 600; }
+tr:nth-child(even) { background: #e8f5ec; }
+a { color: #3d6b35; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { background: #e4eddb; padding: 2px 6px; border-radius: 3px; font-size: 0.88em; color: #3d6b35; }
+blockquote { border-left: 4px solid #c3dbcc; margin: 10px 0; padding: 0 16px; color: #5a7a55; }
+pre { background: #f5f0eb; padding: 12px; border-radius: 8px; overflow-x: auto; color: #3d3731; font-size: 0.8em; }
+hr { border: none; border-top: 1px solid #c3dbcc; margin: 16px 0; }
+strong { color: #2d5a27; }
+.key { background: #e8f5ec; border: 1px solid #c3dbcc; border-radius: 6px; padding: 10px 14px; margin: 12px 0; }
+</style>
+</head>
+<body>
+
+<h1>股票买卖系列（状态机 DP）</h1>
+
+<blockquote>
+  股票系列的<strong>核心矛盾</strong>是后效性：当前决策（买/卖）的可行性依赖于过去操作留下的"痕迹"（是否持股、交易了几次、是否刚卖完）。<strong>DP 通过把痕迹编码到状态中来解决后效性。</strong> 不同题目的差异，只是"痕迹"的内容不同。
+</blockquote>
+
+<hr>
+
+<h3>buy stock I — 121. Best Time to Buy and Sell Stock</h3>
+
+<p><strong>整个过程只能买一次。后效性不存在，一个变量就够了。</strong></p>
+
+<ul>
+  <li>因为只能买一次，不需要知道任何历史状态，只需要知道历史最低价。</li>
+</ul>
+
+<pre>
+int minPrice = Integer.MAX_VALUE;
+int maxProfit = 0;
+for (int price : prices) {
+    if (price &lt; minPrice)
+        minPrice = price;
+    else if (price - minPrice &gt; maxProfit)
+        maxProfit = price - minPrice;
+}
+return maxProfit;
+</pre>
+
+<p><strong>本质</strong>：问题退化为「在历史最低点买入，在未来最高点卖出」。不需要 DP。</p>
+
+<hr>
+
+<h3>buy stock II — 122. Best Time to Buy and Sell Stock II</h3>
+
+<p><strong>无限次交易，但手中只能持有 1 支股票。</strong></p>
+
+<h4>后效性分析</h4>
+
+<p>buy stock II 会<strong>破坏无后效性</strong>：即使当前价格适合买入，能否买入取决于手里<strong>是否有股票</strong>。如果只用一维 <code>dp[i]</code>（第 i 天的最大利润），就无法区分"手里有股"和"手里无股"这两种状态——它们对未来（能否买入）的影响完全不同。</p>
+
+<p><strong>解决</strong>：扩展为二维 DP，把"持股状态"显式编码到状态中。</p>
+
+<h4>DP 解法</h4>
+
+<p><strong>定义</strong></p>
+<ul>
+  <li><code>dp[i][0]</code>：第 i 天结束时，<strong>不持有</strong>股票的最大利润。</li>
+  <li><code>dp[i][1]</code>：第 i 天结束时，<strong>持有</strong>股票的最大利润。</li>
+</ul>
+
+<p><strong>递推公式</strong></p>
+<pre>
+dp[i][0] = max(dp[i-1][0], dp[i-1][1] + prices[i])   // 继续空仓 / 卖出
+dp[i][1] = max(dp[i-1][1], dp[i-1][0] - prices[i])   // 继续持有 / 买入
+</pre>
+
+<p><strong>初始化</strong></p>
+<pre>
+dp[0][0] = 0;
+dp[0][1] = -prices[0];
+</pre>
+
+<p><strong>结果</strong>：<code>dp[n-1][0]</code></p>
+
+<p><strong>空间优化</strong>：i 的结果只依赖 i-1，用 <code>cash</code>（不持股）和 <code>hold</code>（持股）两个变量滚动：</p>
+
+<pre>
+int cash = 0, hold = -prices[0];
+for (int p : prices) {
+    cash = Math.max(cash, hold + p);
+    hold = Math.max(hold, cash - p);
+}
+return cash;
+</pre>
+
+<h4>为什么贪心法也能解？</h4>
+
+<p>无限次交易意味着可以把一次长持有拆成多段短持有，总和不变：</p>
+<ul>
+  <li>例如 [1,3,5]：1买5卖=4；1买3卖(2) + 3买5卖(2)=4 → 一样</li>
+  <li>所以只要价格今天比昨天高，就当作昨天买今天卖，累加这个差价。</li>
+  <li>累加正差价是 DP 在 k=∞ 时的退化特例，因为不需要考虑持股状态以外的历史信息了。</li>
+</ul>
+
+<pre>
+int profit = 0;
+for (int i = 1; i &lt; prices.length; i++) {
+    if (prices[i] &gt; prices[i - 1])
+        profit += prices[i] - prices[i - 1];
+}
+return profit;
+</pre>
+
+<hr>
+
+<h3>buy stock III — 123. Best Time to Buy and Sell Stock III</h3>
+<h3>buy stock IV — 188. Best Time to Buy and Sell Stock IV</h3>
+
+<p><strong>最多只能交易 K 次，手中只有一只股票。III 是特例 K=2。</strong></p>
+
+<h4>后效性分析</h4>
+
+<p>贪心算法彻底失效了——不能一看到有利润就交易。如果整个大盘有三次暴涨机会，你必须放弃其中涨幅最小的那一次，选择能带来最大利润的两次。</p>
+
+<p>这里的"痕迹"有两个：</p>
+<ol>
+  <li><strong>是否持股</strong>（和 II 一样）</li>
+  <li><strong>已经交易了多少次</strong>（新的后效性来源）</li>
+</ol>
+
+<p>只有持股状态还不够——即使知道手里没股票，也无法判断还能不能继续交易。所以需要把"当前是第几次交易"也编码到状态中。</p>
+
+<p><strong>解决</strong>：引入第三个维度 K，表示已经完成的交易次数（<strong>买入算作一笔交易的开始</strong>）。</p>
+
+<h4>DP 定义</h4>
+
+<ul>
+  <li><code>dp[i][k][0]</code>：第 i 天结束时，已经进行了 k 次交易，且当前不持有股票。</li>
+  <li><code>dp[i][k][1]</code>：第 i 天结束时，已经进行了 k 次交易，且当前持有股票。</li>
+</ul>
+
+<h4>递推公式</h4>
+
+<pre>
+dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i])   // 继续空仓 / 卖出（完成第k笔）
+dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i]) // 继续持有 / 买入（开启第k笔）
+</pre>
+
+<p><strong>关键理解</strong>：买入时 <code>k</code> 增加（标志着新交易的开始），所以从 <code>k-1</code> 转移过来；卖出时 <code>k</code> 不变（只是完成了已经在进行的第 k 笔交易）。</p>
+
+<h4>初始化</h4>
+
+<ul>
+  <li><code>dp[0][1][0] = 0</code>：第 0 天不持股，属于第 1 次交易，利润 0</li>
+  <li><code>dp[0][1][1] = -prices[0]</code>：第 0 天买入，开启第 1 次交易</li>
+  <li><code>dp[0][2][0] = -∞</code>：第 0 天不可能完成第 2 次交易</li>
+  <li><code>dp[0][2][1] = -prices[0]</code>：第 0 天直接买入强行开启第 2 次交易（设为 <code>-∞</code> 也可，<code>-prices[0]</code> 能保证后续转移正确）</li>
+</ul>
+
+<h4>关于 <code>dp[i][1][0]</code> 的常见误解</h4>
+
+<ul>
+  <li><code>k=1, status=1</code>：第 1 次买入，还没卖（进行中）</li>
+  <li><code>k=1, status=0</code>：第 1 次买入并已卖出（已结束）</li>
+  <li><code>dp[i][1][0]</code> 是 <strong>第一笔已经结束</strong>，不是"第一笔还没开始"。「还没开始」对应的是 <code>dp[i][0][0]</code>（k=0，没买过）。</li>
+</ul>
+
+<h4>K=2 时的四变量手写优化</h4>
+
+<p>K=2 时每天只有 4 种具体状态流动，可以拍平为 4 个变量：</p>
+
+<pre>
+int buy1 = -prices[0], sell1 = 0;
+int buy2 = -prices[0], sell2 = 0;
+for (int p : prices) {
+    buy1  = Math.max(buy1, -p);
+    sell1 = Math.max(sell1, buy1 + p);
+    buy2  = Math.max(buy2, sell1 - p);
+    sell2 = Math.max(sell2, buy2 + p);
+}
+return sell2;
+</pre>
+
+<p>五状态含义：rest / 持有1 / 空仓1 / 持有2 / 空仓2</p>
+
+<h4>当 K &gt; n/2 时的退化</h4>
+
+<p>如果 <code>K &gt; n/2</code>，问题退化为 buy stock II（无限次交易），因为每天买卖一次最多也只能做 n/2 次交易。此时 K 不再是约束，不需要三维 DP。</p>
+
+<hr>
+
+<h3>buy stock V — 309. Best Time to Buy and Sell Stock with Cooldown</h3>
+
+<p><strong>无限次交易，但卖出后第二天不能买入（冷冻期 1 天）。</strong></p>
+
+<h4>后效性分析</h4>
+
+<p>为什么两状态 DP（cash/hold）不够？因为第 i 天能不能买入取决于第 i-1 天<strong>是否刚卖出</strong>。<code>hold</code> 状态丢失了"昨天是否卖过"这个信息——这是新的后效性来源。</p>
+
+<p><strong>解决</strong>：将"不持股"拆为两个状态：sold（刚卖出，明天冷冻）和 rest（不持股且可买入）。</p>
+
+<h4>三状态 DP</h4>
+
+<pre>
+int hold = -prices[0];  // 持有股票
+int sold = 0;            // 刚卖出（明天冷冻）
+int rest = 0;            // 不持股且可买入
+
+for (int p : prices) {
+    int prevSold = sold;
+    sold = hold + p;                 // 卖出：hold → sold
+    hold = Math.max(hold, rest - p); // 买入：rest → hold（不能从 sold 买入）
+    rest = Math.max(rest, prevSold); // 冷冻恢复：sold → rest
+}
+return Math.max(sold, rest);
+</pre>
+
+<p><strong>状态机转移</strong>：</p>
+<pre>
+rest &larr;→ hold  (买入：rest → hold)
+hold → sold   (卖出：hold → sold)
+sold → rest   (冷冻恢复：sold → rest)
+</pre>
+
+<p><strong>关键</strong>：<code>hold</code> 只能从 <code>rest</code> 转移，不能从 <code>sold</code> 转移——卖出的第二天不能买入。</p>
+
+<hr>
+
+<h3>buy stock VI — 714. Best Time to Buy and Sell Stock with Transaction Fee</h3>
+
+<p><strong>无限次交易，但每次卖出需要支付手续费 fee。</strong></p>
+
+<p>与 buy stock II 几乎完全一样，后效性来源相同（只需知道是否持股），只是卖出时扣手续费：</p>
+
+<pre>
+int cash = 0, hold = -prices[0];
+for (int p : prices) {
+    cash = Math.max(cash, hold + p - fee);  // 卖出时扣手续费
+    hold = Math.max(hold, cash - p);
+}
+return cash;
+</pre>
+
+<p><strong>注意</strong>：有手续费时不能再用贪心法（累加正差价）。因为每次交易有固定成本，必须权衡是否值得交易——这正是 DP 的优势，它能全局最优地决定要不要交易。</p>
+
+<hr>
+
+<h2>后效性与状态扩展的对应关系</h2>
+
+<table>
+  <tr><th>后效性来源</th><th>表现</th><th>解法</th><th>对应题目</th></tr>
+  <tr><td>不知道手里是否有股票</td><td>当前能否买入不确定</td><td>加 <code>status</code> 维度（持股/不持股）</td><td>122</td></tr>
+  <tr><td>不知道已经交易了几次</td><td>是否还能继续交易不确定</td><td>加 <code>k</code> 维度（交易次数）</td><td>123, 188</td></tr>
+  <tr><td>不知道是否处于冷冻期</td><td>今天能否买入不确定</td><td>拆分"不持股"为 sold/rest</td><td>309</td></tr>
+  <tr><td>手续费</td><td>交易是否需要扣钱</td><td>转移方程直接减 fee（无需加维度）</td><td>714</td></tr>
+</table>
+
+<p><strong>本质</strong>：<strong>把"未来需要知道的过去信息"编码到当前状态中。</strong> 每个新约束引入一个新的后效性来源，对应地在状态空间中增加一个维度。状态扩展后，每个状态的转移只依赖昨天相邻状态，不再依赖更久远的历史，后效性被消除。</p>
+
+<hr>
+
+<h2>各题目对照表</h2>
+
+<table>
+  <tr><th>题目</th><th>后效性来源</th><th>状态维度</th><th>最终结果</th></tr>
+  <tr><td>121 一次交易</td><td>无（只需历史最低价）</td><td>0 维（两个变量）</td><td>maxProfit</td></tr>
+  <tr><td>122 无限次</td><td>是否持股</td><td>1 维（持股/不持股）</td><td><code>dp[n-1][0]</code></td></tr>
+  <tr><td>123 两次交易</td><td>是否持股 + 已交易次数</td><td>2 维（k=2, status）</td><td>sell2</td></tr>
+  <tr><td>188 K 次交易</td><td>是否持股 + 已交易次数</td><td>2 维（k=K, status）</td><td><code>dp[n-1][K][0]</code></td></tr>
+  <tr><td>309 冷冻期</td><td>是否持股 + 是否冷冻</td><td>2 维（3 状态）</td><td>max(sold, rest)</td></tr>
+  <tr><td>714 手续费</td><td>是否持股</td><td>1 维（持股/不持股）</td><td><code>dp[n-1][0]</code></td></tr>
+</table>
+
+<hr>
+
+<h2>代码实现</h2>
+
+<ul>
+  <li><code>TwoPointer.java</code> — 121, 122 的实现</li>
+  <li>其他题目位于 <code>algorithm/src/main/java/leetcode/</code></li>
+</ul>
+
+<h2>相关链接</h2>
+
+<ul>
+  <li><a href="dynamic-programming.html#p7">DP 专题 — 股票系列 part</a></li>
+  <li><a href="two-pointer.html">Two Pointer 专题 — 股票买卖</a></li>
+</ul>
+
+</body>
+</html>
