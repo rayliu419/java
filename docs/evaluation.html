@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>表达式求值：± vs ±*/ 控制流对比</title>
+<title>表达式求值：什么时候触发结算</title>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif; line-height: 1.45; max-width: 960px; margin: 0 auto; padding: 16px 24px 60px; color: #2d3a31; background: #f5faf6; font-size: 13px; }
   h1 { font-size: 1.35em; border-bottom: 3px solid #4a7c3f; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
@@ -20,140 +20,78 @@
   pre { background: #f5f0eb; color: #3d3731; padding: 12px 16px; border-radius: 8px; overflow-x: auto; font-size: 0.8em; line-height: 1.45; margin: 8px 0; }
   code { font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace; }
   p > code, li > code, td > code { background: #e4eddb; padding: 2px 6px; border-radius: 4px; font-size: 0.88em; color: #3d6b35; }
-  .highlight-add { background: #d4edda; padding: 2px 6px; border-radius: 4px; }
-  .highlight-del { background: #f8d7da; padding: 2px 6px; border-radius: 4px; }
-  .highlight-key { background: #fff3cd; padding: 2px 6px; border-radius: 4px; }
   hr { border: none; border-top: 2px dashed #c3dbcc; margin: 16px 0; }
   .tip { background: #e8f5ec; border-left: 5px solid #5a8f4c; padding: 12px 20px; border-radius: 0 8px 8px 0; margin: 10px 0; }
   .tip strong { color: #2d5a27; }
-  .compare-row { display: flex; gap: 12px; margin: 12px 0; }
-  .compare-col { flex: 1; }
-  .compare-col h4 { margin: 0 0 6px 0; }
-  .compare-col pre { margin: 0; }
-  .arrow { color: #5a8f4c; font-weight: bold; font-size: 1.1em; }
 </style>
 </head>
 <body>
 
-<h1>表达式求值：± vs ±*/ 控制流对比</h1>
+<h1>表达式求值：什么时候触发结算</h1>
 
-<blockquote><strong>核心洞见：</strong>运算符的数量决定了"延迟结算"的程度。±只有一级优先级，立即结算；±*/ 有二级优先级，需要缓冲一个局部块。</blockquote>
-
-<hr>
-
-<h2>1. 两种版本对比</h2>
-
-<h3>版本 A：只有 ±</h3>
-<div class="tip">
-<strong>特征</strong>：遇到 <code>+</code>/<code>-</code> 直接结算当前数字，操作是<strong>即时且无状态的</strong>。
-</div>
-<pre><span class="highlight-key">// 等号两边是对称的：一边是 + 和 - 的 if-else</span>
-while (i &lt; s.length()) {
-    if (Character.isDigit(s.charAt(i))) {
-        num = num * 10 + s.charAt(i) - '0';
-    } <span class="highlight-add">else</span> {                              <span class="arrow">← 单一的 else 分支处理所有非数字</span>
-        curResult = curResult + sign * num;     <span class="arrow">← 立即释放</span>
-        sign = s.charAt(i) == '+' ? 1 : -1;    <span class="arrow">← 更新符号</span>
-        num = 0;
-    }
-    i++;
-}
-curResult += sign * num;                       <span class="arrow">← 末尾还有一段</span></pre>
-
-<h3>版本 B：± \*/</h3>
-<div class="tip">
-<strong>特征</strong>：数字和运算符在两个<strong>独立的 if</strong> 中（非 else if），运算符触发结算的是<strong>上一个运算符</strong>的积累。
-</div>
-<pre><span class="highlight-key">// 这里是不对称的：数字的 if 和 运算符的 if 是并行的</span>
-for (int i = 0; i &lt; len; i++) {
-    char ch = s.charAt(i);
-
-    <span class="highlight-del">// if 1：攒数字</span>
-    if (Character.isDigit(ch)) {
-        num = num * 10 + (ch - '0');
-    }
-
-    <span class="highlight-del">// if 2：遇到运算符/结尾 → 结算上一段</span>
-    <span class="highlight-key">// 注意：这不是 else if！两个 if 独立！</span>
-    if (sign == '+' || sign == '-' || sign == '*' || sign == '/' || i == len - 1) {
-        if (sign == '+') {
-            res += lastNum;
-            lastNum = num;
-        } else if (sign == '-') {
-            res += lastNum;
-            lastNum = -num;
-        } else if (sign == '*') {
-            lastNum = lastNum * num;
-        } else if (sign == '/') {
-            lastNum = lastNum / num;
-        }
-        sign = ch;     <span class="arrow">← sign 更新为当前字符 ch，而 c 只是触发时刻</span>
-        num = 0;
-    }
-}
-res += lastNum;                              <span class="arrow">← 末尾还有一段</span></pre>
+<blockquote><strong>核心洞见：</strong>表达式求值的所有变体共享同一个循环模版——数字拼接 → 遇到触发条件 → 结算并更新状态。区别只在于触发条件和结算时哪些变量需要更新。</blockquote>
 
 <hr>
 
-<h2>2. 好记的口诀："运算符不是对当前 operator 做事，而是对上一个"</h2>
+<h2>1. 理解什么时候触发</h2>
 
-<p>完整的控制流逻辑：</p>
+<table>
+  <tr><th>题目</th><th>触发结算的条件</th></tr>
+  <tr><td>只有 <code>+</code> <code>-</code></td><td><code>+</code> <code>-</code> &vert; <code>i == len-1</code></td></tr>
+  <tr><td>加入 <code>*</code> <code>/</code></td><td><code>+</code> <code>-</code> <code>*</code> <code>/</code> &vert; <code>i == len-1</code></td></tr>
+  <tr><td>加入 <code>()</code></td><td><code>+</code> <code>-</code> <code>(</code> <code>)</code> &vert; <code>i == len-1</code></td></tr>
+</table>
 
-<ol>
-  <li><strong>攒数字</strong>：<code>num = num * 10 + digit</code></li>
-  <li><strong>一旦碰到运算符或结尾，就用 <code>prevOp</code>（即 <code>sign</code>）结算 <code>num</code>，然后 <code>sign = ch</code></strong></li>
-  <li><strong>数字和结算<em>必须</em>在两个独立的 if 中</strong>，否则文件 / 字符串结束时最后一段数字算不进去</li>
-</ol>
+<p><code>i == len-1</code> 出现在每一个里——最后一个数字后面没有运算符来推动结算，必须显式兜底。</p>
 
-<h3>2.1 为什么不能用 else if？</h3>
+<div class="tip">
+<strong>注意：</strong>结算的触发条件 <strong>必须</strong> 是独立的 <code>if</code>（不能是 <code>else if</code>），否则最后一个字符是数字时会被数字分支吃掉，漏掉结算。
+</div>
 
-<p>看最后一个字符的情况：假设表达式是 <code>"1+2*3"</code>，字符串以 <code>'3'</code> 结尾。</p>
-<ul>
-  <li>遍历到最后 i=4，ch='3'</li>
-  <li>如果是 else if，ch='3' 是数字 → 走数字分支，攒 num=3</li>
-  <li>循环结束 → <strong>3 没有触发结算，丢失了</strong></li>
-</ul>
-<p>所以结算的触发条件 <code>if (sign == ... || i == len - 1)</code> 必须是独立的 if，用 else if 就会漏掉结尾的数字。</p>
+<div class="tip">
+<strong>重要：</strong>触发结算时用的是 <strong>上一个 op</strong>（存在 <code>sign</code> 里），不是当前字符 <code>c</code>。<code>c</code> 只是扳机，扣动后 <code>c</code> 自己变成新的 <code>sign</code> 留给下一轮。
+</div>
 
 <hr>
 
-<h2>3. 两张图：控制流对比</h2>
+<h2>2. 理解触发时什么状态需要更新</h2>
 
-<h3>± only —— "if 是动作触发器，else fall through 无副作用"</h3>
-<pre>
-循环开始
-  │
-  ├─ 如果 c 是数字 → num = num * 10 + digit
-  │
-  └─ else → curResult += sign * num     ← 立即释放当前数字
-             sign = (c == '+') ? 1 : -1  ← 更新符号
-             num = 0
-  │
-循环结束 → curResult += sign * num      ← 最后一段
-</pre>
-
-<h3>± \*/ —— "运算符是终态的触发器"</h3>
-<pre>
-循环开始
-  │
-  ├─ 如果 c 是数字 → num = num * 10 + digit
-  │
-  ├─ 如果 c 是运算符 或 结尾 → 用 prevOp 结算 num   ← NOT c，是 prevOp！
-  │   │
-  │   ├─ prevOp = '+' → res += lastNum; lastNum = num
-  │   ├─ prevOp = '-' → res += lastNum; lastNum = -num
-  │   ├─ prevOp = '*' → lastNum = lastNum * num
-  │   └─ prevOp = '/' → lastNum = lastNum / num
-  │
-  │   prevOp = c     ← 把 c 记住，留给下一轮用
-  │   num = 0
-  │
-循环结束 → res += lastNum                ← 最后一段
-</pre>
+<table>
+  <tr><th>符号</th><th>结算操作</th><th>重置的变量</th></tr>
+  <tr>
+    <td><code>+</code> <code>-</code></td>
+    <td><code>res += sign * num</code></td>
+    <td><code>num = 0</code>，<code>sign</code> 更新为当前符号</td>
+  </tr>
+  <tr>
+    <td><code>*</code> <code>/</code></td>
+    <td><code>lastNum = lastNum */ num</code>（不动 <code>res</code>）</td>
+    <td><code>num = 0</code>，<code>sign</code> 更新为当前符号</td>
+  </tr>
+  <tr>
+    <td><code>(</code></td>
+    <td><code>stack.push(res); stack.push(sign)</code>，开启新上下文</td>
+    <td><code>res = 0</code>，<code>sign = 1</code>，<code>num = 0</code></td>
+  </tr>
+  <tr>
+    <td><code>)</code></td>
+    <td><code>res += sign * num</code>，然后 <code>pop</code> 合并外层</td>
+    <td><code>num = 0</code></td>
+  </tr>
+</table>
 
 <div class="tip">
-<strong>一句话总结版本 B</strong>：运算符 <code>c</code> 是结算<strong>上一个</strong> <code>prevOp</code> 的<strong>扳机</strong>，然后 <code>c</code> 成为新的 <code>prevOp</code>。
+<strong>口诀：</strong>运算符越多，延迟越多——<code>±</code> 立即结算，<code>±*/</code> 需缓冲 <code>lastNum</code>，<code>±()</code> 需栈暂存外层上下文。
 </div>
+
+<h3>代码对比</h3>
+
+<table>
+  <tr><th>方法</th><th>额外变量</th><th>循环外收尾</th></tr>
+  <tr><td><code>calculateAddMinus</code></td><td>无</td><td>无（循环内已结算完）</td></tr>
+  <tr><td><code>calculateMultiplyDivide</code></td><td><code>lastNum</code></td><td><code>res += lastNum</code></td></tr>
+  <tr><td><code>calculateWithParentheses</code></td><td><code>stack</code></td><td>无（循环内已结算完）</td></tr>
+</table>
 
 </body>
 </html>

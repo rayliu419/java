@@ -92,6 +92,57 @@ public class Evaluation {
      * @param s
      * @return
      */
+    int calculateWithParentheses(String s) {
+        if (s == null || s.isEmpty()) return 0;
+
+        int res = 0;
+        int num = 0;
+        int sign = 1;
+        Stack<Integer> stack = new Stack<>();
+        int len = s.length();
+
+        for (int i = 0; i < len; i++) {
+            char c = s.charAt(i);
+
+            if (Character.isDigit(c)) {
+                num = num * 10 + (c - '0');
+            }
+
+            if (c == '+' || c == '-' || c == '(' || c == ')' || i == len - 1) {
+                switch (c) {
+                    case '+':
+                        res += sign * num;
+                        sign = 1;
+                        num = 0;
+                        break;
+                    case '-':
+                        res += sign * num;
+                        sign = -1;
+                        num = 0;
+                        break;
+                    case '(':
+                        stack.push(res);
+                        stack.push(sign);
+                        res = 0;
+                        sign = 1;
+                        num = 0;
+                        break;
+                    case ')':
+                        res += sign * num;
+                        int lastSign = stack.pop();
+                        int lastRes = stack.pop();
+                        res = lastRes + lastSign * res;
+                        num = 0;
+                        break;
+                    default:
+                        res += sign * num;
+                        break;
+                }
+            }
+        }
+
+        return res;
+    }
 }
 
 

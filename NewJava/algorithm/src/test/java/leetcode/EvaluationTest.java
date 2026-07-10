@@ -111,4 +111,31 @@ public class EvaluationTest {
     public void mulDiv_complexExpression() {
         assertEquals(44, Evaluation.calculateMultiplyDivide("2+3*5+4/2+10*3-5"));
     }
+
+    // ========== calculateWithParentheses ==========
+
+    @Test
+    public void parentheses_simple() {
+        assertEquals(3, eval.calculateWithParentheses("(1+2)"));
+    }
+
+    @Test
+    public void parentheses_nested() {
+        assertEquals(6, eval.calculateWithParentheses("1+(2+3)"));
+    }
+
+    @Test
+    public void parentheses_complex() {
+        assertEquals(8, eval.calculateWithParentheses("(1+(2+3))+2"));
+    }
+
+    @Test
+    public void parentheses_subtraction() {
+        assertEquals(-1, eval.calculateWithParentheses("(3-4)"));
+    }
+
+    @Test
+    public void parentheses_mixed() {
+        assertEquals(3, eval.calculateWithParentheses("1+2-(3-4)+5-6"));
+    }
 }
