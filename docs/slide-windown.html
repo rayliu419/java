@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sliding Window (滑动窗口) 总结</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif; line-height: 1.45; max-width: 960px; margin: 0 auto; padding: 16px 24px 60px; color: #2d3a31; background: #f5faf6; font-size: 13px; }
+  h1 { font-size: 1.35em; border-bottom: 3px solid #4a7c3f; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
+  h2 { font-size: 1.2em; color: #3d6b35; margin-top: 20px; padding-left: 8px; border-left: 4px solid #5a8f4c; }
+  h3 { font-size: 1.02em; color: #2d3a31; margin-top: 16px; }
+  h4 { font-size: 0.95em; color: #3a5235; margin-top: 12px; }
+  p { margin: 6px 0; } li { margin: 2px 0; } ol, ul { padding-left: 20px; }
+  blockquote { margin: 10px 0; padding: 12px 20px; background: #e8f5ec; border-left: 5px solid #5a8f4c; border-radius: 0 8px 8px 0; }
+  blockquote > p { margin: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9em; }
+  th, td { border: 1px solid #c3dbcc; padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: #4a7c3f; color: #fff; font-weight: 600; white-space: nowrap; }
+  tr:nth-child(even) { background: #e8f5ec; }
+  pre { background: #f5f0eb; color: #3d3731; padding: 12px 16px; border-radius: 8px; overflow-x: auto; font-size: 0.8em; line-height: 1.45; margin: 8px 0; }
+  code { font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace; }
+  p > code, li > code, td > code { background: #e4eddb; padding: 2px 6px; border-radius: 4px; font-size: 0.88em; color: #3d6b35; }
+  .star { color: #d4a017; font-weight: bold; }
+  .done { color: #16a34a; font-weight: bold; }
+  .pending { color: #94a3b8; }
+  hr { border: none; border-top: 2px dashed #c3dbcc; margin: 16px 0; }
+  .route { background: linear-gradient(135deg, #2d5a27, #4a7c3f); color: #fff; padding: 12px 20px; border-radius: 12px; margin: 12px 0; line-height: 1.7; font-size: 0.9em; }
+  .route strong { color: #fbbf24; }
+</style>
+</head>
+<body>
+
+<h1>Sliding Window (滑动窗口)</h1>
+
+<blockquote><strong>核心性质：</strong>滑动窗口适用于连续子串/子数组问题，通过左右指针维护窗口来在线性时间内求解。核心在于明确窗口的<strong>扩张条件</strong>、<strong>收缩条件</strong>和<strong>答案更新时机</strong>。</blockquote>
+
+<h2>几类题型</h2>
+
+<ul>
+  <li><strong>固定窗口</strong> — 窗口大小固定，滑动过程中更新答案</li>
+  <li><strong>最大窗口</strong> — 最长满足条件的子串/子数组，窗口不满足约束时收缩</li>
+  <li><strong>最小窗口</strong> — 最短满足条件的子串/子数组，窗口满足目标时尽量收缩</li>
+</ul>
+
+<h3>最大窗口通用模版</h3>
+
+<pre><code>int left = 0;
+int answer = 0;
+for (int right = 0; right &lt; n; right++) {
+    // 1. 扩张窗口：加入 nums[right] / s.charAt(right)
+    add(right);
+    // 2. 如果窗口不满足约束，持续收缩
+    while (windowIsInvalid()) {
+        remove(left);
+        left++;
+    }
+    // 3. 此时 [left, right] 是一个合法窗口
+    answer = Math.max(answer, right - left + 1);
+}
+return answer;</code></pre>
+
+<h3>最小窗口通用模版</h3>
+
+<pre><code>int left = 0;
+int answer = Integer.MAX_VALUE;
+for (int right = 0; right &lt; n; right++) {
+    // 1. 扩张窗口
+    add(right);
+    // 2. 一旦窗口满足目标，尽量收缩
+    while (windowIsValid()) {
+        answer = Math.min(answer, right - left + 1);
+        remove(left);
+        left++;
+    }
+}
+return answer == Integer.MAX_VALUE ? 0 : answer;</code></pre>
+
+<h3>解题模版</h3>
+
+<p>以后每刷一道最大/最小窗口题，都先写这几行：</p>
+
+<pre><code>窗口范围: [left, right]
+窗口状态:
+窗口扩张:
+窗口收缩:
+触发收缩的条件:
+答案更新时机:</code></pre>
+
+<h2>举例</h2>
+
+<p>主要是不同题型的状态怎么维护，怎么快速判断不满足或者满足。</p>
+
+<ul>
+  <li>
+    <strong>LeetCode 3 — 无重复字符最长子串</strong>
+    <ul>
+      <li><code>count[128]</code> 为状态，因为只有 char。</li>
+    </ul>
+  </li>
+  <li>
+    <strong>最多包含 K 个不同字符的最长子串</strong>
+    <ul>
+      <li>Map 为状态，因为需要存频次。K 取任意常数可复用。</li>
+      <li>LeetCode 904 就是 K=2 的特例。</li>
+    </ul>
+  </li>
+  <li>
+    <strong>LeetCode 209 — Minimum Size Subarray Sum</strong>
+    <ul>
+      <li><code>sum</code> 为状态。</li>
+    </ul>
+  </li>
+  <li>
+    <strong>LeetCode 76 — Minimum Window Substring</strong>
+    <ul>
+      <li>难点在于：不能每次都遍历整个 Map 来判断窗口是否合法。</li>
+      <li>t 需要什么字符、每个字符需要多少个。</li>
+      <li><strong>如何快速判断 windowIsValid?</strong> — <code>formed</code> + <code>required</code> 字段的引入，使得 O(1) 能回答这个问题。</li>
+    </ul>
+  </li>
+  <li>
+    <strong>Contains Duplicate III</strong>
+    <ul>
+      <li>桶排序思想维护窗口内元素的近似性。</li>
+    </ul>
+  </li>
+</ul>
+
+<hr>
+
+<h2>实现文件</h2>
+<ul>
+  <li><code>algorithm/src/main/java/leetcode/SlideWindow.java</code> — 主实现</li>
+</ul>
+
+</body>
+</html>

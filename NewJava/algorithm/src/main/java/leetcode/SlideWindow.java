@@ -6,132 +6,172 @@ import java.util.Map;
 public class SlideWindow {
 
     /**
-     * https://leetcode.com/problems/longest-substring-without-repeating-characters/
+     * LeetCode 3 — 无重复字符最长子串
      *
-     * @param s
-     * @return
+     * 模板：最大窗口
+     * 窗口范围: [left, right]
+     * 窗口状态: charCount (每个字符出现频次)
+     * 窗口扩张: charCount.put(c, getOrDefault(c,0)+1)
+     * 窗口收缩: charCount.put(leftChar, get(leftChar)-1); left++
+     * 触发收缩的条件: 当前字符 c 的频次 > 1（有重复）
+     * 答案更新时机: 收缩后窗口合法时, Math.max(answer, right - left + 1)
      */
     public int lengthOfLongestSubstring(String s) {
         Map<Character, Integer> charCount = new HashMap<>();
         int left = 0;
-        int right = 0;
-        int maxLength = 0;
-        while (right < s.length()) {
-            int curCount = charCount.getOrDefault(s.charAt(right), 0);
-            int updateCount = curCount + 1;
-            charCount.put(s.charAt(right), updateCount);
-            if (updateCount == 1) {
-                maxLength = Math.max(maxLength, right - left + 1);
-                right++;
-            } else {
-                while (left < right) {
-                    if (s.charAt(left) != s.charAt(right)) {
-                        charCount.merge(s.charAt(left), -1, Integer::sum);
-                        left++;
-                    } else {
-                        charCount.merge(s.charAt(left), -1, Integer::sum);
-                        left++;
-                        break;
-                    }
-                }
-                right++;
+        int answer = 0;
+        for (int right = 0; right < s.length(); right++) {
+            char c = s.charAt(right);
+            charCount.put(c, charCount.getOrDefault(c, 0) + 1);
+            while (charCount.get(c) > 1) {
+                char leftChar = s.charAt(left);
+                charCount.put(leftChar, charCount.get(leftChar) - 1);
+                left++;
             }
+            answer = Math.max(answer, right - left + 1);
         }
-        return maxLength;
+        return answer;
     }
 
     /**
-     * https://leetcode.com/problems/minimum-size-subarray-sum/
-     * target = 3, nums = [4, 1, 2, 3]
-     * target = 3, nums = [1, 2, 3]
+     * LeetCode 340 — 最多包含 K 个不同字符的最长子串
      *
+     * 模板：最大窗口
+     * 窗口范围: [left, right]
+     * 窗口状态: charCount (每个字符出现频次)
+     * 窗口扩张: charCount.put(c, getOrDefault(c,0)+1)
+     * 窗口收缩: charCount.put(leftChar, get(leftChar)-1); 频次归零则 remove(leftChar); left++
+     * 触发收缩的条件: charCount.size() > K（超过 K 种不同字符）
+     * 答案更新时机: 收缩后窗口合法时, Math.max(answer, right - left + 1)
+     */
+    public int lengthOfLongestSubstringKDistinct(String s, int k) {
+        if (k == 0) return 0;
+        Map<Character, Integer> charCount = new HashMap<>();
+        int left = 0;
+        int answer = 0;
+        for (int right = 0; right < s.length(); right++) {
+            char c = s.charAt(right);
+            charCount.put(c, charCount.getOrDefault(c, 0) + 1);
+            while (charCount.size() > k) {
+                char leftChar = s.charAt(left);
+                int leftCount = charCount.get(leftChar);
+                if (leftCount == 1) {
+                    charCount.remove(leftChar);
+                } else {
+                    charCount.put(leftChar, leftCount - 1);
+                }
+                left++;
+            }
+            answer = Math.max(answer, right - left + 1);
+        }
+        return answer;
+    }
+
+    /**
+     * LeetCode 904 — Fruit Into Baskets
+     *
+     * 本质上就是 K=2 的「最多包含 K 个不同字符的最长子串」
+     * 区别在于输入是 int[] 而非 String
+     * 模板：最大窗口
+     * 窗口范围: [left, right]
+     * 窗口状态: fruitCount (每种水果数量)
+     * 窗口扩张: fruitCount.put(f, getOrDefault(f,0)+1)
+     * 窗口收缩: fruitCount.put(leftFruit, get(leftFruit)-1); 数量归零则 remove(leftFruit); left++
+     * 触发收缩的条件: fruitCount.size() > 2（超过 2 个篮子）
+     * 答案更新时机: 收缩后窗口合法时, Math.max(answer, right - left + 1)
+     */
+    public int totalFruit(int[] fruits) {
+        Map<Integer, Integer> fruitCount = new HashMap<>();
+        int left = 0;
+        int answer = 0;
+        for (int right = 0; right < fruits.length; right++) {
+            int f = fruits[right];
+            fruitCount.put(f, fruitCount.getOrDefault(f, 0) + 1);
+            while (fruitCount.size() > 2) {
+                int leftFruit = fruits[left];
+                int leftCount = fruitCount.get(leftFruit);
+                if (leftCount == 1) {
+                    fruitCount.remove(leftFruit);
+                } else {
+                    fruitCount.put(leftFruit, leftCount - 1);
+                }
+                left++;
+            }
+            answer = Math.max(answer, right - left + 1);
+        }
+        return answer;
+    }
+
+    /**
+     * LeetCode 209 — Minimum Size Subarray Sum
+     *
+     * 模板：最小窗口
+     * 窗口范围: [left, right]
+     * 窗口状态: sum（当前窗口的和）
+     * 窗口扩张: sum += nums[right]
+     * 窗口收缩: sum -= nums[left]; left++
+     * 触发收缩的条件: sum >= target（窗口满足目标）
+     * 答案更新时机: 收缩循环内, Math.min(answer, right - left + 1)
      */
     public int minSubArrayLen(int target, int[] nums) {
-        int curSum = 0;
-        int left, right;
-        left = right = 0;
-        int minLength = Integer.MAX_VALUE;
-        while (right < nums.length) {
-            curSum = curSum + nums[right];
-            if (curSum < target) {
-                right++;
-            } else {
-                // 获取一个解
-                minLength = Math.min(minLength, right - left + 1);
-                while (left < right) {
-                    if (curSum - nums[left] >= target) {
-                        curSum = curSum - nums[left];
-                        left++;
-                        minLength = Math.min(minLength, right - left + 1);
-                    } else {
-                        break;
-                    }
-                }
-                right++;
+        int left = 0;
+        int sum = 0;
+        int answer = Integer.MAX_VALUE;
+        for (int right = 0; right < nums.length; right++) {
+            sum += nums[right];
+            while (sum >= target) {
+                answer = Math.min(answer, right - left + 1);
+                sum -= nums[left];
+                left++;
             }
         }
-        return minLength == Integer.MAX_VALUE ? 0 : minLength;
+        return answer == Integer.MAX_VALUE ? 0 : answer;
     }
 
     /**
-     * https://leetcode.cn/problems/minimum-window-substring
-     * 这种方法明显更好
+     * LeetCode 76 — Minimum Window Substring
      *
+     * 模板：最小窗口
+     * 窗口范围: [left, right]
+     * 窗口状态: target（t 所需频次）, window（当前窗口频次）, formed（达标字符数）, required（所需字符种类数）
+     * 窗口扩张: window.put(c, window.getOrDefault(c, 0) + 1); 如果字符频次达标则 formed++
+     * 窗口收缩: window.put(leftChar, window.get(leftChar) - 1); 如果频次跌破达标线则 formed--; left++
+     * 触发收缩的条件: formed == required（窗口覆盖了 t）
+     * 答案更新时机: 收缩循环内, Math.min(answer, right - left + 1)
      */
     public String minWindow(String s, String t) {
-        // target: 记录 t 中每个字符需要出现多少次
         Map<Character, Integer> target = new HashMap<>();
-        buildTarget(t, target);
-        // window: 记录当前窗口中每个字符的实际出现次数
+        for (int i = 0; i < t.length(); i++) {
+            target.put(t.charAt(i), target.getOrDefault(t.charAt(i), 0) + 1);
+        }
         Map<Character, Integer> window = new HashMap<>();
-
-        int required = target.size();   // t 中有几种不同的字符
-        int formed = 0;                 // 当前有几种字符的频次已达 target 要求
-
-        int left = 0, right = 0;
+        // 最重要的是formed和required的设置，是的能快速的计算windowIsValid()
+        int required = target.size();
+        int formed = 0;
+        int left = 0;
         int minLen = Integer.MAX_VALUE;
-        int minLeft = 0;  // 记录最优窗口的起始位置，避免频繁 substring
+        int minLeft = 0;
 
-        while (right < s.length()) {
-            // ----- 1. 扩张右边界 -----
+        for (int right = 0; right < s.length(); right++) {
             char c = s.charAt(right);
-            // 不在target也一起增加，不影响
-            window.merge(c, 1, Integer::sum);
-
-            // 如果当前字符是目标字符，且频次刚好达标，formed++
+            window.put(c, window.getOrDefault(c, 0) + 1);
             if (target.containsKey(c) && window.get(c).intValue() == target.get(c).intValue()) {
                 formed++;
             }
-
-            // ----- 2. 窗口已覆盖 t，尝试收缩左边界 -----
             while (left <= right && formed == required) {
-                // 记录当前窗口
-                int curLen = right - left + 1;
-                if (curLen < minLen) {
-                    minLen = curLen;
+                if (right - left + 1 < minLen) {
+                    minLen = right - left + 1;
                     minLeft = left;
                 }
-
                 char leftChar = s.charAt(left);
-                // 收缩：移除 leftChar
-                window.merge(leftChar, -1, Integer::sum);
-                // 如果移除了一个"恰好达标"的目标字符，formed--
-                if (target.containsKey(leftChar) && window.get(leftChar).intValue() < target.get(leftChar).intValue()) {
+                window.put(leftChar, window.get(leftChar) - 1);
+                if (target.containsKey(leftChar)
+                        && window.get(leftChar).intValue() < target.get(leftChar).intValue()) {
                     formed--;
                 }
                 left++;
             }
-
-            // 继续扩张右边界
-            right++;
         }
-
         return minLen == Integer.MAX_VALUE ? "" : s.substring(minLeft, minLeft + minLen);
-    }
-
-    private void buildTarget(String t, Map<Character, Integer> target) {
-        for (int i = 0; i < t.length(); i++) {
-            target.merge(t.charAt(i), 1, Integer::sum);
-        }
     }
 }

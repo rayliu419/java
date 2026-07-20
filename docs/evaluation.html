@@ -94,4 +94,155 @@
 </table>
 
 </body>
+<hr>
+
+<h2>3. 通用算法模版</h2>
+
+<h3>3.1 加减法（仅 + 和 -）</h3>
+
+<pre><code>int calculateAddMinus(String s) {
+    if (s == null || s.isEmpty()) return 0;
+
+    int res = 0;
+    int num = 0;
+    char sign = '+';
+
+    for (int i = 0; i &lt; s.length(); i++) {
+        char ch = s.charAt(i);
+
+        // 1. 组合多位数
+        if (Character.isDigit(ch)) {
+            num = num * 10 + (ch - &#39;0&#39;);
+        }
+
+        // 2. 遇到运算符或末尾 &rarr; 用上一个 sign 触发结算
+        if (ch == &#39;+&#39; || ch == &#39;-&#39; || i == s.length() - 1) {
+            switch (sign) {
+                case &#39;+&#39;: {
+                    res += num;
+                    break;
+                }
+                case &#39;-&#39;: {
+                    res -= num;
+                    break;
+                }
+            }
+            sign = ch;
+            num = 0;
+    }
+
+    return res;
+}</code></pre>
+
+<div class="tip">
+<strong>关键：</strong>结算用的是<strong>上一个运算符</strong>（<code>sign</code>），<code>ch</code> 只是触发信号并成为下一个 <code>sign</code>。<code>if</code> 不能是 <code>else if</code>，否则数字结尾会漏结算。
+</div>
+
+<h3>3.2 四则运算（+ - * /）LeetCode 227</h3>
+
+<pre><code>int calculateMultiplyDivide(String s) {
+    if (s == null || s.isEmpty()) return 0;
+
+    int res = 0;
+    int lastNum = 0;
+    int num = 0;
+    char sign = &#39;+&#39;;
+
+    for (int i = 0; i &lt; s.length(); i++) {
+        char ch = s.charAt(i);
+
+        if (Character.isDigit(ch)) {
+            num = num * 10 + (ch - &#39;0&#39;);
+        }
+
+        if (ch == &#39;+&#39; || ch == &#39;-&#39; || ch == &#39;*&#39; || ch == &#39;/&#39; || i == s.length() - 1) {
+            switch (sign) {
+                case &#39;+&#39;: {
+                    res += lastNum;
+                    lastNum = num;
+                    break;
+                }
+                case &#39;-&#39;: {
+                    res += lastNum;
+                    lastNum = -num;
+                    break;
+                }
+                case &#39;*&#39;: {
+                    lastNum = lastNum * num;
+                    break;
+                }
+                case &#39;/&#39;: {
+                    lastNum = lastNum / num;
+                    break;
+                }
+            }
+            sign = ch;
+            num = 0;
+        }
+    }
+
+    res += lastNum;  // 循环外补上最后一个 lastNum
+    return res;
+}</code></pre>
+
+<div class="tip">
+<strong>关键：</strong><code>* /</code> 优先级高，不能立即合并到 <code>res</code>，需要 <code>lastNum</code> 缓冲。循环结束必须 <code>res += lastNum</code> 收尾。
+</div>
+
+<h3>3.3 带括号的加减法（+ - ( )）</h3>
+
+<pre><code>int calculateWithParentheses(String s) {
+    if (s == null || s.isEmpty()) return 0;
+
+    int res = 0;
+    int num = 0;
+    int sign = 1;     // 1 代表 +, -1 代表 -
+    Stack&lt;Integer&gt; stack = new Stack&lt;&gt;();
+
+    for (int i = 0; i &lt; s.length(); i++) {
+        char c = s.charAt(i);
+
+        if (Character.isDigit(c)) {
+            num = num * 10 + (c - &#39;0&#39;);
+        }
+
+        if (c == &#39;+&#39; || c == &#39;-&#39; || c == &#39;(&#39; || c == &#39;)&#39; || i == s.length() - 1) {
+            switch (c) {
+                case &#39;+&#39;: {
+                    res += sign * num;
+                    sign = 1;
+                    num = 0;
+                    break;
+                }
+                case &#39;-&#39;: {
+                    res += sign * num;
+                    sign = -1;
+                    num = 0;
+                    break;
+                }
+                case &#39;(&#39;: {
+                    stack.push(res);
+                    stack.push(sign);
+                    res = 0;
+                    sign = 1;
+                    num = 0;
+                    break;
+                }
+                case &#39;)&#39;: {
+                    res += sign * num;
+                    int lastSign = stack.pop();
+                    int lastRes = stack.pop();
+                    res = lastRes + lastSign * res;
+                    num = 0;
+                    break;
+                }
+        }
+    }
+
+    return res;
+}</code></pre>
+
+<div class="tip">
+<strong>关键：</strong>遇到 <code>(</code> 把当前 <code>res</code> 和 <code>sign</code> 入栈，开启新上下文；遇到 <code>)</code> 先结算括号内，再弹栈合并回外层。<code>sign</code> 用 <code>int</code> 方便入栈。
+</div>
 </html>
