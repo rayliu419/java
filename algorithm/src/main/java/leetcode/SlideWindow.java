@@ -174,4 +174,43 @@ public class SlideWindow {
         }
         return minLen == Integer.MAX_VALUE ? "" : s.substring(minLeft, minLeft + minLen);
     }
+
+    /**
+     * https://leetcode.com/problems/permutation-in-string/description/?envType=problem-list-v2&envId=sliding-window
+     * 难点主要是cnt数组的使用
+     */
+    public boolean checkInclusion(String s1, String s2) {
+        if (s2.length() < s1.length()) return false;
+
+        // cnt[c]  = 当前窗口还缺多少个字符 c（负 = 多了，零 = 刚好）
+        int[] cnt = new int[26];
+        for (char c : s1.toCharArray()) cnt[c - 'a']++;
+
+        int k = s1.length();           // 固定窗口大小
+        int need = k;                   // 还缺多少个字符才能凑齐 s1
+
+        for (int i = 0; i < k; i++) {
+            char c = s2.charAt(i);
+            cnt[c - 'a']--;               // 窗口拥有了这个字符 → 需求量减 1
+            if (cnt[c - 'a'] >= 0) need--; // cnt>=0 说明s1确实需要这个字符
+        }
+        if (need == 0) return true;
+
+        // need可以继续使用
+        for (int i = k; i < s2.length(); i++) {
+            // --- add(i)：右边界 s2[i] 进入窗口 ---
+            char add = s2.charAt(i);
+            cnt[add - 'a']--;              // 多了一个，差额减 1
+            if (cnt[add - 'a'] >= 0) need--; // 减之前 cnt>0（还缺），现在少缺一个
+
+            // --- remove(i - k)：左边界 s2[i-k] 离开窗口 ---
+            char rem = s2.charAt(i - k);
+            cnt[rem - 'a']++;              // 少了一个，差额加 1
+            if (cnt[rem - 'a'] > 0) need++; // 加之后 cnt>0（变缺了），多缺一个
+
+            if (need == 0) return true;
+        }
+
+        return false;
+    }
 }

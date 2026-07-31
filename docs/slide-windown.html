@@ -42,6 +42,22 @@
   <li><strong>最小窗口</strong> — 最短满足条件的子串/子数组，窗口满足目标时尽量收缩</li>
 </ul>
 
+<h3>固定窗口通用模版</h3>
+
+<pre><code>// 窗口大小固定为 k（已知常数）
+
+// 1. 初始化第一个窗口 [0, k-1]
+for (int i = 0; i &lt; k; i++) add(i);
+if (check()) return ...;
+
+// 2. 整体平移
+for (int i = k; i &lt; n; i++) {
+    add(i);              // 加入新右边界
+    remove(i - k);       // 移除旧左边界
+    if (check()) return ...;
+}
+</code></pre>
+
 <h3>最大窗口通用模版</h3>
 
 <pre><code>int left = 0;
@@ -122,6 +138,15 @@ return answer == Integer.MAX_VALUE ? 0 : answer;</code></pre>
     <strong>Contains Duplicate III</strong>
     <ul>
       <li>桶排序思想维护窗口内元素的近似性。</li>
+    </ul>
+  </li>
+  <li>
+    <strong>LeetCode 567 — Permutation in String</strong>
+    <ul>
+      <li>固定窗口的典型应用。窗口大小固定为 <code>s1.length()</code>。</li>
+      <li>用 <code>int[26]</code> 维护字符频次，加右减左后与 <code>count</code> 数组逐位比较。</li>
+      <li>可以用 <code>matched</code> + <code>distinct</code> 增量维护（加右减左时判断 <code>window[c] == count[c]</code> 和 <code>window[c] == count[c]+1</code> 来增减 <code>matched</code>），达到真正的 O(1) 校验。</li>
+      <li>核心代码见 <code>Exam.java</code> 中的 <code>checkInclusion</code> (固定窗口版)。</li>
     </ul>
   </li>
 </ul>
