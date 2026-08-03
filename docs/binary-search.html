@@ -181,25 +181,6 @@
   <tr><td><span class="star">★</span></td><td>174</td><td>Dungeon Game</td><td>🔴 Hard</td><td>二分血量 + DP check</td><td><span class="pending">⬜</span></td></tr>
 </table>
 
-<!-- ─── 核心套路 ─── -->
-<h2>核心套路</h2>
-
-<pre>
-精确查找    → 标准二分，相等即返回
-左边界      → 找到后 high = mid - 1 继续往左
-右边界      → 找到后 low = mid + 1 继续往右
-插入位置    → lower_bound 找第一个 ≥ target
-旋转数组    → 比较 mid 与 high/low，判断哪半有序
-答案二分    → 在值域上二分，check 函数判断可行性
-数值二分    → 整数平方根/除法，注意溢出用 long
-二维二分    → 映射为一维 / 右上角 Z 字形
-矩阵第 K 小 → 二分值域 + 每行计数
-中位数      → 划分数组 + 二分，奇偶统一处理
-求峰值      → 比较 mid 与 mid+1，往上升方向收缩
-快速幂      → 分治 x^n = x^(n/2) * x^(n/2) * (n%2 ? x : 1)
-LIS         → tails[i] 表示长度为 i+1 的递增子序列的最小末尾
-</pre>
-
 <!-- ─── 刷题路线 ─── -->
 <h2>刷题路线</h2>
 
@@ -217,6 +198,23 @@ LIS         → tails[i] 表示长度为 i+1 的递增子序列的最小末尾
 
 <blockquote>二分查找的每一轮循环开始前，我们都<strong>确信答案一定在 [low, high] 范围内</strong>（如果存在的话）。这个确信的结论就是"不变量"。根据 mid 与 target 的比较结果，我们缩小区间，同时保证这个不变量仍然成立。当区间缩小到空集（或只剩一个元素）时，答案就找到了。</blockquote>
 
+<h4>完整决策流程</h4>
+<pre>
+mid 有可能是答案吗？
+├─ 否 → 排除：low = mid+1 / high = mid-1
+│    ├─ 循环条件：区间能缩到空 → 用 &lt;=
+│    └─ 取整：无所谓 → 惯例下取整
+└─ 是 → 两种处理方式：
+     ├─ 保留式：答案留在区间内，low = mid / high = mid
+     │    ├─ 循环条件：区间缩不到空 → 必须用 &lt;（退出时 low==high 即答案）
+     │    └─ 取整：mid 不能等于被保留的端点
+     │         ├─ high = mid → 下取整（mid 偏左）
+     │         └─ low = mid  → 上取整（mid 偏右）
+     └─ 记录式：答案搬到 ans 里，区间照常排除 ±1
+          ├─ 循环条件：区间能缩到空 → 必须用 &lt;=（退出时答案 = ans）
+          └─ 取整：无所谓 → 惯例下取整
+</pre>
+
 <h4>概览</h4>
 
 <ul>
@@ -224,125 +222,11 @@ LIS         → tails[i] 表示长度为 i+1 的递增子序列的最小末尾
   <li><strong>猜数法</strong>：需要猜数或者用不同的数来试某个解时，使用二分法快速试错。</li>
 </ul>
 
-<h4>解题思维顺序</h4>
-
-<p>碰到一道二分题时，按这个顺序推导：</p>
-
-<p><strong>第 1 步：看能否排除 mid → 决定 low/high 更新方式</strong></p>
-<p>核心问题：<strong>mid 有没有可能是最终答案？</strong></p>
-<ul>
-  <li><code>nums[mid]</code> 肯定不是答案（如 <code>nums[mid] &gt; target</code> 且要找 target）→ <code>low = mid + 1</code> / <code>high = mid - 1</code></li>
-  <li><code>nums[mid]</code> 可能就是答案（如找左边界，<code>nums[mid] &gt;= target</code> 时 mid 可能是第一个）→ <code>low = mid</code> / <code>high = mid</code></li>
-</ul>
-
-<p><strong>第 2 步：看更新方式 → 决定循环条件</strong></p>
-<table>
-  <tr><th>更新方式</th><th>循环条件</th><th>原因</th></tr>
-  <tr><td><code>mid &plusmn; 1</code></td><td><code>&lt;=</code></td><td>每次范围至少减 1，<code>low &gt; high</code> 自然退出</td></tr>
-  <tr><td><code>high = mid</code> 或 <code>low = mid</code></td><td><code>&lt;</code></td><td>mid 可能被保留，范围不必然减 1，<code>low == high</code> 时终止</td></tr>
-</table>
-
-<p><strong>第 3 步：看题意 → 决定 mid 取整方向</strong></p>
-<ul>
-  <li>需要<strong>靠左</strong>决策（如找左边界，<code>high = mid</code>）→ 下取整 <code>mid = low + (high - low) / 2</code></li>
-  <li>需要<strong>靠右</strong>决策（如找右边界，<code>low = mid</code>）→ <strong>必须上取整</strong> <code>mid = low + (high - low + 1) / 2</code>，否则 <code>low + 1 == high</code> 时死循环</li>
-</ul>
-
-<p>三步走完，二分查找的三个决定性因素就全部确定了。</p>
-
-<h4>三个决定性因素</h4>
-
-<table>
-  <tr><th>因素</th><th>说明</th></tr>
-  <tr><td><strong>区间定义</strong></td><td>左闭右闭 <code>[low, high]</code> vs 左闭右开 <code>[low, high)</code></td></tr>
-  <tr><td><strong>mid 取整方向</strong></td><td><code>low + (high - low) / 2</code>（下取整）vs <code>low + (high - low + 1) / 2</code>（上取整）</td></tr>
-  <tr><td><strong>收缩方式</strong></td><td><code>low = mid + 1</code> / <code>high = mid - 1</code> vs <code>low = mid</code> / <code>high = mid</code></td></tr>
-</table>
-
-<p>这三个因素必须相互匹配，否则死循环或越界。</p>
-
-
-<h4>循环条件与收缩规则的深层原理</h4>
-
-<p><code>while (low &lt;= high)</code> 和 <code>while (low &lt; high)</code> 的根本区别在于：<strong>mid 是否能被安全地排除出搜索空间。</strong></p>
-
-<p><strong>核心直觉</strong>：搜索空间是一个集合 <code>[low, high]</code>，每次循环要缩小这个集合。缩小方式由 <code>mid</code> 是否可能是最终答案来决定。</p>
-
-<p><strong>场景一：mid 可以被排除（标准二分）</strong></p>
-<p>当我们知道 <code>nums[mid] != target</code> 后，<code>mid</code> 肯定不是答案，可以大胆排除：</p>
-<pre>
-low = mid + 1    // mid 及其左侧全都排除
-high = mid - 1   // mid 及其右侧全都排除</pre>
-<p>每次范围至少缩小 1，<code>low &lt;= high</code> 作为终止条件完全安全 — 迟早 <code>low &gt; high</code> 退出。</p>
-
-<p><strong>场景二：mid 可能还是答案（边界查找 / 变体）</strong></p>
-<pre>
-// 左边界：找第一个 &gt;= target 的数
-if (nums[mid] &gt;= target)  high = mid;   // mid 可能就是答案，不能排除！</pre>
-<p>当 <code>nums[mid] &gt;= target</code> 成立时，<code>mid</code> 有可能是第一个符合条件的数，所以 <code>high = mid</code> 而不是 <code>mid - 1</code>。</p>
-<p>但问题来了：如果 <code>high = mid</code>，<code>low</code> 更新为 <code>mid + 1</code>，当 <code>low + 1 == high</code> 时：</p>
-<pre>
-low = k, high = k+1
-mid = low + (high - low) / 2 = k   // 下取整
-如果命中条件 &rarr; high = mid = k &rarr; low = k, high = k &rarr; low == high</pre>
-<p>此时如果还用 <code>low &lt;= high</code>，<code>low == high</code> 时还会进循环，而 <code>mid = low = high</code>，如果又命中条件 &rarr; <code>high = mid = low</code> &rarr; <strong>死循环</strong>！</p>
-<p>所以<strong>当出现 <code>high = mid</code> 或 <code>low = mid</code> 时，必须用 <code>low &lt; high</code></strong>。循环在 <code>low == high</code> 时终止，此时唯一剩下的元素就是答案。</p>
-
-<p><strong>场景三：low = mid 时为什么必须上取整？</strong></p>
-<pre>
-// 右边界：找最后一个 &lt;= target 的数
-if (nums[mid] &lt;= target)  low = mid;   // mid 可能就是答案</pre>
-<p>当 <code>low = mid</code> 且 <code>low + 1 == high</code> 时：</p>
-<pre>
-low = k, high = k+1
-mid = low + (high - low) / 2 = k      // 下取整！
-如果命中条件 &rarr; low = mid = k &rarr; low 没变 &rarr; 死循环！</pre>
-<p>必须改成<strong>上取整</strong>：</p>
-<pre>
-mid = low + (high - low + 1) / 2 = k+1
-如果命中条件 &rarr; low = mid = k+1 &rarr; low = high &rarr; 退出 ✅</pre>
-
-<p><strong>三段论总结：</strong></p>
-<table>
-  <tr><th>收缩方式</th><th>能否排除 mid</th><th>循环条件</th><th>取整方式</th><th>原因</th></tr>
-  <tr><td><code>low = mid+1</code>, <code>high = mid-1</code></td><td>✅ 排除 mid</td><td><code>&lt;=</code></td><td>下取整</td><td>范围每次至少减 1，不会死循环</td></tr>
-  <tr><td><code>low = mid+1</code>, <code>high = mid</code></td><td>❌ mid 可能保留</td><td><code>&lt;</code></td><td>下取整</td><td>保留 mid 意味着范围不必然减 1，<code>&lt;</code> 在 <code>low==high</code> 时终止</td></tr>
-  <tr><td><code>low = mid</code>, <code>high = mid-1</code></td><td>❌ mid 可能保留</td><td><code>&lt;</code></td><td><strong>上取整</strong></td><td><code>low = mid</code> 必须上取整，否则 <code>low+1==high</code> 时死循环</td></tr>
-</table>
-
 <hr>
 
 
 <!-- ─── 三、实现细节 ─── -->
 <h3>三、实现细节</h3>
-
-<h4>mid 取整方向</h4>
-
-<ul>
-  <li><code>mid = low + (high - low) / 2</code> — mid 总是<strong>偏向左边</strong>（偶数长度时取左中）或中间（奇数长度）。</li>
-  <li><code>mid = low + (high - low + 1) / 2</code> — mid 总是<strong>偏向右边</strong>（偶数长度时取右中）或中间（奇数长度）。</li>
-  <li><code>low = mid</code> 时 → 必须用<strong>上取整</strong>，否则死循环。</li>
-  <li><code>high = mid</code> 时 → 必须用<strong>下取整</strong>，否则死循环。</li>
-</ul>
-
-<h4>循环条件的选择</h4>
-
-<ul>
-  <li><code>while (low &lt;= high)</code> → <strong>闭区间</strong> <code>[low, high]</code>。low 和 high 都可能被检查到。
-    <ul>
-      <li>移动 low 或 high 后，最终以 <code>low &gt; high</code> 退出循环。一般最后检查 <code>low</code> 的情况。</li>
-    </ul>
-  </li>
-  <li><code>while (low &lt; high)</code> → <strong>半开区间</strong> <code>[low, high)</code>。终止时 <code>low == high</code> 即为答案。</li>
-  <li>选择 <code>&lt;=</code> 还是 <code>&lt;</code>，取决于解可能在<strong>闭区间还是半开区间</strong>。</li>
-</ul>
-
-<h4>收缩方式</h4>
-
-<ul>
-  <li>常规算法：<code>low = mid + 1</code>，<code>high = mid - 1</code>。</li>
-  <li>变体：<code>low = mid</code>，<code>high = mid</code>，主要看设置会不会把解漏掉。一般来说只会取一种，否则可能死循环。</li>
-</ul>
 
 <h4>如何写出 bug free 的二分</h4>
 
@@ -418,29 +302,6 @@ int searchInsert(int[] nums, int target) {
 
 <blockquote>看似简单的二分，但极容易写错。因为 <code>mid&sup2; &le; x</code> 时 <code>mid</code> <strong>本身可能就是最终答案</strong>，但你往往会在 <code>low = mid + 1</code> 时把它跳过去。这道题是验证自己对二分「不变量」理解深度的试金石。</blockquote>
 
-<div class="comparison">
-<div>
-<h4>❌ 常见错误写法</h4>
-<pre>
-int mySqrt(int x) {
-    int low = 1, high = x;
-    while (low &lt; high) {
-        int mid = low + (high - low) / 2;
-        if (mid &lt; x / mid) {
-            low = mid + 1;   // ← mid 可能是答案，但被跳过了
-        } else if (mid &gt; x / mid) {
-            high = mid - 1;
-        } else {
-            return mid;
-        }
-    }
-    return low;
-}
-</pre>
-<strong>问题</strong>：当 <code>mid&sup2; &lt; x</code> 时，<code>mid</code> 可能就是 floor sqrt（如 <code>x=8, mid=2</code>），但 <code>low = mid + 1</code> 直接跳过了它，最终返回 <code>3</code>。
-</div>
-
-<div>
 <h4>✅ 正确写法</h4>
 <pre>
 int mySqrt(int x) {
@@ -461,9 +322,7 @@ int mySqrt(int x) {
     return ans;
 }
 </pre>
-<strong>要点</strong>：用 <code>ans</code> 变量记录最后一个可行的 <code>mid</code>，循环条件用 <code>&lt;=</code>。
-</div>
-</div>
+<p><strong>要点</strong>：用 <code>ans</code> 变量记录最后一个可行的 <code>mid</code>，循环条件用 <code>&lt;=</code>。</p>
 
 <h4>逐版 bug 分析</h4>
 
@@ -477,40 +336,16 @@ int mySqrt(int x) {
   </tr>
   <tr>
     <td>V2</td>
-    <td><code>while (low &lt; high)</code> + <code>low = mid + 1</code></td>
-    <td>漏掉最后一个有效 mid，因为 mid 是答案但被跳过且循环没机会检查</td>
-    <td><code>x = 8</code></td>
-  </tr>
-  <tr>
-    <td>V3</td>
     <td><code>while (low &lt; high)</code> + <code>ans</code> 变量</td>
     <td><code>low == high</code> 时循环不进，可能跳过唯一的解</td>
     <td><code>x = 2</code></td>
   </tr>
-  <tr>
-    <td>V4 ✅</td>
-    <td><code>while (low &lt;= high)</code> + <code>ans</code> 变量 + <code>if (x &lt; 2)</code></td>
-    <td>无 bug</td>
-    <td>—</td>
-  </tr>
-</table>
-
-<h4>正确的边界分析</h4>
-
-<table>
-  <tr><th>x</th><th>过程</th><th>ans</th><th>结果</th></tr>
-  <tr><td>0</td><td>早期返回</td><td>—</td><td>0</td></tr>
-  <tr><td>1</td><td>早期返回</td><td>—</td><td>1</td></tr>
-  <tr><td>2</td><td>low=1, high=2 → mid=1, 1&lt;2/1 → ans=1, low=2 → mid=2, 2&gt;2/2 → high=1 → 退出</td><td>1</td><td>1</td></tr>
-  <tr><td>3</td><td>low=1, high=3 → mid=2, 2&gt;3/2 → high=1 → mid=1, 1&lt;3/1 → ans=1, low=2 → 退出</td><td>1</td><td>1</td></tr>
-  <tr><td>8</td><td>low=1, high=8 → mid=4, 4&gt;8/4 → high=3 → mid=2, 2&lt;8/2 → ans=2, low=3 → mid=3, 3&gt;8/3 → high=2 → 退出</td><td>2</td><td>2</td></tr>
-  <tr><td>Integer.MAX_VALUE</td><td>收敛到 46340</td><td>46340</td><td>46340</td></tr>
 </table>
 
 <h4>核心教训</h4>
 <ul>
   <li>数值二分的溢出陷阱：永远用 <code>mid &gt; x / mid</code> 代替 <code>mid * mid &gt; x</code></li>
-  <li><code>mid&sup2; &lt; x</code> 时 <code>mid</code> 可能是最终答案 → 不能简单 <code>low = mid + 1</code>，要用 <code>ans</code> 变量记录</li>
+  <li><code>mid&sup2; &lt; x</code> 时 <code>mid</code> 可能是最终答案 → 可以 <code>low = mid + 1</code> 排除（记录式），但必须同时 <code>ans = mid</code> 记录，不能只 +1 不记录</li>
   <li>带 <code>ans</code> 变量的写法必须用 <code>while (low &lt;= high)</code>，否则 <code>low == high</code> 时的解会被漏掉</li>
   <li>二分范围可以优化为 <code>[1, x/2]</code>（除 0、1 外），因为 <code>&radic;x &le; x/2</code> 对所有 <code>x &ge; 4</code> 成立</li>
 </ul>
@@ -595,21 +430,9 @@ if (nums[low] &lt; nums[mid]) {
   </tr>
   <tr>
     <td>V2</td>
-    <td>只比较 <code>nums[mid] &gt; target</code>，未加值域判断</td>
-    <td>旋转数组中间元素大于 target 时，target 可能在无序的另一半</td>
-    <td><code>[4,5,6,7,0,1,2], target=0</code></td>
-  </tr>
-  <tr>
-    <td>V3</td>
     <td><code>nums[low] &lt; target</code>（左闭区间写成开区间）</td>
     <td>target 等于左边界（即数组第一个元素）时被漏掉</td>
     <td><code>[4,5,6,7,0,1,2], target=4</code></td>
-  </tr>
-  <tr>
-    <td>V4 ✅</td>
-    <td><code>nums[low] &lt;= nums[mid]</code> + 完整值域 <code>[nums[low], nums[mid])</code> / <code>(nums[mid], nums[high]]</code></td>
-    <td>无 bug</td>
-    <td>—</td>
   </tr>
 </table>
 
@@ -791,6 +614,38 @@ if (nums[mid] &gt; nums[mid + 1]) {
   <tr><td>答案二分</td><td>二分范围没覆盖全</td><td>确保 left 和 right 包含所有合法答案</td></tr>
   <tr><td>死循环</td><td><code>low = mid</code> 时忘记上取整</td><td>有 <code>low = mid</code> 一定要上取整</td></tr>
 </table>
+
+<hr>
+
+<!-- ─── 附录：三个决策的推导原理 ─── -->
+<h2>附录：三个决策的推导原理</h2>
+
+<p>正文的「完整决策流程」是操作口诀；本附录解释它<strong>为什么正确</strong>：三个决策不是并列的自由选择，真正要判断的只有「mid 能不能是答案」（排除还是保留），循环条件和取整方向都被它锁定。推导依据只有一条不变量——<strong>每一轮循环都必须严格缩小搜索区间 [low, high]</strong>，否则就是死循环。</p>
+
+<h4>决策 1：循环条件（&lt; 还是 &lt;=）—— 问"区间最终能缩到空吗？"</h4>
+<ul>
+  <li><strong>所有分支都排除</strong>（<code>mid &plusmn; 1</code>）：每轮至少减 1，最终缩到空 → 用 <code>&lt;=</code>，退出时 <code>low &gt; high</code>，答案已检查过或不存在。</li>
+  <li><strong>存在分支保留</strong>（<code>= mid</code>）：保留分支永远不删最后一个元素，区间最多缩到 1 个元素、<strong>缩不到空</strong>。若还用 <code>&lt;=</code>，<code>low == high</code> 时仍会进循环，保留分支的赋值等于没赋 → 死循环；必须用 <code>&lt;</code>，退出时 <code>low == high</code>，剩下的唯一元素就是答案。</li>
+</ul>
+
+<h4>决策 2：取整方向 —— 问"mid 会不会正好落在被保留的端点上？"</h4>
+<p>当区间还剩 ≥ 2 个元素时，<strong>mid 绝不能等于可能被保留的那个端点</strong>。看只剩两个元素 [k, k+1] 的极端情况：</p>
+<ul>
+  <li>存在 <code>high = mid</code>（保留右端点）→ 必须<strong>下取整</strong>。若上取整，mid = k+1 = high，命中后 <code>high = mid = high</code>，区间没变 → 死循环。</li>
+  <li>存在 <code>low = mid</code>（保留左端点）→ 必须<strong>上取整</strong>。若下取整，mid = k = low，命中后 <code>low = mid = low</code>，区间没变 → 死循环。</li>
+  <li>全部排除 → 取整方向不影响正确性，惯例下取整。</li>
+</ul>
+
+<p>口诀：<strong>保留哪一端，mid 就偏向另一端</strong> —— 保留 high → mid 偏左（下取整）；保留 low → mid 偏右（上取整）。</p>
+
+<h4>两套合法模板（混搭必出 bug）</h4>
+<table>
+  <tr><th>模板</th><th>更新方式</th><th>循环条件</th><th>取整</th><th>退出时</th><th>答案在哪</th></tr>
+  <tr><td>排除式</td><td>所有分支 <code>mid &plusmn; 1</code></td><td><code>&lt;=</code></td><td>下取整（随意）</td><td><code>low &gt; high</code>（空区间）</td><td>已检查的元素 / <code>low</code> / <code>ans</code></td></tr>
+  <tr><td>保留式</td><td>某分支 <code>low = mid</code> 或 <code>high = mid</code></td><td><code>&lt;</code></td><td>保留 high → 下取整；保留 low → 上取整</td><td><code>low == high</code>（单元素）</td><td>就是剩下的那个元素</td></tr>
+</table>
+
+<p>常见 bug 都是混搭：保留式更新 + <code>&lt;=</code>（缩到单元素后原地转圈）；<code>low = mid</code> + 下取整（两元素时原地踏步）；排除式更新 + <code>&lt;</code>（漏掉最后一个候选，如 69 的 V2）。</p>
 
 </body>
 </html>
