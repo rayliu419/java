@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多字段排序：Comparator 综合拼装</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif; line-height: 1.45; max-width: 960px; margin: 0 auto; padding: 16px 24px 60px; color: #2d3a31; background: #f5faf6; font-size: 13px; }
+  h1 { font-size: 1.35em; border-bottom: 3px solid #4a7c3f; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
+  h2 { font-size: 1.2em; color: #3d6b35; margin-top: 20px; padding-left: 8px; border-left: 4px solid #5a8f4c; }
+  h3 { font-size: 1.02em; color: #2d3a31; margin-top: 16px; }
+  h4 { font-size: 0.95em; color: #3a5235; margin-top: 12px; }
+  p { margin: 6px 0; } li { margin: 2px 0; } ol, ul { padding-left: 20px; }
+  blockquote { margin: 10px 0; padding: 12px 20px; background: #e8f5ec; border-left: 5px solid #5a8f4c; border-radius: 0 8px 8px 0; }
+  blockquote > p { margin: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9em; }
+  th, td { border: 1px solid #c3dbcc; padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: #4a7c3f; color: #fff; font-weight: 600; white-space: nowrap; }
+  tr:nth-child(even) { background: #e8f5ec; }
+  tr:hover { background: #ddf0e4; }
+  pre { background: #f5f0eb; color: #3d3731; padding: 12px 16px; border-radius: 8px; overflow-x: auto; font-size: 0.8em; line-height: 1.45; margin: 8px 0; }
+  code { font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace; }
+  p > code, li > code, td > code { background: #e4eddb; padding: 2px 6px; border-radius: 4px; font-size: 0.88em; color: #3d6b35; }
+  hr { border: none; border-top: 2px dashed #c3dbcc; margin: 16px 0; }
+  .core { background: #f0eeff; border-radius: 8px; border-left: 4px solid #6366f1; padding: 12px 16px; margin: 12px 0; }
+  .tip { background: #fef9e7; border-radius: 8px; border-left: 4px solid #d4a017; padding: 12px 16px; margin: 12px 0; }
+  .warn { background: #fdf0ef; border-radius: 8px; border-left: 4px solid #d9534f; padding: 12px 16px; margin: 12px 0; }
+  .summary { background: #edf7ed; border-radius: 8px; border-left: 4px solid #4caf50; padding: 12px 16px; margin: 12px 0; }
+  .toc {
+    background: #e8f5ec;
+    border: 1px solid #c3dbcc;
+    border-radius: 8px;
+    padding: 14px 20px;
+    margin: 12px 0 16px;
+  }
+  .toc h2 { font-size: 1em; color: #1a4f2e; margin: 0 0 8px; border: none; padding: 0; background: none; }
+  .toc > ol { margin: 0; list-style: none; counter-reset: toc; }
+  .toc > ol > li { counter-increment: toc; margin: 3px 0; }
+  .toc > ol > li::before { content: counter(toc) ". "; font-weight: 600; color: #1a4f2e; }
+  .toc a { color: #236b3e; text-decoration: none; font-size: 0.9em; }
+  .toc a:hover { text-decoration: underline; color: #1a4f2e; }
+</style>
+</head>
+<body>
+<a href="index.html" style="position: fixed; top: 14px; left: 14px; z-index: 999; background: #e8f5ec; border: 1px solid #c3dbcc; color: #2d5a27; text-decoration: none; font-size: 12px; padding: 4px 12px; border-radius: 999px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">← 返回目录</a>
+
+<h1>多字段排序：Comparator 综合拼装</h1>
+
+<blockquote><strong>核心思路：</strong>对象排序的难点不在"排"，而在"比"——class 有多个字段，其中既有可直接比较的基本字段（int value），又有需要转换后才能比较的处理字段（String "xx:yy:zz" → 秒）。关键问题是：怎么把多个字段的规则综合拼装成一个 Comparator？本仓库的 <code>MultiSort</code> 采用「外围连接」：每个字段一个独立小比较器，转换逻辑内聚在比较器内部，再用 <code>thenComparing</code> 按优先级串联成字典序。</blockquote>
+
+<div class="toc">
+<h2>目录</h2>
+<ol>
+  <li><a href="#sec1">问题背景：为什么多字段排序是面试高频</a></li>
+  <li><a href="#sec2">难点拆解：两类字段，两种"比法"</a></li>
+  <li><a href="#sec3">三种 Comparator 拼装方式对比</a></li>
+  <li><a href="#sec4">外围连接逐步拆解（MultiSort 源码）</a></li>
+  <li><a href="#sec5">面试真题延伸</a></li>
+  <li><a href="#sec6">易错点清单</a></li>
+  <li><a href="#sec7">总结</a></li>
+</ol>
+</div>
+
+<h2 id="sec1">1. 问题背景：为什么多字段排序是面试高频</h2>
+
+<p>算法题里的排序，对象排序比 int 数组排序常见得多。一出现"先按 A 排，A 相同再按 B 排"的描述，就属于多字段排序（Multi-key Sort）。典型场景：</p>
+
+<ul>
+  <li><strong>区间类</strong>：先按起点排，起点相同再按终点排（Merge Intervals、Meeting Rooms）</li>
+  <li><strong>包络类</strong>：先按宽排，宽相同再按高排（Russian Doll Envelopes）</li>
+  <li><strong>日志类</strong>：先按类型排（字母日志 / 数字日志），类型相同再按内容排（Reorder Data in Logs）</li>
+  <li><strong>业务类</strong>：先按优先级排，再按时间排（本仓库 <code>MultiSort</code>：value → time）</li>
+</ul>
+
+<p>这类题的考察点不在排序算法本身（就是 <code>Arrays.sort</code>），而在<strong>如何把多条比较规则组装成一个 Comparator</strong>——这也是本节要讲透的东西。</p>
+
+<h2 id="sec2">2. 难点拆解：两类字段，两种"比法"</h2>
+
+<p>一个待排序 class 的字段天然分成两类：</p>
+
+<table>
+  <tr><th>字段类型</th><th>例子</th><th>比较方式</th><th>典型写法</th></tr>
+  <tr><td>基本字段</td><td><code>int value</code></td><td>直接比较大小</td><td><code>Comparator.comparingInt(Item::getValue)</code></td></tr>
+  <tr><td>处理字段</td><td><code>String time = "xx:yy:zz"</code></td><td>先转换（解析成秒）再比较</td><td>独立字段比较器，内部调用转换函数</td></tr>
+  <tr><td>多字段组合</td><td>value + time</td><td>按优先级串联成字典序</td><td><code>comparingInt(...).thenComparing(timeComparator)</code></td></tr>
+</table>
+
+<div class="core">
+<strong>核心心法：</strong>把两个问题彻底分开——
+<ol>
+  <li><strong>每个字段怎么比</strong>：基本字段一行搞定；处理字段把"转换"封装进该字段的比较器，比较器只管自己的事；</li>
+  <li><strong>字段之间怎么连</strong>：用 <code>thenComparing</code> 按优先级链式连接，前一个返回 0 才进入下一个，天然就是"先 value、相等再 time"的字典序。</li>
+</ol>
+</div>
+
+<h2 id="sec3">3. 三种 Comparator 拼装方式对比</h2>
+
+<h3>方式一：手写整体 compare（不推荐）</h3>
+
+<pre>
+// 所有规则堆在一个 compare 里，嵌套 if-else
+Arrays.sort(items, new Comparator&lt;Item&gt;() {
+    @Override
+    public int compare(Item o1, Item o2) {
+        if (o1.getValue() != o2.getValue()) {
+            return o1.getValue() - o2.getValue();
+        }
+        int t1 = getTime(o1.getTime());
+        int t2 = getTime(o2.getTime());
+        if (t1 != t2) {
+            return t1 - t2;
+        }
+        return 0;
+    }
+});
+</pre>
+
+<p>字段一多，这个 compare 会越来越长：每一级字段都要一层 if 包裹，缩进失控，哪个字段在哪一层一目难辨。改排序规则时要小心翼翼，极易改错层级。</p>
+
+<h3>方式二：外围连接（本实现采用，推荐）</h3>
+
+<pre>
+// 每个字段一个独立比较器，thenComparing 串联
+Comparator&lt;Item&gt; timeComparator = (o1, o2) -&gt; getTime(o1.getTime()) - getTime(o2.getTime());
+Comparator&lt;Item&gt; c = Comparator.comparingInt(Item::getValue)
+        .thenComparing(timeComparator);
+Arrays.sort(items, c);
+</pre>
+
+<p>优点：加字段 = 加一个比较器 + 加一个 <code>thenComparing</code>，层级由链式结构天然表达；处理字段的转换逻辑内聚在字段比较器内部，与排序主流程解耦。</p>
+
+<h3>方式三：预计算 key（key extraction）</h3>
+
+<pre>
+// 先统一把处理字段转成可直接比较的值，再直连
+for (Item item : items) {
+    item.setTimeSec(getTime(item.getTime()));
+}
+Comparator&lt;Item&gt; c = Comparator.comparingInt(Item::getValue)
+        .thenComparingInt(Item::getTimeSec);
+Arrays.sort(items, c);
+</pre>
+
+<p>转换从"每次比较都做"变成"每个元素只做一次"，比较成本更低；代价是给 Item 多一个字段（或外部 map 存 key），多一层预计算循环。元素量大、转换代价高时值得用。</p>
+
+<table>
+  <tr><th>维度</th><th>方式一：手写嵌套</th><th>方式二：外围连接</th><th>方式三：预计算 key</th></tr>
+  <tr><td>代码可读性</td><td>差，层级靠缩进表达</td><td>好，链式即层级</td><td>好</td></tr>
+  <tr><td>加字段 / 改规则</td><td>易错，要动嵌套结构</td><td>加一个比较器 + 一个 thenComparing</td><td>加一行 comparingXxx</td></tr>
+  <tr><td>转换成本</td><td>每次比较都转换</td><td>每次比较都转换</td><td>每元素只转换一次</td></tr>
+  <tr><td>侵入性</td><td>无</td><td>无</td><td>需改类结构 / 额外容器</td></tr>
+</table>
+
+<h2 id="sec4">4. 外围连接逐步拆解（MultiSort 源码）</h2>
+
+<p>对应文件：<code>algorithm/src/main/java/leetcode/MultiSort.java</code>（测试：<code>algorithm/src/test/java/leetcode/MultiSortTest.java</code>，从 engineering 包迁移而来）。</p>
+
+<h3>第一步：待排序对象 Item</h3>
+
+<pre>
+static class Item {
+    private int value;   // 基本字段：直接比较
+    private String time; // 处理字段："xx:yy:zz"，需转秒
+    // getter / setter 略
+}
+</pre>
+
+<h3>第二步：转换函数独立成方法</h3>
+
+<pre>
+public static int getTime(String time) {
+    String[] res = time.split(":");  // ":" 是正则字面量，可直接拆分
+    return Integer.parseInt(res[0]) * 3600 +
+            Integer.parseInt(res[1]) * 60 +
+            Integer.parseInt(res[2]);
+}
+</pre>
+
+<p>"xx:yy:zz" → 秒（时 × 3600 + 分 × 60 + 秒）。独立成方法的意义：比较器内部只是"调用它"，比较逻辑与解析逻辑互不干扰，还能单独写单测（<code>testGetTimeNormal</code> 等覆盖 6 个转换用例）。</p>
+
+<h3>第三步：处理字段单独一个比较器</h3>
+
+<pre>
+Comparator&lt;Item&gt; timeComparator = (o1, o2) -&gt; getTime(o1.getTime()) - getTime(o2.getTime());
+</pre>
+
+<p>这个比较器只做一件事：把两个 time 转成秒再比大小。<strong>转换逻辑被关在字段比较器内部</strong>，主流程完全看不到解析细节。</p>
+
+<h3>第四步：thenComparing 串联（外围连接）</h3>
+
+<pre>
+Comparator&lt;Item&gt; c = Comparator.comparingInt(Item::getValue)
+        .thenComparing(timeComparator);
+Arrays.sort(items, c);
+</pre>
+
+<div class="core">
+<strong>thenComparing 的语义：</strong>前一个比较器返回 0 时，才进入下一个比较器。这正好实现"先按 value 排，value 相等再按 time 排"——不需要任何 if-else，优先级由链条顺序表达，这就是"外围连接"。
+</div>
+
+<h3>排序结果验证</h3>
+
+<p>以混合用例（<code>testSortMixedValuesAndTimes</code>）为例：输入 value/time 为 <code>(2,23:59:59) (1,00:00:01) (2,00:00:00) (1,23:59:59)</code>，排序后 <code>(1,00:00:01) (1,23:59:59) (2,00:00:00) (2,23:59:59)</code>——value 优先，同 value 按时间升序。另外 <code>Arrays.sort</code> 是稳定排序，value、time 都相等时保持原相对顺序（<code>testSortStableWhenValueAndTimeEqual</code>）。</p>
+
+<h2 id="sec5">5. 面试真题延伸</h2>
+
+<p>同一个"外围连接"套路，改改字段比较器就能套进一堆真题：</p>
+
+<table>
+  <tr><th>题号</th><th>题目</th><th>排序规则</th><th>要点</th></tr>
+  <tr><td>56</td><td>Merge Intervals</td><td>start 升序</td><td>合并只需要第一键，先排序是前提</td></tr>
+  <tr><td>354</td><td>Russian Doll Envelopes</td><td>w 升序 + h 降序</td><td>第二键要<b>降序</b>，配合 LIS 求最大嵌套</td></tr>
+  <tr><td>937</td><td>Reorder Data in Log Files</td><td>先类型、再内容</td><td>"类型"也是需要处理的字段（判断 letter/digit）</td></tr>
+  <tr><td>179</td><td>Largest Number</td><td>拼接比较</td><td>比较函数本身复杂：(a+b).compareTo(b+a)</td></tr>
+  <tr><td>973</td><td>K Closest Points to Origin</td><td>距离升序</td><td>距离是计算字段，适合预计算 key</td></tr>
+</table>
+
+<h3>降序怎么做：reversed() 的位置是考点</h3>
+
+<pre>
+// 错误：把整个链条 reversed，value 也变降序了
+Comparator.comparingInt(Item::getValue).thenComparing(timeComparator).reversed();
+
+// 正确：只对"要降序的那一个字段比较器" reversed
+Comparator&lt;Item&gt; hDesc = Comparator.comparingInt(Item::getH).reversed();
+Comparator&lt;Item&gt; c = Comparator.comparingInt(Item::getW).thenComparing(hDesc);
+</pre>
+
+<h2 id="sec6">6. 易错点清单</h2>
+
+<div class="warn">
+<strong>易错点 1（仓库早期实际踩过的坑）：转换函数参数写错。</strong>
+早期版本用 commons-lang3 的 <code>StringUtils.split(":")</code>——单参重载按<strong>空白</strong>拆分，"<code>:</code>"被当成待拆分的字符串本身，返回 <code>[":"]</code>，随后 <code>Integer.parseInt(":")</code> 抛 NumberFormatException；参数 <code>time</code> 完全没用上。正确写法是 <code>StringUtils.split(time, ":")</code>（按分隔符拆分）。当前实现改用 JDK 的 <code>time.split(":")</code>（<code>":"</code> 是正则字面量，可安全拆分）。写转换函数时务必确认：<strong>拆的是参数，不是字面量；用的 API 语义对吗？</strong>
+</div>
+
+<div class="warn">
+<strong>易错点 2：减法比较的溢出。</strong>
+<code>getTime(o1) - getTime(o2)</code> 在值很大（如秒数接近 Integer.MAX_VALUE）时会溢出，得到错误结果甚至负负得正。用 <code>Integer.compare(a, b)</code> 或 <code>comparingInt</code> 更稳。本用例时间最大 86399 秒，无风险，但面试中值得主动指出。
+</div>
+
+<div class="tip">
+<strong>注意：</strong>处理字段为 <code>null</code> 时，<code>split</code> 返回 <code>null</code>，<code>res[0]</code> 抛 NPE；格式不校验（<code>"12:99:99"</code> 也能解析）。是否需要防御视题目约束而定，面试时提一句"假设输入格式合法"即可。
+</div>
+
+<div class="tip">
+<strong>提示：</strong>理解 <code>compare</code> 返回 0 的含义——它表示"本轮不分胜负"，此时才轮到下一个比较器，而不是"两个对象相等"。排序完成后，<code>compare(a,b) == 0</code> 的一批元素称为"等价类"，稳定排序保证它们保持原始相对顺序。
+</div>
+
+<h2 id="sec7">7. 总结</h2>
+
+<div class="summary">
+<strong>外围连接三步法：</strong>
+<ul>
+  <li><strong>拆字段</strong>：按优先级列出每个字段，标注它是基本字段还是处理字段；</li>
+  <li><strong>写比较器</strong>：基本字段用 <code>comparingXxx</code>；处理字段单独写一个比较器，转换逻辑内聚在内部；要降序就在该字段比较器上 <code>reversed()</code>；</li>
+  <li><strong>链式串联</strong>：<code>comparingInt(...).thenComparing(timeComparator).thenComparing(...)</code>，链条顺序 = 排序优先级，天然字典序。</li>
+</ul>
+需要多次比较的高代价转换（解析、距离计算）用"预计算 key"先转好，<code>thenComparingInt</code> 直连。
+</div>
+
+</body>
+</html>
