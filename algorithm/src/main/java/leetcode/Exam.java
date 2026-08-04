@@ -3,23 +3,37 @@ package leetcode;
 
 public class Exam {
 
-    int mySqrt(int x) {
-        if (x < 2) return x;
-        int low = 1;
-        int high = 46340;
-        int ans = -1;
+    public int[] searchRange(int[] nums, int target) {
+        int low = 0, high = nums.length - 1;
+        int ans1, ans2;
+        ans1 = ans2 = -1;
+        int[] result = new int[2];
         while (low <= high) {
             int mid = low + (high - low) / 2;
-            if (mid == x / mid) {
-                return mid;
-            } else if (mid > x / mid ) {
+            if (target == nums[mid]) {
+                ans1 = mid;
                 high = mid - 1;
-            } else {
-                // 可能也是一个解
-                ans = mid;
+            } else if (target > nums[mid]) {
                 low = mid + 1;
+            } else {
+                high = mid - 1;
             }
         }
-        return ans;
+        result[0] = ans1;
+        low = 0;
+        high = nums.length - 1;
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (target == nums[mid]) {
+                ans2 = mid;
+                low = mid + 1;
+            } else if (target > nums[mid]) {
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+        result[1] = ans2;
+        return result;
     }
 }

@@ -255,45 +255,43 @@ mid 有可能是答案吗？
 <!-- ─── 四、各题要点 ─── -->
 <h3>四、各题要点</h3>
 
-<!---------- 704 ---------->
-<h4>Binary Search（704）⭐⭐⭐⭐⭐</h4>
-<ul>
-  <li>最基础的二分模板，建议一次性写对</li>
-  <li>终止条件 <code>low &lt;= high</code>，每次更新 <code>mid &plusmn; 1</code></li>
-</ul>
-
-<hr>
-
 <!---------- 35 ---------->
 <h4>Search Insert Position（35）⭐⭐⭐⭐⭐</h4>
 <ul>
   <li>等价于 lower_bound：找第一个 <code>≥ target</code> 的下标</li>
-  <li>如果所有数都 <code>&lt; target</code>，返回 <code>nums.length</code></li>
-  <li>可以直接用左边界写法，最终返回 <code>low</code>：</li>
+  <li>考虑边界情况</li>
 </ul>
 
+<div class="warn">
+  <strong>⚠ 不能用 ans 模板（<code>ans = mid</code> 记录式）！</strong> 这是 69 题「记录最后一个可行 mid」模板的反面教材：
+  <code>ans</code> 一个变量混装了两种语义——「命中位置」和「插入位置」。<code>nums[mid] &lt; target</code> 分支里的
+  <code>ans = mid</code> 在 target 不存在时记录的是插入位置（正确）；但 target 命中后继续向左搜索时，
+  左侧任何 <code>&lt; target</code> 的元素都会把命中位置覆盖掉（错误）。
+</div>
+<p><strong>反例</strong>：<code>nums = [1,3,5,6], target = 3</code> → ans 模板返回 <code>0</code>，正确答案是 <code>1</code>。</p>
+
+<h4>✅ 正确写法：不用 ans，靠循环不变量</h4>
 <pre>
 int searchInsert(int[] nums, int target) {
     int low = 0, high = nums.length - 1;
     while (low &lt;= high) {
         int mid = low + (high - low) / 2;
-        if (nums[mid] &gt;= target)  high = mid - 1;
-        else                      low = mid + 1;
+        if (nums[mid] == target) return mid;   // 命中直接返回，杜绝后续覆盖
+        else if (nums[mid] &gt; target) high = mid - 1;
+        else low = mid + 1;
     }
-    return low;
+    return low;   // 退出时 low 天然是插入位置
 }
 </pre>
+<p><strong>核心心法</strong>：循环始终维持 <code>nums[low-1] &lt; target ≤ nums[low]</code>（边界视为 ±∞），
+退出时 <code>low</code> 即第一个 ≥ target 的位置。答案由结构保证，不需要变量去「记」——
+这也是 69 题用 ans、本题不用 ans 的根本分界：ans 记录的是「最后一个可行解」，而本题的插入位置由不变量直接给出。</p>
 
 <hr>
 
 <!---------- 34 ---------->
 <h4>Find First and Last Position（34）⭐⭐⭐⭐⭐</h4>
-<ul>
-  <li>左右边界分解成两个独立函数，各调一次</li>
-  <li>左边界：<code>nums[mid] &gt;= target</code> → <code>high = mid - 1</code>，记录 <code>ans</code></li>
-  <li>右边界：<code>nums[mid] &lt;= target</code> → <code>low = mid + 1</code>，记录 <code>ans</code></li>
-  <li>不存在时返回 <code>[-1, -1]</code></li>
-</ul>
+标准的ans模版题，直接按照[完整决策流程]解决即可。
 
 <hr>
 
