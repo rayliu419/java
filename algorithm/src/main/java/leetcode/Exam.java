@@ -5,18 +5,12 @@ import infra.TreeNode;
 
 public class Exam {
 
-    public boolean isValidBST(TreeNode root) {
-        TreeNode[] pre = new TreeNode[1];
-        pre[0] = null;
-        return isValidBST(root, pre);
-    }
-
-    private boolean isValidBST(TreeNode root, TreeNode[] pre) {
-        if (root == null) return true;
-        boolean ans = isValidBST(root.left, pre);
-        if (!ans) return false;
-        if (pre[0] != null && root.val <= pre[0].val) return false;
-        pre[0] = root;
-        return isValidBST(root.right, pre);
+    public boolean isSameTree(TreeNode p, TreeNode q) {
+        if (p == null && q != null) return false;
+        if (p != null && q == null) return false;
+        if (p == null && q == null) return true;
+        if (p.val != q.val) return false;
+        if (!isSameTree(p.left, q.left)) return false;
+        return isSameTree(p.right, q.right);
     }
 }

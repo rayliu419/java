@@ -181,13 +181,14 @@
       <ol>
         <li><a href="#p98">Validate BST</a></li>
         <li><a href="#p701-450">Insert / Delete Node</a></li>
-        <li><a href="#p230">Kth Smallest</a></li>
         <li><a href="#p99">Recover BST</a></li>
         <li><a href="#p101-100">Symmetric / Same Tree</a></li>
         <li><a href="#p173">BST Iterator</a></li>
         <li><a href="#p110">Balanced</a></li>
         <li><a href="#p-leaf">链接叶子节点</a></li>
-        <li><a href="#p-build">构造树序列</a></li>
+        <li><a href="#p108">Construct BST from Array（108）</a></li>
+        <li><a href="#p105">Preorder + Inorder（105）</a></li>
+        <li><a href="#p106">Inorder + Postorder（106）</a></li>
         <li><a href="#p-arith">Arithmetic Expr Tree</a></li>
         <li><a href="#p114">Flatten</a></li>
         <li><a href="#p543">直径</a></li>
@@ -210,9 +211,10 @@
     <th>频次</th><th>题号</th><th>题目</th><th>难度</th><th>核心思路</th><th>状态</th>
   </tr>
   <tr><td><span class="star">★★★★★</span></td><td>98</td><td>Validate Binary Search Tree</td><td>🟡 Medium</td><td>① 中序遍历检查递增 ② 区间约束 (min, max)</td><td><span class="done">✅ BST.java</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>230</td><td>Kth Smallest Element in a BST</td><td>🟡 Medium</td><td>中序遍历到第 K 个即停止</td><td><span class="done">✅ BST.java</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>450</td><td>Delete Node in a BST</td><td>🟡 Medium</td><td>三种情况：叶子 / 单子 / 双子（后继替换）</td><td><span class="done">✅ BST.java</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>108</td><td>Convert Sorted Array to BST</td><td>🟢 Easy</td><td>二分递归构建</td><td><span class="done">✅ BST.java</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>105</td><td>Construct Binary Tree from Preorder and Inorder</td><td>🟡 Medium</td><td>前序首元素为根 → 中序分割 → leftSize 切前序</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>106</td><td>Construct Binary Tree from Inorder and Postorder</td><td>🟡 Medium</td><td>后序末元素为根 → 中序分割 → 右子树留末尾下标</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>235</td><td>Lowest Common Ancestor of a BST</td><td>🟡 Medium</td><td>利用大小关系剪枝：p &lt; root &lt; q → root 就是 LCA</td><td><span class="done">✅ BST.java</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>96</td><td>Unique BST</td><td>🟡 Medium</td><td>DP / 卡特兰数</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>297</td><td>Serialize and Deserialize Binary Tree</td><td>🔴 Hard</td><td>前序序列化 + # 空标记递归反序列化</td><td><span class="done">✅ BST.java</span></td></tr>
@@ -307,13 +309,6 @@
 
 <hr>
 
-<!---------- 230 ---------->
-<h4 id="p230">Kth Smallest Element in a BST（230）⭐⭐⭐⭐⭐</h4>
-<ul>
-  <li>中序遍历 + 计数器，遍历到第 K 个时停止</li>
-</ul>
-
-<hr>
 
 <!---------- 99 ---------->
 <h4 id="p99">Recover BST（99）⭐⭐⭐</h4>
@@ -329,11 +324,7 @@
 
 <!---------- 101 / 100 ---------->
 <h4 id="p101-100">Symmetric Tree（101）/ Same Tree（100）⭐⭐⭐</h4>
-<ul>
-  <li>都是 <strong>两个根节点比较</strong></li>
-  <li>关键：定义好递归函数的语义（"这两个子树是否相同/对称"）</li>
-</ul>
-
+关键：定义好递归函数的语义（"这两个子树是否相同/对称"）
 <hr>
 
 <!---------- 173 ---------->
@@ -366,14 +357,68 @@
 
 <hr>
 
-<!---------- 构造树序列 ---------->
-<h4 id="p-build">构造树序列</h4>
+<!---------- 108 ---------->
+<h4 id="p108">Convert Sorted Array to BST（108）⭐⭐⭐⭐</h4>
+<p><strong>思想</strong>：后序构造（bottom-up）。先建好左右子树，再向上返回、挂接到根。每次取<strong>中点</strong>作为根，保证左右子树元素数量接近，从而构造出高度平衡的 BST。</p>
+<ol>
+  <li>取区间 <code>[lo, hi)</code> 的中点 <code>mid</code></li>
+  <li><code>root.val = nums[mid]</code></li>
+  <li><code>root.left = build(lo, mid)</code></li>
+  <li><code>root.right = build(mid+1, hi)</code></li>
+  <li><code>return root</code></li>
+</ol>
+<p><strong>递归终止</strong>：<code>lo &gt;= hi</code> 返回 <code>null</code>。</p>
+<pre>
+build(0, 7)  mid=3 → nums[3]
+   ├── build(0,3)  mid=1 → nums[1]
+   └── build(4,7)  mid=5 → nums[5]
+</pre>
+<p><strong>复杂度</strong>：O(n)——每个元素恰好被创建一次节点。</p>
+<div class="tip">
+<strong>💡</strong> 区间统一用<strong>左闭右开</strong> <code>[lo, hi)</code>：中点 <code>mid = lo + (hi - lo) / 2</code>，左子树 <code>[lo, mid)</code>、右子树 <code>[mid+1, hi)</code>，天然规避 off-by-one。
+</div>
 
-<table>
-  <tr><th>题目</th><th>方法</th><th>注意</th></tr>
-  <tr><td><strong>108. Convert Sorted Array to BST</strong></td><td>后序构造：先建子树再连根向上返回</td><td>—</td></tr>
-  <tr><td><strong>105 / 106. 前序+中序 / 中序+后序</strong></td><td>找根 → 分割左右 → 递归</td><td><strong>下标处理要非常小心</strong></td></tr>
-</table>
+<hr>
+
+<!---------- 105 ---------->
+<h4 id="p105">Construct Binary Tree from Preorder and Inorder（105）⭐⭐⭐</h4>
+<p><strong>核心</strong>：前序的第一个元素必然是整棵树的<strong>根</strong>。</p>
+<ol>
+  <li>取前序区间 <code>[preStart, preEnd]</code> 的首元素作为根</li>
+  <li>在中序里找到根的位置 <code>idx</code> → 左边 <code>[inStart, idx-1]</code> 是左子树、右边 <code>[idx+1, inEnd]</code> 是右子树</li>
+  <li>算左子树大小 <code>leftSize = idx - inStart</code>，用它去分割前序区间</li>
+</ol>
+<p><strong>关键推导（前序下标）</strong>：</p>
+<ul>
+  <li>左子树前序区间：<code>[preStart+1, preStart+leftSize]</code></li>
+  <li>右子树前序区间：<code>[preStart+leftSize+1, preEnd]</code></li>
+</ul>
+<div class="warn">
+<strong>⚠️ 易错点</strong>：两个前序区间的下标推导是经典陷阱。正确姿势是<strong>先算 leftSize，再套公式</strong>，不要凭空心算下标。
+</div>
+<p><strong>优化</strong>：先用 <code>HashMap</code> 记录「中序值 → 下标」，找根从 O(n) 降为 O(1)，总复杂度 O(n)。</p>
+
+<hr>
+
+<!---------- 106 ---------->
+<h4 id="p106">Construct Binary Tree from Inorder and Postorder（106）⭐⭐⭐</h4>
+<p><strong>核心</strong>：与 105 完全对称，只是根的来源不同——后序的<strong>最后一个元素</strong>是整棵树的根。</p>
+<ul>
+  <li>105：前序<strong>从左往右</strong>取根（根在前序开头）</li>
+  <li>106：后序<strong>从右往左</strong>取根（根在后序末尾）</li>
+</ul>
+<ol>
+  <li>取后序区间 <code>[postStart, postEnd]</code> 的末尾元素作为根</li>
+  <li>中序里找到根 <code>idx</code>，同样切出左右子树，<code>leftSize = idx - inStart</code></li>
+  <li>左子树后序区间：<code>[postStart, postStart+leftSize-1]</code></li>
+  <li>右子树后序区间：<code>[postStart+leftSize, postEnd-1]</code>（末尾 postEnd 已被根占用）</li>
+</ol>
+<div class="warn">
+<strong>⚠️ 易错点</strong>：与 105 相反，这里根在末尾，所以<strong>右子树的区间要留出最后一个下标</strong>给根，千万不要把根又算进右子树里。
+</div>
+<div class="tip">
+<strong>💡 共性规律</strong>：单靠<strong>一种</strong>遍历序列通常无法唯一重建树（除非有 BST 大小约束或用 # 空标记）。要重建，必须借助<strong>两种互相印证</strong>的序列——先找根，再靠中序把左右子树切干净。
+</div>
 
 <hr>
 
