@@ -177,7 +177,24 @@
     <li><a href="#problems">题目列表（按面试频次降序）</a></li>
     <li><a href="#core">核心心法</a></li>
     <li><a href="#details">实现细节</a></li>
-    <li><a href="#points">各题要点</a></li>
+    <li><a href="#points">各题要点</a>
+      <ol>
+        <li><a href="#p98">Validate BST</a></li>
+        <li><a href="#p701-450">Insert / Delete Node</a></li>
+        <li><a href="#p230">Kth Smallest</a></li>
+        <li><a href="#p99">Recover BST</a></li>
+        <li><a href="#p101-100">Symmetric / Same Tree</a></li>
+        <li><a href="#p173">BST Iterator</a></li>
+        <li><a href="#p110">Balanced</a></li>
+        <li><a href="#p-leaf">链接叶子节点</a></li>
+        <li><a href="#p-build">构造树序列</a></li>
+        <li><a href="#p-arith">Arithmetic Expr Tree</a></li>
+        <li><a href="#p114">Flatten</a></li>
+        <li><a href="#p543">直径</a></li>
+        <li><a href="#p124">Max Path Sum</a></li>
+        <li><a href="#p572">Subtree</a></li>
+      </ol>
+    </li>
     <li><a href="#lca">LCA（Lowest Common Ancestor）— 两种实现对比</a></li>
     <li><a href="#kary-lca">K-ary Tree LCA（多叉树最近公共祖先）</a></li>
     <li><a href="#serialization">二叉树序列化（LeetCode 297）</a></li>
@@ -259,26 +276,25 @@
 <h3 id="points">各题要点</h3>
 
 <!---------- 98 ---------->
-<h4>Validate BST（98）⭐⭐⭐⭐⭐</h4>
-<blockquote>两种解法都得会</blockquote>
+<h4 id="p98">Validate BST（98）⭐⭐⭐⭐⭐</h4>
+<blockquote>两种解法</blockquote>
 
 <div class="comparison">
   <div>
     <h4>✅ pre 节点法</h4>
     <p>中序遍历，检查当前值是否 &gt; pre</p>
-    <p><code>Java 需要数组包装才能在递归中保持 pre 的读写</code></p>
+      <p>注意，不能用int[]，应该用TreeNode[]。因为int[]不好赋值。</p>
   </div>
   <div>
     <h4>✅ 区间约束法</h4>
     <p>递归传 (min, max)，左子树缩上限，右子树缩下限</p>
-    <p><strong>更推荐</strong>，简洁且不易出错</p>
   </div>
 </div>
 
 <hr>
 
 <!---------- 701 / 450 ---------->
-<h4>Insert into a BST（701）⭐⭐⭐ / Delete Node in a BST（450）⭐⭐⭐⭐</h4>
+<h4 id="p701-450">Insert into a BST（701）⭐⭐⭐ / Delete Node in a BST（450）⭐⭐⭐⭐</h4>
 <blockquote>核心：<strong>递归函数语义 = "返回调整好的子树根"</strong> 定义完成后，考虑在不同层次需要做的事情。<code>root.left/right = recursive_method</code> 是关键。这种写法普遍用于复杂的树问题。</blockquote>
 
 <p><code>insertIntoBST</code> 和 <code>deleteNode</code> 都是同一个语义。为什么要这么设计？<br>
@@ -292,7 +308,7 @@
 <hr>
 
 <!---------- 230 ---------->
-<h4>Kth Smallest Element in a BST（230）⭐⭐⭐⭐⭐</h4>
+<h4 id="p230">Kth Smallest Element in a BST（230）⭐⭐⭐⭐⭐</h4>
 <ul>
   <li>中序遍历 + 计数器，遍历到第 K 个时停止</li>
 </ul>
@@ -300,7 +316,7 @@
 <hr>
 
 <!---------- 99 ---------->
-<h4>Recover BST（99）⭐⭐⭐</h4>
+<h4 id="p99">Recover BST（99）⭐⭐⭐</h4>
 <blockquote>注意两种 case 的区别</blockquote>
 
 <table>
@@ -312,7 +328,7 @@
 <hr>
 
 <!---------- 101 / 100 ---------->
-<h4>Symmetric Tree（101）/ Same Tree（100）⭐⭐⭐</h4>
+<h4 id="p101-100">Symmetric Tree（101）/ Same Tree（100）⭐⭐⭐</h4>
 <ul>
   <li>都是 <strong>两个根节点比较</strong></li>
   <li>关键：定义好递归函数的语义（"这两个子树是否相同/对称"）</li>
@@ -321,7 +337,7 @@
 <hr>
 
 <!---------- 173 ---------->
-<h4>BST Iterator（173）⭐⭐⭐</h4>
+<h4 id="p173">BST Iterator（173）⭐⭐⭐</h4>
 <ul>
   <li>核心：把 in-order 迭代拆成三步</li>
   <li><code>pushLeft(root)</code> — 一路向左入栈</li>
@@ -332,7 +348,7 @@
 <hr>
 
 <!---------- 110 ---------->
-<h4>Balanced Tree（110）⭐⭐</h4>
+<h4 id="p110">Balanced Tree（110）⭐⭐</h4>
 
 <table>
   <tr><th>做法</th><th>复杂度</th><th>说明</th></tr>
@@ -343,7 +359,7 @@
 <hr>
 
 <!---------- 链接叶子 ---------->
-<h4>链接二叉树的所有叶子节点</h4>
+<h4 id="p-leaf">链接二叉树的所有叶子节点</h4>
 <ul>
   <li>不限于前序，<strong>中序也可以</strong> — 只要从左至右访问叶子节点即可</li>
 </ul>
@@ -351,7 +367,7 @@
 <hr>
 
 <!---------- 构造树序列 ---------->
-<h4>构造树序列</h4>
+<h4 id="p-build">构造树序列</h4>
 
 <table>
   <tr><th>题目</th><th>方法</th><th>注意</th></tr>
@@ -362,13 +378,13 @@
 <hr>
 
 <!---------- Arithmetic Expression Tree ---------->
-<h4>Arithmetic Expression Tree</h4>
+<h4 id="p-arith">Arithmetic Expression Tree</h4>
 <div class="warn"><strong>🚧</strong> 还不熟，需要练习</div>
 
 <hr>
 
 <!---------- 114 ---------->
-<h4>Flatten Binary Tree to Linked List（114）</h4>
+<h4 id="p114">Flatten Binary Tree to Linked List（114）</h4>
 <ul>
   <li>和 701/450 同样的模式：<strong>定义递归函数语义 → 用 <code>root.left/right = recursive()</code> 挂接结果</strong></li>
 </ul>
@@ -400,7 +416,7 @@ flattenTree(root):
 <hr>
 
 <!---------- 543 ---------->
-<h4>二叉树的直径（543）⭐⭐⭐⭐</h4>
+<h4 id="p543">二叉树的直径（543）⭐⭐⭐⭐</h4>
 <p>直径可能来源于三个地方：</p>
 
 <pre>
@@ -418,7 +434,7 @@ flattenTree(root):
 <hr>
 
 <!---------- 124 ---------->
-<h4>Binary Tree Maximum Path Sum（124）⭐⭐⭐⭐⭐</h4>
+<h4 id="p124">Binary Tree Maximum Path Sum（124）⭐⭐⭐⭐⭐</h4>
 <blockquote>思路类似树的直径，<strong>务必仔细看负值处理！</strong></blockquote>
 
 <p>递归函数的语义：</p>
@@ -431,7 +447,7 @@ flattenTree(root):
 <hr>
 
 <!---------- 572 ---------->
-<h4>Subtree of Another Tree（572）⭐⭐</h4>
+<h4 id="p572">Subtree of Another Tree（572）⭐⭐</h4>
 <p>将树<strong>编码成字符串</strong>，后序遍历：</p>
 
 <pre>

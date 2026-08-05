@@ -1,39 +1,22 @@
 package leetcode;
 
 
+import infra.TreeNode;
+
 public class Exam {
 
-    public int[] searchRange(int[] nums, int target) {
-        int low = 0, high = nums.length - 1;
-        int ans1, ans2;
-        ans1 = ans2 = -1;
-        int[] result = new int[2];
-        while (low <= high) {
-            int mid = low + (high - low) / 2;
-            if (target == nums[mid]) {
-                ans1 = mid;
-                high = mid - 1;
-            } else if (target > nums[mid]) {
-                low = mid + 1;
-            } else {
-                high = mid - 1;
-            }
-        }
-        result[0] = ans1;
-        low = 0;
-        high = nums.length - 1;
-        while (low <= high) {
-            int mid = low + (high - low) / 2;
-            if (target == nums[mid]) {
-                ans2 = mid;
-                low = mid + 1;
-            } else if (target > nums[mid]) {
-                low = mid + 1;
-            } else {
-                high = mid - 1;
-            }
-        }
-        result[1] = ans2;
-        return result;
+    public boolean isValidBST(TreeNode root) {
+        TreeNode[] pre = new TreeNode[1];
+        pre[0] = null;
+        return isValidBST(root, pre);
+    }
+
+    private boolean isValidBST(TreeNode root, TreeNode[] pre) {
+        if (root == null) return true;
+        boolean ans = isValidBST(root.left, pre);
+        if (!ans) return false;
+        if (pre[0] != null && root.val <= pre[0].val) return false;
+        pre[0] = root;
+        return isValidBST(root.right, pre);
     }
 }
