@@ -38,6 +38,22 @@
   .tier-3 { background: #e8f5ec; color: #3d6b35; }
   .tier-4 { background: #fdf0ef; color: #cf222e; }
   .graph-box { background: #e8f5ec; border: 1px solid #c3dbcc; border-radius: 8px; padding: 12px; margin: 12px 0; font-family: "SF Mono", "Fira Code", "Consolas", monospace; font-size: 0.9em; line-height: 1.6; }
+  .toc {
+    background: #e8f5ec;
+    border: 1px solid #c3dbcc;
+    border-radius: 8px;
+    padding: 14px 20px;
+    margin: 12px 0 16px;
+  }
+  .toc h2 { font-size: 1em; color: #1a4f2e; margin: 0 0 8px; border: none; padding: 0; background: none; }
+  .toc > ol { margin: 0; list-style: none; counter-reset: toc; }
+  .toc > ol > li { counter-increment: toc; margin: 3px 0; }
+  .toc > ol > li::before { content: counter(toc) ". "; font-weight: 600; color: #1a4f2e; }
+  .toc a { color: #236b3e; text-decoration: none; font-size: 0.9em; }
+  .toc a:hover { text-decoration: underline; color: #1a4f2e; }
+  .toc ol ol { list-style: none; padding-left: 18px; margin: 2px 0 4px; }
+  .toc ol ol li { margin: 2px 0; }
+  .toc ol ol li::before { content: "· "; color: #236b3e; }
 </style>
 </head>
 <body>
@@ -49,7 +65,21 @@
 <strong>核心性质：</strong>排序后遍历处理重叠关系；按 start 排序适合合并/求并集，按 end 排序适合贪心最多不重叠；最小堆/扫描线求峰值并发数
 </blockquote>
 
-<h2>题目列表（按面试频次降序）</h2>
+
+<div class="toc">
+<h2>目录</h2>
+<ol>
+  <li><a href="#problems">题目列表（按面试频次降序）</a></li>
+  <li><a href="#sort-strategy">排序策略</a></li>
+  <li><a href="#meeting-rooms-ii">Meeting Rooms II</a></li>
+  <li><a href="#sweep-line">扫描线（差分数组）</a></li>
+  <li><a href="#insert-binary">Insert Interval 的二分优化</a></li>
+  <li><a href="#pitfalls">常见误区</a></li>
+  </li>
+</ol>
+</div>
+
+<h2 id="problems">题目列表（按面试频次降序）</h2>
 
 <table>
 <thead>
@@ -202,46 +232,7 @@
 </tbody>
 </table>
 
-<h2>核心套路</h2>
-
-<pre><code>Merge Intervals         → 按 start 排序，cur[0] &lt;= prev[1] 时合并
-Non-overlapping         → 按 end 排序贪心（结束越早给后面留越大空间）
-Insert Interval         → 三段式：左 + 中间合并 + 右；也可二分 O(logn)
-Meeting Rooms II        → 最小堆 / 扫描线（差分数组），堆 size 峰值 = 最大并发数
-
-My Calendar I           → TreeMap 二分找前后区间
-My Calendar II          → 单重 + 双重预订列表逐层判断
-My Calendar III         → 差分数组 / 线段树求最大 k
-Carpooling              → 差分数组 + 遍历
-
-Interval Intersections  → 双指针，取交集后移动 end 较小的
-Partition Labels        → lastIndex 扫两遍，等价于区间合并
-Employee Free Time      → 合并所有区间后找间隙
-
-Find Right Interval     → start 排序 + 二分查找
-Range Module            → TreeMap 区间维护（分裂 + 合并）
-Min Interval per Query  → 离线排序 + 懒删除堆
-Data Stream as Disjoint → TreeMap 实时合并</code></pre>
-
-<h2>刷题路线</h2>
-
-<pre><code><span class="tier tier-1">第一梯队（必会）</span>：56 → 57 → 435 → 253
-<span class="tier tier-2">第二梯队（高频）</span>：252 → 452 → 986 → 763
-<span class="tier tier-3">第三梯队（进阶）</span>：729 → 759 → 731 → 1094
-<span class="tier tier-4">第四梯队（扩展）</span>：436 → 352 → 715 → 732 → 1851</code></pre>
-
-<h2>实现文件</h2>
-
-<ul>
-<li><code>algorithm/src/main/java/leetcode/Intervals.java</code> — 主实现</li>
-<li><code>algorithm/src/test/java/leetcode/IntervalsTest.java</code> — 测试</li>
-</ul>
-
-<hr>
-
-<h2>我的笔记</h2>
-
-<h3>排序策略</h3>
+<h3 id="sort-strategy">排序策略</h3>
 
 <pre><code>按 start 排序  → Merge, Insert(已有序), Meeting Rooms, 找重叠
 按 end 排序   → Erase, Arrows（贪心：选最早结束的，给后面留最多空间）</code></pre>
@@ -252,53 +243,13 @@ Data Stream as Disjoint → TreeMap 实时合并</code></pre>
 <li><strong>要保留最多不重叠区间</strong> → 按 end 排序，每次选结束最早的，给后面留最大空间</li>
 </ul>
 
-<h3>重叠判断</h3>
-
-<p>两个区间 <code>[a1, a2]</code> 和 <code>[b1, b2]</code>（假设 a1 &lt;= b1）：</p>
-
-<pre><code>重叠：a1 ----- a2
-            b1 ----- b2
-      条件：b1 &lt;= a2
-
-不重叠：a1 --- a2
-                    b1 --- b2
-      条件：a2 &lt; b1</code></pre>
-
-<p>Java 代码：</p>
-<pre><code><span style="color:#0550ae;">// 合并条件（按 start 排序后）</span>
-<span style="color:#cf222e;">if</span> (cur[<span style="color:#0550ae;">0</span>] &lt;= prev[<span style="color:#0550ae;">1</span>]) {
-    prev[<span style="color:#0550ae;">1</span>] = Math.<span style="color:#8250df;">max</span>(prev[<span style="color:#0550ae;">1</span>], cur[<span style="color:#0550ae;">1</span>]);
-} <span style="color:#cf222e;">else</span> {
-    result.<span style="color:#8250df;">add</span>(prev);
-    prev = cur;
-}
-
-<span style="color:#0550ae;">// 不重叠条件（Non-overlapping 判断，按 end 排序后）</span>
-<span style="color:#cf222e;">if</span> (cur[<span style="color:#0550ae;">0</span>] &gt;= end) {
-    count++;
-    end = cur[<span style="color:#0550ae;">1</span>];
-}</code></pre>
-
-<h3>最小堆（Meeting Rooms II）</h3>
-
-<pre><code><span style="color:#8250df;">PriorityQueue</span>&lt;Integer&gt; heap = <span style="color:#cf222e;">new</span> <span style="color:#8250df;">PriorityQueue</span>&lt;&gt;();
-heap.<span style="color:#8250df;">offer</span>(meetings[<span style="color:#0550ae;">0</span>][<span style="color:#0550ae;">1</span>]);
-<span style="color:#cf222e;">int</span> min = <span style="color:#0550ae;">1</span>;
-<span style="color:#cf222e;">for</span> (<span style="color:#cf222e;">int</span> i = <span style="color:#0550ae;">1</span>; i &lt; meetings.length; i++) {
-    <span style="color:#cf222e;">int</span> curStart = meetings[i][<span style="color:#0550ae;">0</span>];
-    <span style="color:#cf222e;">while</span> (!heap.<span style="color:#8250df;">isEmpty</span>() &amp;&amp; heap.<span style="color:#8250df;">peek</span>() &lt;= curStart) {
-        heap.<span style="color:#8250df;">poll</span>(); <span style="color:#0550ae;">// 已结束的会议出堆</span>
-    }
-    heap.<span style="color:#8250df;">offer</span>(meetings[i][<span style="color:#0550ae;">1</span>]);
-    min = Math.<span style="color:#8250df;">max</span>(min, heap.<span style="color:#8250df;">size</span>());
-}
-<span style="color:#cf222e;">return</span> min;</code></pre>
+<h3 id="meeting-rooms-ii">Meeting Rooms II</h3>
 
 <p>原理：堆里存所有进行中会议的结束时间。新会议来之前，先把所有已结束的弹出，剩下的就是当前同时进行的会议。堆 size 的最大值就是答案。</p>
 
 <p>为什么只检查堆顶？因为堆顶是最早结束的会议。如果最早结束的还没结束，其他的肯定都没结束。</p>
 
-<h3>扫描线（差分数组）</h3>
+<h3 id="sweep-line">扫描线（差分数组）</h3>
 
 <pre><code>Meeting Rooms II 的另一种写法：
 events:  (time, delta)
@@ -311,7 +262,7 @@ time  0   5   10   15   20   30
 
 <p>扫描线适用于「求某时刻最大并发数」的场景，不限于 Meeting Rooms，还适用于 Carpooling、My Calendar III 等。</p>
 
-<h3>Insert Interval 的二分优化</h3>
+<h3 id="insert-binary">Insert Interval 的二分优化</h3>
 
 <p>既然 intervals 已按 start 有序且无重叠，可以用二分找到 <code>newInterval.start</code> 和 <code>newInterval.end</code> 在数组中的位置：</p>
 
@@ -321,32 +272,7 @@ time  0   5   10   15   20   30
 
 <p>不过 O(n) 的三段式已经足够清晰，面试写三段式即可，二分是加分项。</p>
 
-<h3>题目关联图</h3>
-
-<div class="graph-box">
-Merge Intervals (56)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;├── Insert Interval (57) — 有序版 + 二分优化<br>
-&nbsp;&nbsp;&nbsp;&nbsp;├── Partition Labels (763) — 字符串版的 merge<br>
-&nbsp;&nbsp;&nbsp;&nbsp;├── Employee Free Time (759) — merge 后取反<br>
-&nbsp;&nbsp;&nbsp;&nbsp;└── Data Stream as Disjoint Intervals (352) — 在线 merge<br>
-<br>
-Non-overlapping Intervals (435)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;└── Minimum Arrows to Burst Balloons (452) — 同一思路，判定条件从 &gt;= 改成 &gt;<br>
-<br>
-Meeting Rooms II (253)                 — 最小堆 / 扫描线<br>
-&nbsp;&nbsp;&nbsp;&nbsp;├── Meeting Rooms (252)            — 判断版（不需要堆）<br>
-&nbsp;&nbsp;&nbsp;&nbsp;├── Carpooling (1094)              — 差分数组扫描<br>
-&nbsp;&nbsp;&nbsp;&nbsp;├── My Calendar I (729)            — 单重预订<br>
-&nbsp;&nbsp;&nbsp;&nbsp;├── My Calendar II (731)           — 双重预订<br>
-&nbsp;&nbsp;&nbsp;&nbsp;└── My Calendar III (732)          — k 重预订<br>
-<br>
-Interval List Intersections (986)      — 双指针<br>
-Find Right Interval (436)              — 二分查找<br>
-Range Module (715)                     — TreeMap 区间维护<br>
-Minimum Interval per Query (1851)      — 离线 + 堆
-</div>
-
-<h3>常见误区</h3>
+<h3 id="pitfalls">常见误区</h3>
 
 <ol>
 <li>
