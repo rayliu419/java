@@ -43,6 +43,69 @@ public class ArrayStringOperation {
     }
 
     /**
+     * "aaabbb" → "" ；
+     * "ab" → "ab" ；
+     * "aab" → "b" ；
+     * "aa" → ""
+     * @param str
+     * @return
+     */
+    public static String removeAllConsecutiveDuplicates(String str) {
+        if (str == null || str.length() <= 1) {
+            return str;
+        }
+
+        StringBuffer sb = new StringBuffer();
+        int i = 0;
+        int n = str.length();
+        // 外层循环：遍历输入字符串的每一个字符
+        while (i < n) {
+            int next = i + 1;
+            // 内层循环：找出所有连续相同的字符
+            while (next < n && str.charAt(i) == str.charAt(next)) {
+                next++;
+            }
+            // 只有当 next == i + 1 时，说明该字符只出现了 1 次（没有连续重复）
+            if (next == i + 1) {
+                sb.append(str.charAt(i));
+            }
+            // 直接跳过这一整组相同的字符
+            i = next;
+        }
+        return sb.toString();
+    }
+
+    // 保留至少一个
+
+    /**
+     * "aaabbb" → "ab"
+     * "ab" → "ab"
+     * "aa" → "a"
+     * @param str
+     * @return
+     */
+    public static String removeAllConsecutiveDuplicatesAndKeepOne(String str) {
+        if (str == null || str.length() <= 1) {
+            return str;
+        }
+
+        StringBuffer sb = new StringBuffer();
+        int i = 0;
+        int n = str.length();
+        // 外层循环：遍历输入字符串的每一个字符
+        while (i < n) {
+            int next = i + 1;
+            // 内层循环：找出所有连续相同的字符
+            while (next < n && str.charAt(i) == str.charAt(next)) {
+                next++;
+            }
+            sb.append(str.charAt(i));
+            i = next;
+        }
+        return sb.toString();
+    }
+
+    /**
      * 注意：String 不可变，s.toCharArray() 拿到的是副本，修改副本不影响原字符串。
      * 所以必须传 char[] 进来直接操作。
      */
