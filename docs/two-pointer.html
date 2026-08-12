@@ -30,6 +30,22 @@
   td:nth-child(2), th:nth-child(2) { text-align: center; }
   td:nth-child(4), th:nth-child(4) { text-align: center; }
   td:nth-child(6), th:nth-child(6) { text-align: center; }
+  .toc {
+    background: #e8f5ec;
+    border: 1px solid #c3dbcc;
+    border-radius: 8px;
+    padding: 14px 20px;
+    margin: 12px 0 16px;
+  }
+  .toc h2 { font-size: 1em; color: #1a4f2e; margin: 0 0 8px; border: none; padding: 0; background: none; }
+  .toc > ol { margin: 0; list-style: none; counter-reset: toc; }
+  .toc > ol > li { counter-increment: toc; margin: 3px 0; }
+  .toc > ol > li::before { content: counter(toc) ". "; font-weight: 600; color: #1a4f2e; }
+  .toc a { color: #236b3e; text-decoration: none; font-size: 0.9em; }
+  .toc a:hover { text-decoration: underline; color: #1a4f2e; }
+  .toc ol ol { list-style: none; padding-left: 18px; margin: 2px 0 4px; }
+  .toc ol ol li { margin: 2px 0; }
+  .toc ol ol li::before { content: "· "; color: #236b3e; }
 </style>
 </head>
 <body>
@@ -39,7 +55,34 @@
 
 <blockquote><strong>核心性质：</strong>双指针通过两个变量的协同移动来缩小解空间；与滑动窗口的区别在于不要求连续</blockquote>
 
-<h2>题目列表（按面试频次降序）</h2>
+<div class="toc">
+<h2>目录</h2>
+<ol>
+  <li><a href="#problems">题目列表（按面试频次降序）</a></li>
+  <li><a href="#analysis">详细分析</a>
+    <ol>
+      <li><a href="#p11">Container With Most Water (11)</a></li>
+      <li><a href="#p15">3Sum (15)</a></li>
+      <li><a href="#p121">Best Time to Buy and Sell Stock (121)</a></li>
+      <li><a href="#p42">Trapping Rain Water (42)</a></li>
+      <li><a href="#p122">Best Time to Buy and Sell Stock II (122)</a></li>
+      <li><a href="#p844">Backspace String Compare (844)</a></li>
+      <li><a href="#p75">Sort Colors (75)</a></li>
+      <li><a href="#p581">Shortest Unsorted Continuous Subarray (581)</a></li>
+      <li><a href="#p134">Gas Station (134)</a></li>
+      <li><a href="#p455">Assign Cookies (455)</a></li>
+      <li><a href="#p123">Best Time to Buy and Sell Stock III (123)</a></li>
+      <li><a href="#p167">Two Sum II - Input Array Is Sorted (167)</a></li>
+      <li><a href="#p26">Remove Duplicates from Sorted Array (26)</a></li>
+      <li><a href="#p283">Move Zeroes (283)</a></li>
+      <li><a href="#p962">Maximum Width Ramp (962)</a></li>
+      <li><a href="#merge-squares">合并有序数组的平方（四指针两端夹逼）</a></li>
+    </ol>
+  </li>
+</ol>
+</div>
+
+<h2 id="problems">题目列表（按面试频次降序）</h2>
 
 <table>
   <tr><th>频次</th><th>题号</th><th>题目</th><th>难度</th><th>核心思路</th><th>状态</th></tr>
@@ -62,38 +105,11 @@
   <tr><td><span class="star">★</span></td><td>962</td><td>Maximum Width Ramp</td><td>🟡 Medium</td><td>LMin/RMax 双指针 / 单调栈</td><td><span class="pending">⬜</span></td></tr>
 </table>
 
-<h2>核心套路</h2>
-
-<pre>
-左右指针 (Two Ends)     → i=0, j=n-1，向中间逼近，移动哪侧取决于比较 a[i] 和 a[j]
-固定 i + 左右指针       → 排序后固定一个，另外两个左右逼近（3Sum 系列）
-快慢指针 (同向)         → 快慢同时前进，慢指针维护符合条件的区间
-正反指针 (Two Pass)     → 正向扫一遍 + 逆向扫一遍，组合结果（Stock III / 最短无序子数组）
-逆向扫描               → 当正向需要栈/队列记住"未来"的信息时，逆向直接"看到未来"
-双数组指针              → 各指一个已排序数组，按条件移动
-三指针                 → 三种颜色的荷兰国旗问题
-</pre>
-
-<h2>刷题路线</h2>
-
-<div class="route">
-  <strong>第一梯队（必会）：</strong>11 → 15 → 121 → 42 → 167<br>
-  <strong>第二梯队（高频）：</strong>16 → 122 → 844 → 75 → 581<br>
-  <strong>第三梯队（进阶）：</strong>134 → 455 → 123 → 26 → 283<br>
-  <strong>第四梯队（扩展）：</strong>188
-</div>
-
-<h2>实现文件</h2>
-<ul>
-  <li><code>algorithm/src/main/java/leetcode/TwoPointer.java</code> — 主实现</li>
-  <li><code>algorithm/src/main/java/leetcode/StackS.java</code> — Trapping Rain Water（单调栈版）</li>
-</ul>
-
 <hr>
 
-<h2>详细分析</h2>
+<h2 id="analysis">详细分析</h2>
 
-<h3>1. Container With Most Water (11)</h3>
+<h3 id="p11">1. Container With Most Water (11)</h3>
 <p><strong>思路</strong>：两个指针从最左和最右开始，逐步缩小宽度，每次只移动<strong>短板</strong>。</p>
 <pre>
 面积 = min(height[i], height[j]) * (j - i)
@@ -107,7 +123,7 @@ else { i++; j--; }
 
 <hr>
 
-<h3>2. 3Sum (15)</h3>
+<h3 id="p15">2. 3Sum (15)</h3>
 <p><strong>思路</strong>：先排序，固定 i，low = i+1，high = n-1，移动 low/high 寻找 <code>nums[i] + nums[low] + nums[high] == 0</code>。</p>
 <p><strong>去重三连</strong>：</p>
 <pre>
@@ -118,17 +134,17 @@ while (j &lt; k && nums[k] == nums[k-1]) k--;         // k 去重
 
 <hr>
 
-<h3>3. Best Time to Buy and Sell Stock I (121)</h3>
+<h3 id="p121">3. Best Time to Buy and Sell Stock I (121)</h3>
 <p><strong>思路</strong>：正向扫描，记录历史最低价格，每天计算如果当天卖出能赚多少，更新最大利润。不需要逆向扫描。</p>
 
 <hr>
 
-<h3>4. Trapping Rain Water (42)</h3>
+<h3 id="p42">4. Trapping Rain Water (42)</h3>
 <p><strong>思路</strong>：左右指针 + 维护左右最大高度。当 <code>height[left] &lt; height[right]</code> 时，<code>left</code> 位置的接水量仅取决于左侧最大值。</p>
 
 <hr>
 
-<h3>5. Best Time to Buy and Sell Stock II (122)</h3>
+<h3 id="p122">5. Best Time to Buy and Sell Stock II (122)</h3>
 <p><strong>思路</strong>：累加所有正差价，无限次交易可以把一次长持有拆成多段短持有，总和不变。</p>
 <pre>
 for (int i = 1; i &lt; prices.length; i++) {
@@ -138,12 +154,12 @@ for (int i = 1; i &lt; prices.length; i++) {
 
 <hr>
 
-<h3>6. Backspace String Compare (844)</h3>
+<h3 id="p844">6. Backspace String Compare (844)</h3>
 <p><strong>思路</strong>：逆向扫描时，# 代表跳过下一个有效字符，天然适合从后往前处理。</p>
 
 <hr>
 
-<h3>7. Sort Colors (75)</h3>
+<h3 id="p75">7. Sort Colors (75)</h3>
 <p><strong>思路</strong>：三指针（荷兰国旗问题）。</p>
 <pre>
 int red = 0, blue = nums.length - 1, i = 0;
@@ -156,43 +172,62 @@ while (i &lt;= blue) {
 
 <hr>
 
-<h3>8. Shortest Unsorted Continuous Subarray (581)</h3>
+<h3 id="p581">8. Shortest Unsorted Continuous Subarray (581)</h3>
 <p><strong>思路</strong>：找备选区间 → 扩展备选区间（根据 min/max 向外扩展）→ 最终 [s, e] 即为答案。</p>
 
 <hr>
 
-<h3>9. Gas Station (134)</h3>
+<h3 id="p134">9. Gas Station (134)</h3>
 <p><strong>思路</strong>：从点 i 出发到 k 走不下去，则 i 到 k 之间的任意点都不需要尝试，直接跳过从 k+1 开始。</p>
 
 <hr>
 
-<h3>10. Assign Cookies (455)</h3>
+<h3 id="p455">10. Assign Cookies (455)</h3>
 <p><strong>思路</strong>：两个数组各排一次序，两个指针分别扫描。标准双数组指针模板。</p>
 
 <hr>
 
-<h3>11. Best Time to Buy and Sell Stock III (123)</h3>
+<h3 id="p123">11. Best Time to Buy and Sell Stock III (123)</h3>
 <p><strong>思路</strong>：双向分割。left[i] = prices[0..i] 范围内一次交易的最大利润，right[i] = prices[i..n-1] 范围内一次交易的最大利润，ans = max(left[i] + right[i])。</p>
 
 <hr>
 
-<h3>12. Two Sum II - Input Array Is Sorted (167)</h3>
+<h3 id="p167">12. Two Sum II - Input Array Is Sorted (167)</h3>
 <p><strong>思路</strong>：已排序数组，左右指针。<code>sum &lt; target → low++</code>，<code>sum &gt; target → high--</code>。</p>
 
 <hr>
 
-<h3>13. Remove Duplicates from Sorted Array (26)</h3>
+<h3 id="p26">13. Remove Duplicates from Sorted Array (26)</h3>
 <p><strong>思路</strong>：慢指针 i 维护不重复区的末尾，快指针 j 扫描。遇到新元素就放到 i+1。</p>
 
 <hr>
 
-<h3>14. Move Zeroes (283)</h3>
+<h3 id="p283">14. Move Zeroes (283)</h3>
 <p><strong>思路</strong>：慢指针指向当前非零元素应放置的位置，快指针扫描。非零元素前移，最后末尾补零。</p>
 
 <hr>
 
-<h3>15. Maximum Width Ramp (962)</h3>
+<h3 id="p962">15. Maximum Width Ramp (962)</h3>
 <p><strong>思路</strong>：预处理 LMin[i] = a[0..i] 的最小值，RMax[j] = a[j..n-1] 的最大值。双指针贪心扩展 j。</p>
+
+<hr>
+
+<h3 id="merge-squares">16. Merge Two Sorted Arrays（平方后合并）</h3>
+<p><strong>思路</strong>：有序数组（可含负数）平方后顺序被打破，但每个数组的平方最大值必在两端之一（绝对值最大的元素位于最左或最右）。用四个指针（每数组左右各一）从两端夹逼，从大到小填充结果，天然处理负数。</p>
+<p><strong>为什么负数不难</strong>：<code>-4</code> 的平方 <code>16</code> 落在数组左端，正数平方落在右端，取两端 <code>max</code> 即得本数组当前最大平方，谁大谁先出。</p>
+<pre>
+int l1 = 0, r1 = a.length - 1;   // a 的左右指针
+int l2 = 0, r2 = b.length - 1;   // b 的左右指针
+int k = result.length - 1;        // 结果从大到小填充
+while (l1 &lt;= r1 &amp;&amp; l2 &lt;= r2) {
+    int ca = Math.max(a[l1]*a[l1], a[r1]*a[r1]);
+    int cb = Math.max(b[l2]*b[l2], b[r2]*b[r2]);
+    if (ca &gt;= cb) { result[k--] = ca; if (a[l1]*a[l1] &gt; a[r1]*a[r1]) l1++; else r1--; }
+    else          { result[k--] = cb; if (b[l2]*b[l2] &gt; b[r2]*b[r2]) l2++; else r2--; }
+}
+while (l1 &lt;= r1) { result[k--] = Math.max(a[l1]*a[l1], a[r1]*a[r1]); if (a[l1]*a[l1] &gt; a[r1]*a[r1]) l1++; else r1--; }
+while (l2 &lt;= r2) { result[k--] = Math.max(b[l2]*b[l2], b[r2]*b[r2]); if (b[l2]*b[l2] &gt; b[r2]*b[r2]) l2++; else r2--; }
+</pre>
 
 </body>
 </html>

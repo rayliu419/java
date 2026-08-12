@@ -185,4 +185,42 @@ public class TwoPointer {
         return profit;
     }
 
+    /**
+     * 两个有序数组，要求给每个元素取平方，合并数组，输出按照胜序排列的数组
+     * 难点在于负数的处理。
+     * @param a
+     * @param b
+     * @return
+     */
+    public int[] mergeTwoSortedArray(int[] a, int[] b) {
+        int[] result = new int[a.length + b.length];
+        int l1 = 0, r1 = a.length - 1; // a 的左右指针
+        int l2 = 0, r2 = b.length - 1; // b 的左右指针
+        int k = result.length - 1;     // 结果从大到小填充
+
+        // 但每个数组的平方最大值必在两端之一，故用两端指针夹逼即可覆盖负数。
+        while (l1 <= r1 && l2 <= r2) {
+            int ca = Math.max(a[l1] * a[l1], a[r1] * a[r1]);
+            int cb = Math.max(b[l2] * b[l2], b[r2] * b[r2]);
+            if (ca >= cb) {
+                // 取a的较大平方，并收缩其贡献端（左右谁大谁出）
+                result[k--] = ca;
+                if (a[l1] * a[l1] > a[r1] * a[r1]) l1++; else r1--;
+            } else {
+                result[k--] = cb;
+                if (b[l2] * b[l2] > b[r2] * b[r2]) l2++; else r2--;
+            }
+        }
+        // 某个数组耗尽后，处理剩下的那个
+        while (l1 <= r1) {
+            result[k--] = Math.max(a[l1] * a[l1], a[r1] * a[r1]);
+            if (a[l1] * a[l1] > a[r1] * a[r1]) l1++; else r1--;
+        }
+        while (l2 <= r2) {
+            result[k--] = Math.max(b[l2] * b[l2], b[r2] * b[r2]);
+            if (b[l2] * b[l2] > b[r2] * b[r2]) l2++; else r2--;
+        }
+        return result;
+    }
+
 }
