@@ -137,7 +137,7 @@ num = 0; sign = ch;</code></pre>
 
 <h3>3.2 四则运算（+ - * /）LeetCode 227</h3>
 
-<p><strong>这一版和 3.1 的结算时机完全不同，不要套用，否则容易困惑。</strong>因为 * / 优先级高于 + -，一个数不能遇到立刻入账——它后面可能还跟着 * / 会继续改变它。于是引入了lastNum。</p>
+<p><strong>这一版和 3.1 的结算时机完全不同，不要套用，否则容易困惑。包括最后面循环结束还有最后的累加。</strong>因为 * / 优先级高于 + -，一个数不能遇到立刻入账——它后面可能还跟着 * / 会继续改变它。于是引入了lastNum。</p>
 
 <div class="tip"><strong><code>lastNum</code> 是什么：</strong>「当前这一项（term）的待定结果」——还没定死，可能还会被后面的 <code>*</code> <code>/</code> 继续合并。<br>两级累积：<code>res</code> = 已定死的项之和；<code>lastNum</code> = 正在累积、可能被乘除改变的这一项。</div>
 
