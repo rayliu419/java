@@ -72,10 +72,12 @@ public class Evaluation {
                 switch (sign) {
                     case '+':
                         res += lastNum;
+                        // 主要是下面这一行不理解
                         lastNum = num;
                         break;
                     case '-':
                         res += lastNum;
+                        // 主要是下面这一行不理解
                         lastNum = -num;
                         break;
                     case '*':
@@ -91,6 +93,7 @@ public class Evaluation {
             }
         }
 
+        // i == len - 1的最后处理
         res += lastNum;
         return res;
     }

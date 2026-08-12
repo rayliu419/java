@@ -30,11 +30,36 @@
 
 <h1>表达式求值：什么时候触发结算</h1>
 
-<blockquote><strong>核心洞见：</strong>表达式求值的所有变体共享同一个循环模版——数字拼接 → 遇到触发条件 → 结算并更新状态。区别只在于触发条件和结算时哪些变量需要更新。</blockquote>
+<blockquote><strong>核心洞见：</strong>表达式求值的所有变体共享同一个循环模版——数字拼接 → 遇到触发条件 → 结算并更新状态。区别只在于触发条件和结算时哪些变量需要更新。<br><br><strong>而整个问题的核心只有一个：理解「什么时候触发结算」。</strong></blockquote>
 
 <hr>
 
 <h2>1. 理解什么时候触发</h2>
+
+<p>这是全篇唯一需要真正想清楚的逻辑。其余所有变体只是换个触发符号、多几行结算代码而已。触发只有三种情形，且它们本质上是同一件事。</p>
+
+<h3>触发一：碰到一个新的运算符符号</h3>
+
+<p>数字 <code>num</code> 是在累积的，它属于「上一个符号」<code>sign</code> 管辖。一旦读到新符号，<code>num</code> 就攒到头了，必须先把<strong>上一次的运算结算掉</strong>，才能空出 <code>num</code> 给下一轮。</p>
+
+<div class="tip">
+<strong>「碰到新符号，就是结算以前的运算」。</strong>当前符号 <code>c</code> 只是扳机——它自己并不参与这次结算，结算用的是上一个 <code>sign</code>。扣完扳机，<code>c</code> 取代 <code>sign</code> 留给下一轮。</div>
+
+<h3>触发二：到了最后一个字符（虚拟结尾符）</h3>
+
+<p>表达式末尾没有运算符来「推」出结算，但最后一个 <code>num</code> 不能丢。所以 <code>i == len-1</code> 在所有变体里都出现——它相当于在末尾补了一个虚拟的结束符，同样触发一次结算。</p>
+
+<div class="tip">
+<strong>把最后一个字符也当作一次结算触发。</strong>这正是 <code>i == len-1</code> 出现在每个触发条件里的原因，也是为什么这个 <code>if</code> 不能是 <code>else if</code>（否则最后一个字符是数字时会被数字分支吃掉，漏掉结算）。</div>
+
+<h3>触发三：最开始的符号（虚拟开头符）</h3>
+
+<p>同理，第一个数字前其实也隐含了一个「起点」：<code>sign = '+'</code>，<code>res = 0</code>。它等价于在表达式最前面虚拟放了一个 <code>+</code>，只是这个 <code>+</code> 不触发结算，而是作为 <code>num</code> 的初始归属。初始化代码就是在扮演这个虚拟开头符。</p>
+
+<div class="tip">
+<strong>最开始的符号，相当于前置了 <code>result = 0</code>、<code>sign = '+'</code> 的预置结果。</strong>这样一来，「遇到符号就结算」这条规则对第一个数也天然成立，代码可以统一处理，不用为开头写特判。</div>
+
+<p>把三个触发点连起来，整个循环的节奏就清楚了：<strong>预置 <code>res=0, sign='+'</code>（虚拟开头）→ 数字累积 → 遇新符号或末尾结算（结算上一次）</strong>，首尾各一次虚拟触发，中间每次真实触发。</p>
 
 <table>
   <tr><th>题目</th><th>触发结算的条件</th></tr>
@@ -101,94 +126,59 @@
 
 <h3>3.1 加减法（仅 + 和 -）</h3>
 
-<pre><code>int calculateAddMinus(String s) {
-    if (s == null || s.isEmpty()) return 0;
+<p>结算时机最直接：读到运算符（或末尾），就用上一个 <code>sign</code> 把<strong>刚读完的这个数</strong> <code>num</code> 立刻累进 <code>res</code>，随后重置 <code>num</code>，并把当前符号存为新的 <code>sign</code>。无缓冲、无延迟。</p>
 
-    int res = 0;
-    int num = 0;
-    char sign = '+';
+<pre><code>// 结算核心（读到 + - 或末尾时触发，sign 是上一个运算符）
+if (sign == '+') res += num;
+else             res -= num;
+num = 0; sign = ch;</code></pre>
 
-    for (int i = 0; i &lt; s.length(); i++) {
-        char ch = s.charAt(i);
-
-        // 1. 组合多位数
-        if (Character.isDigit(ch)) {
-            num = num * 10 + (ch - &#39;0&#39;);
-        }
-
-        // 2. 遇到运算符或末尾 &rarr; 用上一个 sign 触发结算
-        if (ch == &#39;+&#39; || ch == &#39;-&#39; || i == s.length() - 1) {
-            switch (sign) {
-                case &#39;+&#39;: {
-                    res += num;
-                    break;
-                }
-                case &#39;-&#39;: {
-                    res -= num;
-                    break;
-                }
-            }
-            sign = ch;
-            num = 0;
-    }
-
-    return res;
-}</code></pre>
-
-<div class="tip">
-<strong>关键：</strong>结算用的是<strong>上一个运算符</strong>（<code>sign</code>），<code>ch</code> 只是触发信号并成为下一个 <code>sign</code>。<code>if</code> 不能是 <code>else if</code>，否则数字结尾会漏结算。
-</div>
+<div class="tip"><strong>时机：</strong>被结算的数就是「当前符号前面、刚读完的那个数」。读到符号的瞬间就完成入账，所以循环内已结算完，<code>res</code> 即最终结果，<strong>循环外无需收尾</strong>。</div>
 
 <h3>3.2 四则运算（+ - * /）LeetCode 227</h3>
 
-<pre><code>int calculateMultiplyDivide(String s) {
-    if (s == null || s.isEmpty()) return 0;
+<p><strong>这一版和 3.1 的结算时机完全不同，不要套用，否则容易困惑。</strong>因为 * / 优先级高于 + -，一个数不能遇到立刻入账——它后面可能还跟着 * / 会继续改变它。于是引入了lastNum。</p>
 
-    int res = 0;
-    int lastNum = 0;
-    int num = 0;
-    char sign = &#39;+&#39;;
+<div class="tip"><strong><code>lastNum</code> 是什么：</strong>「当前这一项（term）的待定结果」——还没定死，可能还会被后面的 <code>*</code> <code>/</code> 继续合并。<br>两级累积：<code>res</code> = 已定死的项之和；<code>lastNum</code> = 正在累积、可能被乘除改变的这一项。</div>
 
-    for (int i = 0; i &lt; s.length(); i++) {
-        char ch = s.charAt(i);
+<p>因此结算被拆成三种动作，对应三种触发：</p>
 
-        if (Character.isDigit(ch)) {
-            num = num * 10 + (ch - &#39;0&#39;);
-        }
+<table>
+  <tr><th>触发（当前符号/末尾）</th><th>结算动作</th><th>为什么这样更新</th></tr>
+  <tr><td>遇 <code>+</code> / <code>-</code></td><td><code>res += lastNum</code>；然后 <code>lastNum = num</code></td><td>前一项定死了 → 冲进 res；<code>num</code> 是刚读完的「本符号前面的数」，成为新项的起点</td></tr>
+  <tr><td>遇 <code>*</code> / <code>/</code></td><td><code>lastNum = lastNum */ num</code></td><td>当前项没定死 → 就地合并，优先级高，不碰 res</td></tr>
+  <tr><td>末尾（i == len-1）</td><td>先按 sign 结算，循环后再 <code>res += lastNum</code></td><td>最后一项没有后面的符号来触发关项，必须手动收尾</td></tr>
+</table>
 
-        if (ch == &#39;+&#39; || ch == &#39;-&#39; || ch == &#39;*&#39; || ch == &#39;/&#39; || i == s.length() - 1) {
-            switch (sign) {
-                case &#39;+&#39;: {
-                    res += lastNum;
-                    lastNum = num;
-                    break;
-                }
-                case &#39;-&#39;: {
-                    res += lastNum;
-                    lastNum = -num;
-                    break;
-                }
-                case &#39;*&#39;: {
-                    lastNum = lastNum * num;
-                    break;
-                }
-                case &#39;/&#39;: {
-                    lastNum = lastNum / num;
-                    break;
-                }
-            }
-            sign = ch;
-            num = 0;
-        }
-    }
+<p>看 <code>3 + 5 * 6 + 4 * 2</code>，揭示结算到底有多「晚」（目标 41）：</p>
 
-    res += lastNum;  // 循环外补上最后一个 lastNum
-    return res;
-}</code></pre>
+<table>
+  <tr><th>i</th><th>ch</th><th>sign(结算用)</th><th>动作</th><th>res</th><th>lastNum</th></tr>
+  <tr><td>1</td><td><code>+</code></td><td>+</td><td>res += 0；lastNum = 3</td><td>0</td><td>3</td></tr>
+  <tr><td>3</td><td><code>*</code></td><td>+</td><td>res += 3；lastNum = 5</td><td>3</td><td>5</td></tr>
+  <tr><td>5</td><td><code>+</code></td><td>*</td><td>lastNum = 5 × 6 = 30（仍在 lastNum）</td><td>3</td><td>30</td></tr>
+  <tr><td>7</td><td><code>*</code></td><td>+</td><td>res += 30；lastNum = 4（此刻 num 已是 4）</td><td>33</td><td>4</td></tr>
+  <tr><td>8</td><td>末尾</td><td>*</td><td>lastNum = 4 × 2 = 8</td><td>33</td><td>8</td></tr>
+  <tr><td>结束</td><td>—</td><td>—</td><td>res += 8</td><td>41</td><td>—</td></tr>
+</table>
 
-<div class="tip">
-<strong>关键：</strong><code>* /</code> 优先级高，不能立即合并到 <code>res</code>，需要 <code>lastNum</code> 缓冲。循环结束必须 <code>res += lastNum</code> 收尾。
-</div>
+<div class="tip"><strong>核心洞见：结算「慢半拍」，关不关项看上次的 sign。</strong><br>
+一项是否被冲进 <code>res</code>，<strong>不看当前字符 <code>ch</code>，而看上一次的 <code>sign</code> 是不是 <code>±</code></strong>。当前字符只是扣扳机：<br>
+- 扳机用 <code>*</code> / <code>/</code> 扣 → 只做乘法合并，结果留在 lastNum，<strong>不关项</strong>；<br>
+- 扳机用 <code>+</code> / <code>-</code> 扣 → 才把 lastNum 冲进 res，<strong>关项</strong>。<br>
+上表里 <code>5 × 6 = 30</code> 一直到第 7 位的第二个 <code>*</code>（sign=<code>+</code>）才入账，<strong>不是</strong>第 5 位的第二个 <code>+</code>（那里 sign=<code>*</code>，只算出 30 仍待定）。<br>
+对比加减法：加减法读到符号立刻 <code>res += num</code> 即时入账；四则符号被暂存、结算永远慢半拍，那半拍恰好用来凑齐乘法的两个操作数。<strong>加减法「即时结算」，四则「乘除延迟、加减才关项」</strong>。</div>
+
+<div class="tip"><strong>两句重点：</strong><br>
+① 触发结算是看<strong>当前</strong>碰到的符号；但<strong>结算逻辑看上一个符号</strong>（sign）。<br>
+② i=5 那个 <code>+</code> 结算的是乘法 <code>5 × 6</code>（sign=<code>*</code>），结果留在 lastNum；等到 i=7 遇 <code>*</code>，用的是 sign=<code>+</code> → 才 <code>res += lastNum</code>（30 入账）。</div>
+
+<div class="tip"><strong>结算时 num 存到哪了——它跑在结算前面一步。</strong><br>
+同一轮迭代里，<strong>数字累加先于结算判断</strong>执行（<code>isDigit</code> 在结算 <code>if</code> 之前），所以到达结算那一刻，num 已经把「当前触发位置前面的那个数」完整装好了：<br>
+- 触发位置是运算符 → num 保持原样，正是该运算符<strong>左边</strong>、上一项起点之前累计的那个数；<br>
+- 触发位置是末尾字符 → num 已含最后一位，是<strong>完整的最后一个数</strong>。<br>
+因此 num 永远比结算快一步：它装的是<strong>下一项</strong>的起点，<strong>不是本次要入账的数</strong>。本次冲进 res 的是 <code>lastNum</code>（上次积下的成果），num 只负责被 <code>lastNum = num</code> 接过去开下一项。用 num 入账会把下一项起点错当成这一项的成果。<br>
+（上表 i=7 处：num=4 已跑到 <code>*</code> 前面、即下一项 4×2 的起点；入账的是 lastNum=30。）</div>
 
 <h3>3.3 带括号的加减法（+ - ( )）</h3>
 
