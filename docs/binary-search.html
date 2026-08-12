@@ -158,19 +158,20 @@
   <tr><td><span class="star">★★★★★</span></td><td>704</td><td>Binary Search</td><td>🟢 Easy</td><td>标准二分模板，左右指针收缩</td><td><span class="done">✅ BinarySearch.java</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>35</td><td>Search Insert Position</td><td>🟢 Easy</td><td>找第一个 ≥ target 的位置</td><td><span class="done">✅ BinarySearch.java</span></td></tr>
   <tr><td><span class="star">★★★★★</span></td><td>34</td><td>Find First and Last Position</td><td>🟡 Medium</td><td>左右边界分别二分查找</td><td><span class="done">✅ BinarySearch.java</span></td></tr>
-  <tr><td><span class="star">★★★★★</span></td><td>69</td><td>Sqrt(x)</td><td>🟢 Easy</td><td>数值二分，平方比较防溢出<br><span style="font-size:0.85em;color:#64748b;">⚠ 看似简单，极容易写错 — 详见下方分析</span></td><td><span class="done">✅ 已分析</span></td></tr>
+  <tr><td><span class="star">★★★★★</span></td><td>69</td><td>Sqrt(x)</td><td>🟢 Easy</td><td>数值二分，平方比较防溢出<br><span style="font-size:0.85em;color:#64748b;">⚠ 看似简单，极容易写错 — 详见下方分析</span></td><td><span class="done">✅ BinarySearch.java</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>33</td><td>Search in Rotated Sorted Array</td><td>🟡 Medium</td><td>先判哪半有序，再二分</td><td><span class="done">✅ BinarySearch.java</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>153</td><td>Find Min in Rotated Sorted Array</td><td>🟡 Medium</td><td>比较 mid 与 high，无重复</td><td><span class="done">✅ BinarySearch.java</span></td></tr>
   <tr><td><span class="star">★★★★</span></td><td>162</td><td>Find Peak Element</td><td>🟡 Medium</td><td>比较 mid vs mid+1，向高侧收缩</td><td><span class="done">✅ BinarySearch.java</span></td></tr>
-  <tr><td><span class="star">★★★</span></td><td>74</td><td>Search a 2D Matrix</td><td>🟡 Medium</td><td>二维映射一维做二分</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★★</span></td><td>875</td><td>Koko Eating Bananas</td><td>🟡 Medium</td><td>答案二分：check 每小时能否吃完</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>74</td><td>Search a 2D Matrix</td><td>🟡 Medium</td><td>二维映射一维做二分</td><td><span class="done">✅ BinarySearch.java</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>240</td><td>Search a 2D Matrix II</td><td>🟡 Medium</td><td>右上角出发，逐行/列排除，O(m+n)</td><td><span class="done">✅ BinarySearch.java</span></td></tr>
+  <tr><td><span class="star">★★★</span></td><td>875</td><td>Koko Eating Bananas</td><td>🟡 Medium</td><td>答案二分：check 每小时能否吃完</td><td><span class="done">✅ 已分析</span></td></tr>
   <tr><td><span class="star">★★★</span></td><td>1011</td><td>Ship Packages Within D Days</td><td>🟡 Medium</td><td>答案二分：check 能否 D 天内运完</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★</span></td><td>278</td><td>First Bad Version</td><td>🟢 Easy</td><td>first occurrence 变体</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★★</span></td><td>367</td><td>Valid Perfect Square</td><td>🟢 Easy</td><td>类似 Sqrt，判断完全平方</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★</span></td><td>81</td><td>Search in Rotated Sorted Array II</td><td>🟡 Medium</td><td>含重复 → 去重处理 (high--)</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★</span></td><td>154</td><td>Find Min in Rotated Sorted Array II</td><td>🔴 Hard</td><td>含重复旋转数组最小值</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★</span></td><td>540</td><td>Single Element in a Sorted Array</td><td>🟡 Medium</td><td>奇偶下标性质</td><td><span class="pending">⬜</span></td></tr>
-  <tr><td><span class="star">★★</span></td><td>4</td><td>Median of Two Sorted Arrays</td><td>🔴 Hard</td><td>划分数组 + 二分，O(log(m+n))</td><td><span class="pending">⬜</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>540</td><td>Single Element in a Sorted Array</td><td>🟡 Medium</td><td>奇偶下标性质</td><td><span class="done">✅ 已分析</span></td></tr>
+  <tr><td><span class="star">★★</span></td><td>4</td><td>Median of Two Sorted Arrays</td><td>🔴 Hard</td><td>划分数组 + 二分，O(log(m+n))</td><td><span class="done">✅ 已分析</span></td></tr>
   <tr><td><span class="star">★★</span></td><td>658</td><td>Find K Closest Elements</td><td>🟡 Medium</td><td>二分找插入点 + 双指针扩展</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★</span></td><td>378</td><td>Kth Smallest in Sorted Matrix</td><td>🟡 Medium</td><td>二分值域 + 计数</td><td><span class="pending">⬜</span></td></tr>
   <tr><td><span class="star">★★</span></td><td>410</td><td>Split Array Largest Sum</td><td>🔴 Hard</td><td>最小化最大值：答案二分经典题</td><td><span class="pending">⬜</span></td></tr>
@@ -564,6 +565,37 @@ if (nums[mid] &gt; nums[mid + 1]) {
   <tr><td>排除 mid（<code>mid &plusmn; 1</code>）</td><td>保留 mid（<code>right = mid</code>）</td></tr>
   <tr><td>找到 target 即返回</td><td>收缩到唯一元素即为峰值</td></tr>
 </table>
+
+<hr>
+
+<!---------- 74 ---------->
+<h4>Search a 2D Matrix（74）⭐⭐⭐</h4>
+<blockquote>
+<p><strong>核心：把二维矩阵按行拼成一维逻辑数组，做标准二分。</strong> 矩阵满足「每行升序，且行首元素 &gt; 上一行行尾」，因此按行展开后整体严格升序，可以直接用一维二分模板。</p>
+</blockquote>
+
+<h4>下标映射</h4>
+<p> 拿张白纸比划一下就知道应该怎么映射了。</p>
+<pre>
+int row = mid / n;      // 行号
+int col = mid % n;      // 列号
+</pre>
+
+<!---------- 240 ---------->
+<h4>Search a 2D Matrix II（240）⭐⭐</h4>
+<blockquote>
+<p>核心：从右上角出发，每次比较排除一整行或一整列，O(m + n)。与 74 不同，本题只保证每行、每列各自升序，行与行之间不保证整体有序（前一行行尾可能大于后一行行首），所以不能展开成一维二分。</p>
+</blockquote>
+
+<h4>算法思路</h4>
+<p>从右上角 <code>(0, n-1)</code> 出发，利用「当前行已升序、当前列已升序」两个方向性：</p>
+<ul>
+  <li><code>matrix[r][c] &gt; target</code>：行内升序 → 它右边（同一行靠右）都更大，且下方只会更大，故当前整列都可排除 → <code>c--</code></li>
+  <li><code>matrix[r][c] &lt; target</code>：列内升序 → 它上边（同一列靠上）都更小，且左侧只会更小，故当前整行都可排除 → <code>r++</code></li>
+</ul>
+
+<h4>为什么不从左上角或右下角出发？</h4>
+<p>从左上角 <code>(0,0)</code> 出发，<code>matrix[r][c]</code> 同时比右边和下边小，无法确定往哪走（两条路都可能是答案），排除不了任何行/列。只有<strong>右上角</strong>（或左下角）这个「一个方向升、一个方向降」的拐点，才能保证每一步只有唯一可行方向。</p>
 
 <hr>
 
