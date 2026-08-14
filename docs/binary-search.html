@@ -141,6 +141,24 @@
   td:nth-child(2), th:nth-child(2) { text-align: center; }
   td:nth-child(4), th:nth-child(4) { text-align: center; }
   td:nth-child(6), th:nth-child(6) { text-align: center; }
+
+  /* ─── 目录 ─── */
+  .toc {
+    background: #e8f5ec;
+    border: 1px solid #c3dbcc;
+    border-radius: 8px;
+    padding: 14px 20px;
+    margin: 12px 0 16px;
+  }
+  .toc h2 { font-size: 1em; color: #1a4f2e; margin: 0 0 8px; border: none; padding: 0; background: none; }
+  .toc > ol { margin: 0; list-style: none; counter-reset: toc; }
+  .toc > ol > li { counter-increment: toc; margin: 3px 0; }
+  .toc > ol > li::before { content: counter(toc) ". "; font-weight: 600; color: #1a4f2e; }
+  .toc a { color: #236b3e; text-decoration: none; font-size: 0.9em; }
+  .toc a:hover { text-decoration: underline; color: #1a4f2e; }
+  .toc ol ol { list-style: none; padding-left: 18px; margin: 2px 0 4px; }
+  .toc ol ol li { margin: 2px 0; }
+  .toc ol ol li::before { content: "· "; color: #236b3e; }
 </style>
 </head>
 <body>
@@ -148,8 +166,40 @@
 
 <h1>Binary Search (二分查找)</h1>
 
+<!-- ─── 目录 ─── -->
+<div class="toc">
+<h2>目录</h2>
+<ol>
+  <li><a href="#y-list">题目列表（按面试频次降序）</a></li>
+  <li><a href="#y-route">刷题路线</a></li>
+  <li><a href="#y-notes">学习笔记</a>
+    <ol>
+      <li><a href="#s-huoxinfa">一、核心心法</a></li>
+      <li><a href="#s-detail">三、实现细节</a></li>
+      <li><a href="#s-questions">四、各题要点</a>
+        <ol>
+          <li><a href="#p35">Search Insert Position (35)</a></li>
+          <li><a href="#p34">Find First and Last Position (34)</a></li>
+          <li><a href="#p69">Sqrt(x) (69)</a></li>
+          <li><a href="#p33">Search in Rotated Sorted Array (33)</a></li>
+          <li><a href="#p153">Find Minimum in Rotated Sorted Array (153)</a></li>
+          <li><a href="#p162">Find Peak Element (162)</a></li>
+          <li><a href="#p74">Search a 2D Matrix (74)</a></li>
+          <li><a href="#p240">Search a 2D Matrix II (240)</a></li>
+          <li><a href="#p875">Koko Eating Bananas (875)</a></li>
+          <li><a href="#p540">Single Element in a Sorted Array (540)</a></li>
+          <li><a href="#p4">Median of Two Sorted Arrays (4)</a></li>
+        </ol>
+      </li>
+      <li><a href="#s-mistakes">五、易错点总结</a></li>
+    </ol>
+  </li>
+  <li><a href="#y-appendix">附录：三个决策的推导原理</a></li>
+</ol>
+</div>
+
 <!-- ─── 题目列表 ─── -->
-<h2>题目列表（按面试频次降序）</h2>
+<h2 id="y-list">题目列表（按面试频次降序）</h2>
 
 <table>
   <tr>
@@ -183,7 +233,7 @@
 </table>
 
 <!-- ─── 刷题路线 ─── -->
-<h2>刷题路线</h2>
+<h2 id="y-route">刷题路线</h2>
 
 <div class="route">
   <strong>第一梯队（必会）：</strong>704 → 35 → 34 → 69 → 33 → 153<br>
@@ -192,10 +242,10 @@
 </div>
 
 <!-- ─── 一、核心心法 ─── -->
-<h2>学习笔记</h2>
+<h2 id="y-notes">学习笔记</h2>
 <hr>
 
-<h3>一、核心心法</h3>
+<h3 id="s-huoxinfa">一、核心心法</h3>
 
 <blockquote>二分查找的每一轮循环开始前，我们都<strong>确信答案一定在 [low, high] 范围内</strong>（如果存在的话）。这个确信的结论就是"不变量"。根据 mid 与 target 的比较结果，我们缩小区间，同时保证这个不变量仍然成立。当区间缩小到空集（或只剩一个元素）时，答案就找到了。</blockquote>
 
@@ -231,7 +281,7 @@ mid 有可能是答案吗？
 
 
 <!-- ─── 三、实现细节 ─── -->
-<h3>三、实现细节</h3>
+<h3 id="s-detail">三、实现细节</h3>
 
 <h4>如何写出 bug free 的二分</h4>
 
@@ -258,10 +308,10 @@ mid 有可能是答案吗？
 <hr>
 
 <!-- ─── 四、各题要点 ─── -->
-<h3>四、各题要点</h3>
+<h3 id="s-questions">四、各题要点</h3>
 
 <!---------- 35 ---------->
-<h4>Search Insert Position（35）⭐⭐⭐⭐⭐</h4>
+<h4 id="p35">Search Insert Position（35）⭐⭐⭐⭐⭐</h4>
 <ul>
   <li>等价于 lower_bound：找第一个 <code>≥ target</code> 的下标</li>
   <li>考虑边界情况</li>
@@ -295,13 +345,13 @@ int searchInsert(int[] nums, int target) {
 <hr>
 
 <!---------- 34 ---------->
-<h4>Find First and Last Position（34）⭐⭐⭐⭐⭐</h4>
+<h4 id="p34">Find First and Last Position（34）⭐⭐⭐⭐⭐</h4>
 标准的ans模版题，直接按照[完整决策流程]解决即可。
 
 <hr>
 
 <!---------- 69 ---------->
-<h4>Sqrt(x)（69）⭐⭐⭐⭐⭐</h4>
+<h4 id="p69">Sqrt(x)（69）⭐⭐⭐⭐⭐</h4>
 
 <blockquote>看似简单的二分，但极容易写错。因为 <code>mid&sup2; &le; x</code> 时 <code>mid</code> <strong>本身可能就是最终答案</strong>，但你往往会在 <code>low = mid + 1</code> 时把它跳过去。这道题是验证自己对二分「不变量」理解深度的试金石。</blockquote>
 
@@ -356,7 +406,7 @@ int mySqrt(int x) {
 <hr>
 
 <!---------- 33 ---------->
-<h4>Search in Rotated Sorted Array（33）⭐⭐⭐⭐</h4>
+<h4 id="p33">Search in Rotated Sorted Array（33）⭐⭐⭐⭐</h4>
 
 <blockquote>
 <p><strong>核心设计思维：从「无序」中找「有序」，利用有序判定方向。</strong></p>
@@ -509,7 +559,7 @@ int search(int[] nums, int target) {
 <hr>
 
 <!---------- 153 ---------->
-<h4>Find Minimum in Rotated Sorted Array（153）⭐⭐⭐⭐</h4>
+<h4 id="p153">Find Minimum in Rotated Sorted Array（153）⭐⭐⭐⭐</h4>
 <ul>
   <li>比较 <code>nums[mid]</code> 与 <code>nums[high]</code></li>
   <li><code>nums[mid] &lt; nums[high]</code> → 最小值在左半，<code>high = mid</code></li>
@@ -520,7 +570,7 @@ int search(int[] nums, int target) {
 <hr>
 
 <!---------- 162 ---------->
-<h4>Find Peak Element（162）⭐⭐⭐⭐</h4>
+<h4 id="p162">Find Peak Element（162）⭐⭐⭐⭐</h4>
 
 <blockquote>
 <p><strong>不是在有序数组中找目标值，而是在「无序」数组中利用局部有序性找峰值。核心直觉：永远往更高的方向走，一定能找到峰值。</strong></p>
@@ -569,7 +619,7 @@ if (nums[mid] &gt; nums[mid + 1]) {
 <hr>
 
 <!---------- 74 ---------->
-<h4>Search a 2D Matrix（74）⭐⭐⭐</h4>
+<h4 id="p74">Search a 2D Matrix（74）⭐⭐⭐</h4>
 <blockquote>
 <p><strong>核心：把二维矩阵按行拼成一维逻辑数组，做标准二分。</strong> 矩阵满足「每行升序，且行首元素 &gt; 上一行行尾」，因此按行展开后整体严格升序，可以直接用一维二分模板。</p>
 </blockquote>
@@ -582,7 +632,7 @@ int col = mid % n;      // 列号
 </pre>
 
 <!---------- 240 ---------->
-<h4>Search a 2D Matrix II（240）⭐⭐</h4>
+<h4 id="p240">Search a 2D Matrix II（240）⭐⭐</h4>
 <blockquote>
 <p>核心：从右上角出发，每次比较排除一整行或一整列，O(m + n)。与 74 不同，本题只保证每行、每列各自升序，行与行之间不保证整体有序（前一行行尾可能大于后一行行首），所以不能展开成一维二分。</p>
 </blockquote>
@@ -600,7 +650,7 @@ int col = mid % n;      // 列号
 <hr>
 
 <!---------- 875 ---------->
-<h4>Koko Eating Bananas（875）⭐⭐⭐</h4>
+<h4 id="p875">Koko Eating Bananas（875）⭐⭐⭐</h4>
 <ul>
   <li>答案二分经典题：二分 <code>k</code>（每小时吃的速度）</li>
   <li>check 函数计算总时间 <code>&sum;⌈pile/k⌉</code>，判断是否 <code>&le; h</code></li>
@@ -610,7 +660,7 @@ int col = mid % n;      // 列号
 <hr>
 
 <!---------- 540 ---------->
-<h4>Single Element in a Sorted Array（540）⭐⭐</h4>
+<h4 id="p540">Single Element in a Sorted Array（540）⭐⭐</h4>
 <ul>
   <li>核心性质：单个元素出现之前 <code>nums[2k] == nums[2k+1]</code>；之后 <code>nums[2k] != nums[2k+1]</code></li>
   <li>二分检查 mid 的奇偶性：
@@ -625,7 +675,7 @@ int col = mid % n;      // 列号
 <hr>
 
 <!---------- 4 ---------->
-<h4>Median of Two Sorted Arrays（4）⭐⭐</h4>
+<h4 id="p4">Median of Two Sorted Arrays（4）⭐⭐</h4>
 <ul>
   <li>核心：在两个数组上做<strong>划分</strong>，保证 <code>len(left_part) == len(right_part)</code> 且 <code>max(left) &le; min(right)</code></li>
   <li>对较短的数组二分划分位置，在长数组上算出对应的划分位置</li>
@@ -636,7 +686,7 @@ int col = mid % n;      // 列号
 <hr>
 
 <!-- ─── 五、易错点总结 ─── -->
-<h3>五、易错点总结</h3>
+<h3 id="s-mistakes">五、易错点总结</h3>
 
 <table>
   <tr><th>场景</th><th>易错点</th><th>正确做法</th></tr>
@@ -652,7 +702,7 @@ int col = mid % n;      // 列号
 <hr>
 
 <!-- ─── 附录：三个决策的推导原理 ─── -->
-<h2>附录：三个决策的推导原理</h2>
+<h2 id="y-appendix">附录：三个决策的推导原理</h2>
 
 <p>正文的「完整决策流程」是操作口诀；本附录解释它<strong>为什么正确</strong>：三个决策不是并列的自由选择，真正要判断的只有「mid 能不能是答案」（排除还是保留），循环条件和取整方向都被它锁定。推导依据只有一条不变量——<strong>每一轮循环都必须严格缩小搜索区间 [low, high]</strong>，否则就是死循环。</p>
 
