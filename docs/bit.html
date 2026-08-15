@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>位操作总结</title>
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif; line-height: 1.45; max-width: 960px; margin: 0 auto; padding: 16px 24px 60px; color: #2d3a31; background: #f5faf6; font-size: 13px; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif; line-height: 1.5; max-width: 960px; margin: 0 auto; padding: 16px 24px 60px; color: #2d3a31; background: #f5faf6; font-size: 15px; }
   h1 { font-size: 1.35em; border-bottom: 3px solid #4a7c3f; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
   h2 { font-size: 1.2em; color: #3d6b35; margin-top: 20px; padding-left: 8px; border-left: 4px solid #5a8f4c; }
   h3 { font-size: 1.02em; color: #2d3a31; margin-top: 16px; }
@@ -13,7 +13,7 @@
   p { margin: 6px 0; } li { margin: 2px 0; } ol, ul { padding-left: 20px; }
   blockquote { margin: 10px 0; padding: 12px 20px; background: #e8f5ec; border-left: 5px solid #5a8f4c; border-radius: 0 8px 8px 0; }
   blockquote > p { margin: 0; }
-  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9em; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.95em; }
   th, td { border: 1px solid #c3dbcc; padding: 6px 10px; text-align: left; vertical-align: top; }
   th { background: #4a7c3f; color: #fff; font-weight: 600; white-space: nowrap; }
   tr:nth-child(even) { background: #e8f5ec; }
@@ -28,6 +28,16 @@
   .summary { background: #edf7ed; border-radius: 8px; border-left: 4px solid #4caf50; padding: 12px 16px; margin: 12px 0; }
   .truth-table { font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace; font-size: 0.85em; }
   .truth-table td { text-align: center; }
+  .toc { background: #e8f5ec; border: 1px solid #c3dbcc; border-radius: 8px; padding: 14px 20px; margin: 12px 0 16px; }
+  .toc h2 { font-size: 1em; color: #1a4f2e; margin: 0 0 8px; border: none; padding: 0; background: none; }
+  .toc > ol { margin: 0; list-style: none; counter-reset: toc; }
+  .toc > ol > li { counter-increment: toc; margin: 3px 0; }
+  .toc > ol > li::before { content: counter(toc) ". "; font-weight: 600; color: #2d5a27; }
+  .toc a { color: #236b3e; text-decoration: none; font-size: 0.9em; }
+  .toc a:hover { text-decoration: underline; color: #1a4f2e; }
+  .toc ol ol { list-style: none; margin: 2px 0 2px 16px; }
+  .toc ol ol > li::before { content: "— "; color: #5a8f4c; }
+
 </style>
 </head>
 <body>
@@ -37,16 +47,18 @@
 
 <blockquote><strong>核心思路：</strong>位操作是 CPU 最底层的运算，天然具有 O(1) 时间、O(1) 空间的优势。位运算的核心模式包括：<strong>用二进制编码压缩状态</strong>（如用 int 的 32 位表示 32 个布尔值）、<strong>利用位掩码跳过循环</strong>（如 n &amp; (n-1) 消除最低位的 1）、<strong>异或的对称抵消性质</strong>（a ^ a = 0, 0 ^ a = a）。掌握这些模式，可以在特定题目中实现惊人的常数优化。</blockquote>
 
-<h2>目录</h2>
-<ul>
-  <li><a href="#sec1">基本操作对照表</a></li>
-  <li><a href="#sec2">常用位技巧</a></li>
-  <li><a href="#sec3">判断 2 的幂</a></li>
-  <li><a href="#sec4">反转二进制位（Reverse Bits）</a></li>
-  <li><a href="#sec5">重复 DNA 序列（Repeated DNA Sequence）</a></li>
-  <li><a href="#sec6">数字范围按位与（Bitwise AND of Numbers Range）</a></li>
-  <li><a href="#sec7">题目汇总</a></li>
-</ul>
+<div class="toc">
+  <h2>目录</h2>
+  <ol>
+    <li><a href="#sec1">基本操作对照表</a></li>
+    <li><a href="#sec2">常用位技巧</a></li>
+    <li><a href="#sec3">判断 2 的幂</a></li>
+    <li><a href="#sec4">反转二进制位（Reverse Bits）</a></li>
+    <li><a href="#sec5">重复 DNA 序列（Repeated DNA Sequence）</a></li>
+    <li><a href="#sec6">数字范围按位与（Bitwise AND of Numbers Range）</a></li>
+    <li><a href="#sec7">题目汇总</a></li>
+  </ol>
+</div>
 
 <hr>
 

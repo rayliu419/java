@@ -38,6 +38,7 @@ Multi-module Maven project (Java 17) with 7 modules:
 - Test sources use `src/test/java` convention
 - ANTLR grammar generates parser code; generated sources are checked in under `compiler/src/main/java/gen/`
 - Tests use JUnit 4 (no JUnit 5 / Jupiter)
+- `algorithm/src/main/java/leetcode/notes` 是软链，指向仓库根的 `docs/` 目录——两处是同一份文件，修改任意一处即改动 git 跟踪的 `docs/` 下的笔记。
 
 ## HTML 笔记风格指南
 

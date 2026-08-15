@@ -13,7 +13,7 @@
     padding: 24px 32px 60px;
     color: #2c3e2d;
     background: #f2f7ed;
-    font-size: 14px;
+    font-size: 15px;
   }
   h1 { font-size: 1.5em; border-bottom: 3px solid #4a7c3f; padding-bottom: 10px; margin-bottom: 20px; color: #2d5a27; }
   h2 { font-size: 1.25em; color: #2d5a27; margin-top: 28px; padding-left: 10px; border-left: 4px solid #5a8f4c; }
@@ -72,7 +72,7 @@
     width: 100%;
     border-collapse: collapse;
     margin: 12px 0;
-    font-size: 0.9em;
+    font-size: 0.95em;
   }
   th, td {
     border: 1px solid #c8d6c0;
@@ -146,12 +146,41 @@
     text-align: center;
     margin-top: 4px;
   }
+  .toc { background: #e8f5ec; border: 1px solid #c3dbcc; border-radius: 8px; padding: 14px 20px; margin: 12px 0 16px; }
+  .toc h2 { font-size: 1em; color: #1a4f2e; margin: 0 0 8px; border: none; padding: 0; background: none; }
+  .toc > ol { margin: 0; list-style: none; counter-reset: toc; }
+  .toc > ol > li { counter-increment: toc; margin: 3px 0; }
+  .toc > ol > li::before { content: counter(toc) ". "; font-weight: 600; color: #2d5a27; }
+  .toc a { color: #236b3e; text-decoration: none; font-size: 0.9em; }
+  .toc a:hover { text-decoration: underline; color: #1a4f2e; }
+  .toc ol ol { list-style: none; margin: 2px 0 2px 16px; }
+  .toc ol ol > li::before { content: "— "; color: #5a8f4c; }
+
 </style>
 </head>
 <body>
 <a href="index.html" style="position: fixed; top: 14px; left: 14px; z-index: 999; background: #e8f5ec; border: 1px solid #c3dbcc; color: #2d5a27; text-decoration: none; font-size: 12px; padding: 4px 12px; border-radius: 999px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">← 返回目录</a>
 
 <h1>编辑距离 Edit Distance</h1>
+
+
+<div class="toc">
+  <h2>目录</h2>
+  <ol>
+    <li><a href="#steps">DP 五步法</a>
+      <ol>
+        <li><a href="#step1">Step 1 确定 dp 数组及下标含义</a></li>
+        <li><a href="#step2">Step 2 确定递推公式</a></li>
+        <li><a href="#step3">Step 3 初始化 dp 数组</a></li>
+        <li><a href="#step4">Step 4 确定遍历顺序</a></li>
+        <li><a href="#step5">Step 5 举例推导 dp 数组</a></li>
+      </ol>
+    </li>
+    <li><a href="#code">完整代码（Java）</a></li>
+    <li><a href="#optimize">空间优化（滚动数组）</a></li>
+    <li><a href="#extend">扩展与应用</a></li>
+  </ol>
+</div>
 
 <p><strong>问题：</strong>给定两个单词 <code>word1</code> 和 <code>word2</code>，请计算将 <code>word1</code> 转换成 <code>word2</code> 所使用的最少操作数。你可以对一个单词进行以下三种操作：</p>
 <ul>
@@ -166,10 +195,10 @@
 
 <hr>
 
-<h2>DP 五步法</h2>
+<h2 id="steps">DP 五步法</h2>
 
 <!-- ============ 第一步 ============ -->
-<h3><span class="step-badge">Step 1</span> 确定 dp 数组及下标含义</h3>
+<h3 id="step1"><span class="step-badge">Step 1</span> 确定 dp 数组及下标含义</h3>
 
 <p>定义 <code>dp[i][j]</code> 表示以下含义：</p>
 
@@ -184,7 +213,7 @@
 <!-- ============ 第二步 ============ -->
 <hr>
 
-<h3><span class="step-badge">Step 2</span> 确定递推公式</h3>
+<h3 id="step2"><span class="step-badge">Step 2</span> 确定递推公式</h3>
 
 <p>对于 <code>dp[i][j]</code>，我们考虑 <code>word1[i-1]</code> 和 <code>word2[j-1]</code> 的关系：</p>
 
@@ -240,7 +269,7 @@
 <!-- ============ 第三步 ============ -->
 <hr>
 
-<h3><span class="step-badge">Step 3</span> 初始化 dp 数组</h3>
+<h3 id="step3"><span class="step-badge">Step 3</span> 初始化 dp 数组</h3>
 
 <p>边界条件：当其中一个字符串为空时，编辑距离就是另一个字符串的长度（全部插入或全部删除）。</p>
 
@@ -280,7 +309,7 @@ for (int i = 0; i <= m; i++) dp[i][0] = i;</code></pre>
 <!-- ============ 第四步 ============ -->
 <hr>
 
-<h3><span class="step-badge">Step 4</span> 确定遍历顺序</h3>
+<h3 id="step4"><span class="step-badge">Step 4</span> 确定遍历顺序</h3>
 
 <p>从递推公式可以看出，<code>dp[i][j]</code> 依赖三个方向：</p>
 <ul>
@@ -312,7 +341,7 @@ return dp[m][n];</code></pre>
 <!-- ============ 第五步 ============ -->
 <hr>
 
-<h3><span class="step-badge">Step 5</span> 举例推导 dp 数组</h3>
+<h3 id="step5"><span class="step-badge">Step 5</span> 举例推导 dp 数组</h3>
 
 <p>以 <code>word1 = "horse"</code>，<code>word2 = "ros"</code> 为例，手动推导整个 dp 矩阵：</p>
 
@@ -434,7 +463,7 @@ return dp[m][n];</code></pre>
 
 <hr>
 
-<h2>完整代码（Java）</h2>
+<h2 id="code">完整代码（Java）</h2>
 
 <pre><code>public int minDistance(String word1, String word2) {
     int m = word1.length(), n = word2.length();
@@ -464,7 +493,7 @@ return dp[m][n];</code></pre>
 <!-- ============ 空间优化 ============ -->
 <hr>
 
-<h2>空间优化（滚动数组）</h2>
+<h2 id="optimize">空间优化（滚动数组）</h2>
 
 <p>观察递推公式，<code>dp[i][j]</code> 只依赖 <code>dp[i-1][j]</code>（上一行）、<code>dp[i][j-1]</code>（当前行左边）和 <code>dp[i-1][j-1]</code>（左上角），所以可以用一维数组 + 一个变量记录左上角值。</p>
 
@@ -502,7 +531,7 @@ return dp[m][n];</code></pre>
 <!-- ============ 应用场景 ============ -->
 <hr>
 
-<h2>扩展与应用</h2>
+<h2 id="extend">扩展与应用</h2>
 
 <ul>
   <li><strong>拼写纠错</strong>：编辑距离最小的候选词作为建议</li>

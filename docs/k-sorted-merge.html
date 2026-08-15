@@ -7,13 +7,13 @@
 <style>
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
-    line-height: 1.45;
+    line-height: 1.5;
     max-width: 960px;
     margin: 0 auto;
     padding: 16px 24px 60px;
     color: #2d3a31;
     background: #f5faf6;
-    font-size: 13px;
+    font-size: 15px;
   }
   h1 { font-size: 1.35em; border-bottom: 3px solid #4a7c3f; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
   h2 { font-size: 1.2em; color: #3d6b35; margin-top: 20px; padding-left: 8px; border-left: 4px solid #5a8f4c; }
@@ -38,7 +38,7 @@
     width: 100%;
     border-collapse: collapse;
     margin: 12px 0;
-    font-size: 0.9em;
+    font-size: 0.95em;
   }
   th, td {
     border: 1px solid #c3dbcc;
@@ -118,6 +118,16 @@
   .matrix-diagram .hl { color: #d4a017; font-weight: bold; }
   .matrix-diagram .dim { color: #8a9a85; }
   .matrix-diagram .arrow { color: #5a7a55; }
+  .toc { background: #e8f5ec; border: 1px solid #c3dbcc; border-radius: 8px; padding: 14px 20px; margin: 12px 0 16px; }
+  .toc h2 { font-size: 1em; color: #1a4f2e; margin: 0 0 8px; border: none; padding: 0; background: none; }
+  .toc > ol { margin: 0; list-style: none; counter-reset: toc; }
+  .toc > ol > li { counter-increment: toc; margin: 3px 0; }
+  .toc > ol > li::before { content: counter(toc) ". "; font-weight: 600; color: #2d5a27; }
+  .toc a { color: #236b3e; text-decoration: none; font-size: 0.9em; }
+  .toc a:hover { text-decoration: underline; color: #1a4f2e; }
+  .toc ol ol { list-style: none; margin: 2px 0 2px 16px; }
+  .toc ol ol > li::before { content: "— "; color: #5a8f4c; }
+
 </style>
 </head>
 <body>
@@ -127,9 +137,26 @@
 
 <blockquote><strong>核心模式：</strong>将 K 个有序序列合并/求 TopK，统一用<strong>最小堆</strong>维护 K 个指针（每个序列当前最小候选），每次 poll 出全局最小，并将该序列的下一个元素入堆。</blockquote>
 
+
+<div class="toc">
+  <h2>目录</h2>
+  <ol>
+    <li><a href="#problems">题目列表（按面试频次降序）</a></li>
+    <li><a href="#unified">核心统一解法</a></li>
+    <li><a href="#details">题目详解</a>
+      <ol>
+        <li><a href="#p23">1. [23] Merge k Sorted Lists</a></li>
+        <li><a href="#p378">2. [378] Kth Smallest Element in a Sorted Matrix</a></li>
+        <li><a href="#p373">3. [373] Find K Pairs with Smallest Sums</a></li>
+      </ol>
+    </li>
+    <li><a href="#complexity">建堆时间复杂度证明</a></li>
+  </ol>
+</div>
+
 <p class="complexity"><strong>复杂度</strong>：建堆 O(K)，每次 poll+push O(logK)，总 O(N logK)，N = 所有元素总数。</p>
 
-<h2>题目列表（按面试频次降序）</h2>
+<h2 id="problems">题目列表（按面试频次降序）</h2>
 
 <table>
   <tr>
@@ -145,41 +172,10 @@
   <tr><td><span class="star">★</span></td><td>1508</td><td>Range Sum of Sorted Subarray Sums</td><td>🟡 Medium</td><td>子数组和构成K个有序序列，堆取前K个</td><td><span class="pending">⬜</span></td></tr>
 </table>
 
-<h2>核心套路</h2>
-
-<pre>
-K个有序链表合并       → 每个链表头入堆，poll后push next
-有序矩阵第K小         → 每行头入堆，poll K次
-K个最小Pair和         → 以短数组为行（固定），长数组为列，存[row, col, sum]
-最小区间覆盖K列表     → 堆取min + 维护max，移动min所在指针缩小区间
-Ugly Number           → 合并 ×p1, ×p2, ..., ×pk 多个有序序列
-
-链表指针移动          → node.next
-数组/矩阵指针移动     → [row, col+1, value]
-Pair指针移动          → [row, col+1, nums1[row]+nums2[col+1]]
-
-二分替代方案          → 值域二分适用于「求第K小」（378, 373, 786）
-                      不适用于「合并全部序列」
-</pre>
-
-<h2>刷题路线</h2>
-
-<div class="route">
-  <strong>第一梯队（必会）：</strong>23 → 378 → 373<br>
-  <strong>第二梯队（高频）：</strong>632 → 264<br>
-  <strong>第三梯队（进阶）：</strong>313 → 786 → 1508
-</div>
-
-<h2>实现文件</h2>
-
-<ul>
-  <li><code>algorithm/src/main/java/leetcode/KSortedListMerge.java</code> — Merge K 链表、K个最小Pair、有序矩阵第K大</li>
-  <li><code>algorithm/src/main/java/leetcode/Kth.java</code> — QuickSelect 求第 K 大/小</li>
-</ul>
 
 <hr>
 
-<h2>核心统一解法</h2>
+<h2 id="unified">核心统一解法</h2>
 
 <pre>
 1. 建堆（K个元素）：所有序列头部入堆
@@ -199,9 +195,9 @@ Pair指针移动          → [row, col+1, nums1[row]+nums2[col+1]]
 
 <hr>
 
-<h2>题目详解</h2>
+<h2 id="details">题目详解</h2>
 
-<h3>1. [23] Merge k Sorted Lists</h3>
+<h3 id="p23">1. [23] Merge k Sorted Lists</h3>
 
 <h4>解法一：最小堆</h4>
 <pre>
@@ -225,7 +221,7 @@ while (lists.size() > 1) {
 
 <hr>
 
-<h3>2. [378] Kth Smallest Element in a Sorted Matrix</h3>
+<h3 id="p378">2. [378] Kth Smallest Element in a Sorted Matrix</h3>
 
 <p>矩阵行和列各自递增 → <strong>每行是一个有序数组</strong> → M 个有序数组求第 K 小。</p>
 
@@ -236,7 +232,7 @@ while (lists.size() > 1) {
 
 <hr>
 
-<h3>3. [373] Find K Pairs with Smallest Sums</h3>
+<h3 id="p373">3. [373] Find K Pairs with Smallest Sums</h3>
 
 <p>以较短的数组做行，固定 <code>nums1[i]</code> 后，<code>nums2</code> 是有序的 → 每行 = 1 条有序链表。</p>
 
@@ -259,7 +255,7 @@ nums1: <span class="hl">1</span>    │ (<span class="hl">1,2</span>)  (1,4)  (1
 
 <hr>
 
-<h2>建堆时间复杂度证明</h2>
+<h2 id="complexity">建堆时间复杂度证明</h2>
 
 <pre>
 完全二叉树，树高为 h 的层有 n/2^h 个节点，每个节点建堆代价 O(h)

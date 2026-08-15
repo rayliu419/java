@@ -7,13 +7,13 @@
 <style>
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
-    line-height: 1.45;
+    line-height: 1.5;
     max-width: 1000px;
     margin: 0 auto;
     padding: 16px 24px 60px;
     color: #2d3a31;
     background: #f5faf6;
-    font-size: 13px;
+    font-size: 15px;
   }
   h1 { font-size: 1.35em; border-bottom: 3px solid #4a7c3f; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
   h2 { font-size: 1.2em; color: #3d6b35; margin-top: 20px; padding-left: 8px; border-left: 4px solid #5a8f4c; }
@@ -27,7 +27,7 @@
     width: 100%;
     border-collapse: collapse;
     margin: 12px 0;
-    font-size: 0.9em;
+    font-size: 0.95em;
   }
   th, td {
     border: 1px solid #c8d6c0;
@@ -118,6 +118,16 @@
   @media (max-width: 640px) { .comparison { grid-template-columns: 1fr; } }
 
   td:first-child { text-align: center; white-space: nowrap; }
+  .toc { background: #e8f5ec; border: 1px solid #c3dbcc; border-radius: 8px; padding: 14px 20px; margin: 12px 0 16px; }
+  .toc h2 { font-size: 1em; color: #1a4f2e; margin: 0 0 8px; border: none; padding: 0; background: none; }
+  .toc > ol { margin: 0; list-style: none; counter-reset: toc; }
+  .toc > ol > li { counter-increment: toc; margin: 3px 0; }
+  .toc > ol > li::before { content: counter(toc) ". "; font-weight: 600; color: #2d5a27; }
+  .toc a { color: #236b3e; text-decoration: none; font-size: 0.9em; }
+  .toc a:hover { text-decoration: underline; color: #1a4f2e; }
+  .toc ol ol { list-style: none; margin: 2px 0 2px 16px; }
+  .toc ol ol > li::before { content: "— "; color: #5a8f4c; }
+
 </style>
 </head>
 <body>
@@ -125,12 +135,24 @@
 
 <h1>416 分割等和子集：为什么内层循环必须倒序？</h1>
 
+
+<div class="toc">
+  <h2>目录</h2>
+  <ol>
+    <li><a href="#sec1">一、代码结构</a></li>
+    <li><a href="#sec2">二、核心逻辑：dp[s] = dp[s] || dp[s - num]</a></li>
+    <li><a href="#sec3">三、为什么倒序能保证只用一次？</a></li>
+    <li><a href="#sec4">四、把抽象变直觉</a></li>
+    <li><a href="#sec5">五、延伸：什么题是正序？</a></li>
+  </ol>
+</div>
+
 <div class="summary">
 <strong>问题：</strong>给定数组，能否选出一些数，使它们的和 = 总和的一半？<br>
 <strong>性质：</strong>每个数只能用一次 → 0-1 背包 → 内层循环必须<strong>倒序</strong>
 </div>
 
-<h2>一、代码结构</h2>
+<h2 id="sec1">一、代码结构</h2>
 
 <pre>
 public boolean canPartition(int[] nums) {
@@ -159,7 +181,7 @@ public boolean canPartition(int[] nums) {
 这跟 coin change、word break 是同一个道理——那些题里每个单词/硬币可以重复用，所以 dp 是正着算的。
 </div>
 
-<h2>二、核心逻辑：dp[s] = dp[s] || dp[s - num]</h2>
+<h2 id="sec2">二、核心逻辑：dp[s] = dp[s] || dp[s - num]</h2>
 
 <p>这行代码的两个分支：</p>
 
@@ -170,7 +192,7 @@ public boolean canPartition(int[] nums) {
 
 <p>所以读 <code>dp[s - num]</code> 时，需要确保它是「还没考虑当前 num 的状态」，否则同一个 num 会被用多次。</p>
 
-<h2>三、为什么倒序能保证只用一次？</h2>
+<h2 id="sec3">三、为什么倒序能保证只用一次？</h2>
 
 <p>用 <code>nums = [2]</code>，target = 4 来演示，数组里只有一个 2：</p>
 
@@ -213,7 +235,7 @@ s=3: dp[3] = F || dp[1](F) = F
 正序时 <code>dp[s - num]</code> 可能是「本轮刚更新」的值——当前数字已经被用过了。
 </div>
 
-<h2>四、把抽象变直觉</h2>
+<h2 id="sec4">四、把抽象变直觉</h2>
 
 <table>
   <tr>
@@ -247,7 +269,7 @@ s=3: dp[3] = F || dp[1](F) = F
 <strong>自检：</strong>如果 416 误写成正序，对于 [1,2,3] 总和 6 → target=3，正序会把 1 重复用多次：dp[1]=T → dp[2]=T（1+1）→ dp[3]=T（1+1+1），直接返回 true，但实际上 [1,2,3] 里只有 1 个 1，不可能用三次。
 </div>
 
-<h2>五、延伸：什么题是正序？</h2>
+<h2 id="sec5">五、延伸：什么题是正序？</h2>
 
 <p>反过来，<code>j++</code> 正序的场景：每个元素可以用无限次。</p>
 

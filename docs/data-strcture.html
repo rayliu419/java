@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>数据结构选择决策图</title>
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif; line-height: 1.45; max-width: 960px; margin: 0 auto; padding: 16px 24px 60px; color: #2d3a31; background: #f5faf6; font-size: 13px; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif; line-height: 1.5; max-width: 960px; margin: 0 auto; padding: 16px 24px 60px; color: #2d3a31; background: #f5faf6; font-size: 15px; }
   h1 { font-size: 1.35em; border-bottom: 3px solid #4a7c3f; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
   h2 { font-size: 1.2em; color: #3d6b35; margin-top: 20px; padding-left: 8px; border-left: 4px solid #5a8f4c; }
   h3 { font-size: 1.02em; color: #2d3a31; margin-top: 16px; }
@@ -13,7 +13,7 @@
   p { margin: 6px 0; } li { margin: 2px 0; } ol, ul { padding-left: 20px; }
   blockquote { margin: 10px 0; padding: 12px 20px; background: #e8f5ec; border-left: 5px solid #5a8f4c; border-radius: 0 8px 8px 0; }
   blockquote > p { margin: 0; }
-  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9em; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.95em; }
   th, td { border: 1px solid #c3dbcc; padding: 6px 10px; text-align: left; vertical-align: top; }
   th { background: #4a7c3f; color: #fff; font-weight: 600; white-space: nowrap; }
   tr:nth-child(even) { background: #e8f5ec; }
@@ -65,39 +65,51 @@
   .cmp-table .tie { color: #d4a017; }
 
   /* Table of Contents */
-  .toc { background: #fff; border: 1.5px solid #c3dbcc; border-radius: 10px; padding: 14px 20px; margin: 16px 0; font-size: 0.88em; }
-  .toc > strong { color: #2d5a27; font-size: 1.05em; display: block; margin-bottom: 6px; }
-  .toc ol { margin: 0; padding-left: 22px; }
-  .toc ol ol { margin: 2px 0; padding-left: 18px; }
-  .toc li { margin: 3px 0; }
-  .toc a { color: #3d6b35; text-decoration: none; }
-  .toc a:hover { text-decoration: underline; color: #2d5a27; }
+  .toc { background: #e8f5ec; border: 1px solid #c3dbcc; border-radius: 8px; padding: 14px 20px; margin: 12px 0 16px; }
+  .toc h2 { font-size: 1em; color: #1a4f2e; margin: 0 0 8px; border: none; padding: 0; background: none; }
+  .toc > ol { margin: 0; list-style: none; counter-reset: toc; }
+  .toc > ol > li { counter-increment: toc; margin: 3px 0; }
+  .toc > ol > li::before { content: counter(toc) ". "; font-weight: 600; color: #2d5a27; }
+  .toc a { color: #236b3e; text-decoration: none; font-size: 0.9em; }
+  .toc a:hover { text-decoration: underline; color: #1a4f2e; }
+  .toc ol ol { list-style: none; margin: 2px 0 2px 16px; }
+  .toc ol ol > li::before { content: "— "; color: #5a8f4c; }
 </style>
 </head>
 <body>
 <a href="index.html" style="position: fixed; top: 14px; left: 14px; z-index: 999; background: #e8f5ec; border: 1px solid #c3dbcc; color: #2d5a27; text-decoration: none; font-size: 12px; padding: 4px 12px; border-radius: 999px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">← 返回目录</a>
 
 <div class="toc">
-<strong>目录</strong>
-<ol>
-  <li><a href="#sec0">算法思路总览</a></li>
-  <li><a href="#sec1">决策表：从需求到数据结构</a></li>
-  <li><a href="#sec2">BST vs Hashtable：两种查找结构对比</a></li>
-  <li><a href="#sec3">排序算法比较</a></li>
-  <li><a href="#sec4">工程常用数据结构和算法</a>
-    <ol>
-      <li><a href="#sec41">Geohash</a> · <a href="#sec42">Skip List</a> · <a href="#sec43">B-Tree</a> · <a href="#sec44">B+Tree</a> · <a href="#sec45">红黑树</a> · <a href="#sec46">Range Query</a></li>
-    </ol>
-  </li>
-  <li><a href="#sec5">经典数据结构详解</a>
-    <ol>
-      <li><a href="#sec51">Heap</a> · <a href="#sec52">Trie</a> · <a href="#sec53">Union-Find</a> · <a href="#sec54">Segment Tree</a> · <a href="#sec55">图 (Graph)</a> · <a href="#sec56">哈希表</a></li>
-    </ol>
-  </li>
-  <li><a href="#sec6">常见题型 → 数据结构映射</a></li>
-  <li><a href="#sec7">实战选择要点</a></li>
-  <li><a href="#sec8">时间复杂度速查表</a></li>
-</ol>
+  <h2>目录</h2>
+  <ol>
+    <li><a href="#sec0">算法思路总览</a></li>
+    <li><a href="#sec1">决策表：从需求到数据结构</a></li>
+    <li><a href="#sec2">BST vs Hashtable：两种查找结构对比</a></li>
+    <li><a href="#sec3">排序算法比较</a></li>
+    <li><a href="#sec4">工程常用数据结构和算法</a>
+      <ol>
+        <li><a href="#sec41">Geohash — 地理空间索引</a></li>
+        <li><a href="#sec42">Skip List (跳表)</a></li>
+        <li><a href="#sec43">B-Tree (B-树) — 磁盘查找的基石</a></li>
+        <li><a href="#sec44">B+Tree — 文件系统的索引标准</a></li>
+        <li><a href="#sec45">红黑树 (Red-Black Tree) — 内存中的平衡 BST</a></li>
+        <li><a href="#sec46">Range Query — 工程中的范围查询</a></li>
+      </ol>
+    </li>
+    <li><a href="#sec5">经典数据结构详解</a>
+      <ol>
+        <li><a href="#sec51">Heap (堆) — 优先队列的工程形态</a></li>
+        <li><a href="#sec52">Trie (前缀树) — 字符串的高速索引</a></li>
+        <li><a href="#sec53">Union-Find (并查集) — 动态连通性</a></li>
+        <li><a href="#sec54">Segment Tree (线段树) — 通用区间查询结构</a></li>
+        <li><a href="#sec55">图 (Graph) 的表示与算法</a></li>
+        <li><a href="#sec56">哈希表 (Hash Table)</a></li>
+      </ol>
+    </li>
+    <li><a href="#sec6">常见题型 → 数据结构映射</a></li>
+    <li><a href="#sec7">实战选择要点</a></li>
+    <li><a href="#sec8">时间复杂度速查表</a></li>
+  </ol>
 </div>
 
 <div class="think-overview">

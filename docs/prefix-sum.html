@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Prefix Sum (前缀和) 总结</title>
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif; line-height: 1.45; max-width: 960px; margin: 0 auto; padding: 16px 24px 60px; color: #2d3a31; background: #f5faf6; font-size: 13px; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif; line-height: 1.5; max-width: 960px; margin: 0 auto; padding: 16px 24px 60px; color: #2d3a31; background: #f5faf6; font-size: 15px; }
   h1 { font-size: 1.35em; border-bottom: 3px solid #4a7c3f; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
   h2 { font-size: 1.2em; color: #3d6b35; margin-top: 20px; padding-left: 8px; border-left: 4px solid #5a8f4c; }
   h3 { font-size: 1.02em; color: #2d3a31; margin-top: 16px; }
@@ -13,7 +13,7 @@
   p { margin: 6px 0; } li { margin: 2px 0; } ol, ul { padding-left: 20px; }
   blockquote { margin: 10px 0; padding: 12px 20px; background: #e8f5ec; border-left: 5px solid #5a8f4c; border-radius: 0 8px 8px 0; }
   blockquote > p { margin: 0; }
-  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9em; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.95em; }
   th, td { border: 1px solid #c3dbcc; padding: 6px 10px; text-align: left; vertical-align: top; }
   th { background: #4a7c3f; color: #fff; font-weight: 600; white-space: nowrap; }
   tr:nth-child(even) { background: #e8f5ec; }
@@ -30,6 +30,16 @@
   td:nth-child(2), th:nth-child(2) { text-align: center; }
   td:nth-child(4), th:nth-child(4) { text-align: center; }
   td:nth-child(6), th:nth-child(6) { text-align: center; }
+  .toc { background: #e8f5ec; border: 1px solid #c3dbcc; border-radius: 8px; padding: 14px 20px; margin: 12px 0 16px; }
+  .toc h2 { font-size: 1em; color: #1a4f2e; margin: 0 0 8px; border: none; padding: 0; background: none; }
+  .toc > ol { margin: 0; list-style: none; counter-reset: toc; }
+  .toc > ol > li { counter-increment: toc; margin: 3px 0; }
+  .toc > ol > li::before { content: counter(toc) ". "; font-weight: 600; color: #2d5a27; }
+  .toc a { color: #236b3e; text-decoration: none; font-size: 0.9em; }
+  .toc a:hover { text-decoration: underline; color: #1a4f2e; }
+  .toc ol ol { list-style: none; margin: 2px 0 2px 16px; }
+  .toc ol ol > li::before { content: "— "; color: #5a8f4c; }
+
 </style>
 </head>
 <body>
@@ -39,7 +49,16 @@
 
 <blockquote><strong>核心性质：</strong>连续子数组/子串求和问题 → 优先考虑前缀和或滑动窗口。有负数时滑动窗口失效，前缀和+HashMap 是通用解法。前缀和能在 O(1) 时间内求出任意子数组的和，空间换时间。</blockquote>
 
-<h2>题目列表（按面试频次降序）</h2>
+
+<div class="toc">
+  <h2>目录</h2>
+  <ol>
+    <li><a href="#problems">题目列表（按面试频次降序）</a></li>
+    <li><a href="#guide">快速判题指南</a></li>
+  </ol>
+</div>
+
+<h2 id="problems">题目列表（按面试频次降序）</h2>
 
 <table>
   <tr><th>频次</th><th>题号</th><th>题目</th><th>难度</th><th>核心思路</th><th>状态</th></tr>
@@ -68,23 +87,8 @@
   <tr><td><span class="star">★</span></td><td>1542</td><td>Find Longest Awesome Substring</td><td>🔴 Hard</td><td>状态压缩(10位bit)+前缀异或</td><td><span class="pending">⬜</span></td></tr>
 </table>
 
-<h2>核心套路</h2>
 
-<pre>
-区间和查询（数组不变）        → 一维前缀和： prefix[i] = prefix[i-1] + nums[i-1]
-矩阵区域和查询               → 二维前缀和： s[x][y] = s[x-1][y] + s[x][y-1] - s[x-1][y-1] + matrix[x][y]
-子数组和 = k（有负数）        → 前缀和+HashMap： map.put(0,1); ans += map.getOrDefault(cur - k, 0)
-子数组和 % k == 0            → 前缀和取模： ans += map.getOrDefault((cur % k + k) % k, 0)
-子数组长度 ≥ 2 && 和%k==0     → 取模存索引，要求 idx - map.get(mod) ≥ 2
-0/1 数组等值转化             → 0→-1，求前缀和，转化为和为 0 的最长子数组
-区间更新，少查询              → 差分数组： diff[l] += val; diff[r+1] -= val
-前缀积                      → 左→右算 prefix，右→左算 suffix，相乘排除自身
-前缀异或                    → pref[i+1] = pref[i] ^ nums[i]; 区间异或 = pref[j+1] ^ pref[i]
-最大子数组和                 → Kadane： cur = max(cur + nums[i], nums[i]); ans = max(ans, cur)
-状态压缩+前缀异或            → 用 bit 表示状态（奇偶），最早出现同状态的距离即为最长
-</pre>
-
-<h2>快速判题指南</h2>
+<h2 id="guide">快速判题指南</h2>
 
 <table>
   <tr><th>场景</th><th>用哪个</th></tr>

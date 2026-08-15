@@ -7,13 +7,13 @@
 <style>
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
-    line-height: 1.45;
+    line-height: 1.5;
     max-width: 1000px;
     margin: 0 auto;
     padding: 16px 24px 60px;
     color: #2d3a31;
     background: #f5faf6;
-    font-size: 13px;
+    font-size: 15px;
   }
   h1 { font-size: 1.35em; border-bottom: 3px solid #4a7c3f; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
   h2 { font-size: 1.2em; color: #3d6b35; margin-top: 20px; padding-left: 8px; border-left: 4px solid #5a8f4c; }
@@ -37,7 +37,7 @@
     width: 100%;
     border-collapse: collapse;
     margin: 12px 0;
-    font-size: 0.9em;
+    font-size: 0.95em;
   }
   th, td {
     border: 1px solid #c8d6c0;
@@ -181,6 +181,16 @@
     font-size: 0.9em;
   }
   .dp-tab a:hover { background: #d4e8ce; }
+  .toc { background: #e8f5ec; border: 1px solid #c3dbcc; border-radius: 8px; padding: 14px 20px; margin: 12px 0 16px; }
+  .toc h2 { font-size: 1em; color: #1a4f2e; margin: 0 0 8px; border: none; padding: 0; background: none; }
+  .toc > ol { margin: 0; list-style: none; counter-reset: toc; }
+  .toc > ol > li { counter-increment: toc; margin: 3px 0; }
+  .toc > ol > li::before { content: counter(toc) ". "; font-weight: 600; color: #2d5a27; }
+  .toc a { color: #236b3e; text-decoration: none; font-size: 0.9em; }
+  .toc a:hover { text-decoration: underline; color: #1a4f2e; }
+  .toc ol ol { list-style: none; margin: 2px 0 2px 16px; }
+  .toc ol ol > li::before { content: "— "; color: #5a8f4c; }
+
 </style>
 </head>
 <body>
@@ -190,22 +200,22 @@
 
 <blockquote><strong>DP = 最优子结构 + 重叠子问题 · 核心：定义状态 → 找到转移 → 初始化 → 遍历 → 返回</strong></blockquote>
 
-<!-- ─── 索引 ─── -->
-<div style="background:#e8f5ec; border:1px solid #c3dbcc; border-radius:8px; padding:12px 20px; margin:12px 0;">
-  <strong style="color:#2d5a27;">📑 索引</strong>
-  <div style="display:grid; grid-template-columns:1fr 1fr; grid-auto-flow:column; grid-template-rows:repeat(4,auto); gap:4px 24px; margin-top:8px;">
-    <div><a href="#problems" style="color:#3d6b35; text-decoration:none;">1. 题目列表</a></div>
-    <div><a href="#route" style="color:#3d6b35; text-decoration:none;">2. 刷题路线</a></div>
-    <div><a href="#notes" style="color:#3d6b35; text-decoration:none;">3. 学习笔记</a></div>
-    <div style="padding-left:16px;"><a href="#core" style="color:#3d6b35; text-decoration:none;">3.1 核心思想</a></div>
-    <div style="padding-left:16px;"><a href="#aftereffect" style="color:#3d6b35; text-decoration:none;">3.2 无后效性详解</a></div>
-    <div style="padding-left:16px;"><a href="#patterns" style="color:#3d6b35; text-decoration:none;">3.3 八大模式</a></div>
-    <div style="padding-left:16px;"><a href="#details" style="color:#3d6b35; text-decoration:none;">3.4 各题要点</a></div>
-    <div style="padding-left:16px;"><a href="#errors" style="color:#3d6b35; text-decoration:none;">3.5 常见错误</a></div>
-    <div style="padding-left:16px;"><a href="#conclusion" style="color:#3d6b35; text-decoration:none;">3.6 结论</a></div>
-  </div>
+<div class="toc">
+  <h2>目录</h2>
+  <ol>
+    <li><a href="#problems">题目列表（按面试频次降序）</a></li>
+    <li><a href="#notes">学习笔记</a>
+      <ol>
+        <li><a href="#core">一、核心思想</a></li>
+        <li><a href="#aftereffect">二、无后效性详解（DP 最重要也最容易被忽略的特性）</a></li>
+        <li><a href="#patterns">三、八大 DP 模式</a></li>
+        <li><a href="#details">四、各题要点</a></li>
+        <li><a href="#errors">五、常见错误</a></li>
+        <li><a href="#conclusion">六、结论</a></li>
+      </ol>
+    </li>
+  </ol>
 </div>
-
 <!-- ─── 题目列表 ─── -->
 <h2 id="problems">题目列表（按面试频次降序）</h2>
 
@@ -264,16 +274,6 @@
 
 <p class="complexity">共 45 题 · 其中 ⭐⭐⭐⭐⭐ 12 题（必会）· ⭐⭐⭐⭐ 16 题（高频）· ⭐⭐⭐ 12 题（进阶）· ⭐⭐ 5 题（扩展）</p>
 
-<!-- ─── 刷题路线 ─── -->
-<h2 id="route">刷题路线</h2>
-
-<div class="route">
-  <strong>第一阶段（一维DP · 建立直觉）：</strong>70 Climbing Stairs → 746 Min Cost Climbing Stairs → 198 House Robber → 740 Delete and Earn → 279 Perfect Squares → 322 Coin Change → 139 Word Break<br>
-  <strong>第二阶段（二维DP · 掌握表格法）：</strong>62 Unique Paths → 64 Minimum Path Sum → 1143 LCS → 72 Edit Distance → 5 最长回文子串 → 647 回文子串计数 → 516 最长回文子序列<br>
-  <strong>第三阶段（背包DP · 核心考点）：</strong>416 Partition Equal Subset Sum → 494 Target Sum → 518 Coin Change II → 377 Combination Sum IV → 322 Coin Change（复习·完全背包视角）<br>
-  <strong>第四阶段（Kadane · 股票系列 · 状态机）：</strong>53 Maximum Subarray → 152 Maximum Product Subarray → 121/122/123/309/714 股票系列五连<br>
-  <strong>第五阶段（进阶DP · 区间/博弈/综合）：</strong>300 LIS（含nlogn） → 354 Russian Doll（LIS变体） → 312 Burst Balloons → 877 Stone Game → 10 正则匹配 → 887 Super Egg Drop
-</div>
 
 <!-- ─── 学习笔记 ─── -->
 <h2 id="notes">学习笔记</h2>

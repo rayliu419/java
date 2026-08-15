@@ -7,13 +7,13 @@
 <style>
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
-    line-height: 1.45;
+    line-height: 1.5;
     max-width: 960px;
     margin: 0 auto;
     padding: 16px 24px 60px;
     color: #2d3a31;
     background: #f5faf6;
-    font-size: 13px;
+    font-size: 15px;
   }
   h1 { font-size: 1.35em; border-bottom: 3px solid #4a7c3f; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
   h2 { font-size: 1.2em; color: #3d6b35; margin-top: 20px; padding-left: 8px; border-left: 4px solid #5a8f4c; }
@@ -39,7 +39,7 @@
     width: 100%;
     border-collapse: collapse;
     margin: 12px 0;
-    font-size: 0.9em;
+    font-size: 0.95em;
   }
   th, td {
     border: 1px solid #c3dbcc;
@@ -141,6 +141,16 @@
   td:nth-child(2), th:nth-child(2) { text-align: center; }
   td:nth-child(4), th:nth-child(4) { text-align: center; }
   td:nth-child(6), th:nth-child(6) { text-align: center; }
+  .toc { background: #e8f5ec; border: 1px solid #c3dbcc; border-radius: 8px; padding: 14px 20px; margin: 12px 0 16px; }
+  .toc h2 { font-size: 1em; color: #1a4f2e; margin: 0 0 8px; border: none; padding: 0; background: none; }
+  .toc > ol { margin: 0; list-style: none; counter-reset: toc; }
+  .toc > ol > li { counter-increment: toc; margin: 3px 0; }
+  .toc > ol > li::before { content: counter(toc) ". "; font-weight: 600; color: #2d5a27; }
+  .toc a { color: #236b3e; text-decoration: none; font-size: 0.9em; }
+  .toc a:hover { text-decoration: underline; color: #1a4f2e; }
+  .toc ol ol { list-style: none; margin: 2px 0 2px 16px; }
+  .toc ol ol > li::before { content: "— "; color: #5a8f4c; }
+
 </style>
 </head>
 <body>
@@ -151,7 +161,27 @@
 <blockquote><strong>核心性质：</strong>BFS 先访问到的节点一定距离最短（无权图）；BFS 天然按层遍历 → 适合层次、最短路径、拓扑排序</blockquote>
 
 <!-- ─── 题目列表 ─── -->
-<h2>题目列表（按面试频次降序）</h2>
+
+<div class="toc">
+  <h2>目录</h2>
+  <ol>
+    <li><a href="#problems">题目列表（按面试频次降序）</a></li>
+    <li><a href="#notes">学习笔记</a>
+      <ol>
+        <li><a href="#sec1">一、BFS 的本质</a></li>
+        <li><a href="#sec2">二、二叉树层次遍历</a></li>
+        <li><a href="#sec3">三、多源 BFS</a></li>
+        <li><a href="#sec4">四、图 BFS &amp; 拓扑排序</a></li>
+        <li><a href="#sec5">五、Word Ladder（高频难题）</a></li>
+        <li><a href="#sec6">六、Surrounded Regions 的关键技巧</a></li>
+        <li><a href="#sec7">七、01 Matrix 的两种思路</a></li>
+        <li><a href="#sec8">八、矩阵 BFS 通用模板</a></li>
+      </ol>
+    </li>
+  </ol>
+</div>
+
+<h2 id="problems">题目列表（按面试频次降序）</h2>
 
 <table>
   <tr>
@@ -181,61 +211,20 @@
   <tr><td><span class="star">★★</span></td><td>787</td><td>Cheapest Flights Within K Stops</td><td>🟡 Medium</td><td>BFS + Bellman-Ford（层次约束的最短路径）</td><td><span class="pending">⬜</span></td></tr>
 </table>
 
-<!-- ─── 核心套路 ─── -->
-<h2>核心套路</h2>
-
-<pre>
-二叉树层次遍历         → queue + size 分层
-树的 Right Side View   → 取每层最后一个
-树的 Zigzag            → 层次遍历 + 奇偶方向反转
-Z 形 / Bottom 遍历      → 层次遍历变体（deque / reverse / 反转结果）
-Top View               → 层次遍历 + 水平坐标 map（首次覆盖即最上层）
-
-多源 BFS              → 所有起点同时入队作为第一批（腐烂橘子 / 01 矩阵）
-矩阵 BFS              → 方向数组 + visited + 边界检查
-从边界 BFS            → 从外围出发向内标记（Surrounded Regions / 太平洋大西洋）
-图 BFS（无向/有向）    → 邻接表 + visited 状态（0/1/2 标记三种状态避免无限循环）
-字符串/隐式图 BFS      → 差一个字符即为一条边（Word Ladder）
-
-拓扑排序              → 入度表（indegree[]）+ 队列维护入度 0 节点
-拓扑 BFS（层次）       → 支持区分层次（两个 set/vector cur/next），类似剥洋葱（Minimum Height Trees）
-
-最短路径（无权图）     → BFS 首达即最短；需要记录路径时 → 父节点 map + 回溯
-路径记录（多条）       → map&lt;节点, vector&lt;前驱&gt;&gt; + 回溯（Word Ladder II 关键技巧）
-BFS + DP              → BFS 顺序天然满足最优子问题（01 Matrix）</pre>
-
-<!-- ─── 刷题路线 ─── -->
-<h2>刷题路线</h2>
-
-<div class="route">
-  <strong>第一梯队（必会）：</strong>102 → 200 → 207/210 → 103 → 994<br>
-  <strong>第二梯队（高频）：</strong>127 → 199 → 130 → 542 → 107<br>
-  <strong>第三梯队（进阶）：</strong>111 → 116 → 637 → 513 → 417<br>
-  <strong>第四梯队（扩展）：</strong>Top View → 310 → 329 → 279 → 909
-</div>
-
-<!-- ─── 实现文件 ─── -->
-<h2>实现文件</h2>
-
-<ul>
-  <li><code>algorithm/src/main/java/leetcode/BFS.java</code> — 主实现</li>
-  <li><code>algorithm/src/main/java/leetcode/Tree.java</code> — 树相关 BFS</li>
-  <li><code>algorithm/src/test/java/leetcode/BFSTest.java</code> — 测试</li>
-</ul>
 
 <hr>
 
 <!-- ─── 学习笔记 ─── -->
-<h2>学习笔记</h2>
+<h2 id="notes">学习笔记</h2>
 <hr>
 
-<h3>一、BFS 的本质</h3>
+<h3 id="sec1">一、BFS 的本质</h3>
 
 <blockquote>BFS 就是逐层遍历。这个「层」的概念在二叉树中是指树的深度，在图中指距离起点的步数，在矩阵中指曼哈顿距离。<strong>BFS 先访问到的节点一定具有最短距离（无权图）</strong>，这是 BFS 最核心的性质。</blockquote>
 
 <hr>
 
-<h3>二、二叉树层次遍历</h3>
+<h3 id="sec2">二、二叉树层次遍历</h3>
 
 <ul>
   <li>经典写法：queue + 每层先取 <code>int size = queue.size()</code>，然后 for 循环处理当前层所有节点。</li>
@@ -248,7 +237,7 @@ BFS + DP              → BFS 顺序天然满足最优子问题（01 Matrix）</
 
 <hr>
 
-<h3>三、多源 BFS</h3>
+<h3 id="sec3">三、多源 BFS</h3>
 
 <ul>
   <li>腐烂橘子（994）和 01 矩阵（542）都是多源 BFS。</li>
@@ -261,7 +250,7 @@ BFS + DP              → BFS 顺序天然满足最优子问题（01 Matrix）</
 
 <hr>
 
-<h3>四、图 BFS &amp; 拓扑排序</h3>
+<h3 id="sec4">四、图 BFS &amp; 拓扑排序</h3>
 
 <ul>
   <li>图 BFS 和树 BFS 的最大区别是要记录 visited，避免重复访问。对于有向图拓扑排序，用 indegree 数组 + queue 维护入度为 0 的节点。</li>
@@ -270,7 +259,7 @@ BFS + DP              → BFS 顺序天然满足最优子问题（01 Matrix）</
 
 <hr>
 
-<h3>五、Word Ladder（高频难题）</h3>
+<h3 id="sec5">五、Word Ladder（高频难题）</h3>
 
 <blockquote>Word Ladder II 是 BFS 综合性最强的题目，涉及多个技巧，值得反复练习。</blockquote>
 
@@ -285,7 +274,7 @@ BFS + DP              → BFS 顺序天然满足最优子问题（01 Matrix）</
 
 <hr>
 
-<h3>六、Surrounded Regions 的关键技巧</h3>
+<h3 id="sec6">六、Surrounded Regions 的关键技巧</h3>
 
 <blockquote>核心洞察：<strong>被 'X' 包围的 'O' 一定不连通到边界</strong>。</blockquote>
 
@@ -296,7 +285,7 @@ BFS + DP              → BFS 顺序天然满足最优子问题（01 Matrix）</
 
 <hr>
 
-<h3>七、01 Matrix 的两种思路</h3>
+<h3 id="sec7">七、01 Matrix 的两种思路</h3>
 
 <table>
   <tr><th>做法</th><th>复杂度</th><th>说明</th></tr>
@@ -310,7 +299,7 @@ BFS + DP              → BFS 顺序天然满足最优子问题（01 Matrix）</
 
 <hr>
 
-<h3>八、矩阵 BFS 通用模板</h3>
+<h3 id="sec8">八、矩阵 BFS 通用模板</h3>
 
 <pre><code>int[] dirs = {0, 1, 0, -1, 1, 0, -1, 0}; // 或者 {{0,1},{1,0},{0,-1},{-1,0}}
 Queue&lt;int[]&gt; queue = new LinkedList&lt;&gt;();

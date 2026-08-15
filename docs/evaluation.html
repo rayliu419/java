@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>表达式求值：什么时候触发结算</title>
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif; line-height: 1.45; max-width: 960px; margin: 0 auto; padding: 16px 24px 60px; color: #2d3a31; background: #f5faf6; font-size: 13px; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif; line-height: 1.5; max-width: 960px; margin: 0 auto; padding: 16px 24px 60px; color: #2d3a31; background: #f5faf6; font-size: 15px; }
   h1 { font-size: 1.35em; border-bottom: 3px solid #4a7c3f; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
   h2 { font-size: 1.2em; color: #3d6b35; margin-top: 20px; padding-left: 8px; border-left: 4px solid #5a8f4c; }
   h3 { font-size: 1.02em; color: #2d3a31; margin-top: 16px; }
@@ -13,7 +13,7 @@
   p { margin: 6px 0; } li { margin: 2px 0; } ol, ul { padding-left: 20px; }
   blockquote { margin: 10px 0; padding: 12px 20px; background: #e8f5ec; border-left: 5px solid #5a8f4c; border-radius: 0 8px 8px 0; }
   blockquote > p { margin: 0; }
-  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9em; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.95em; }
   th, td { border: 1px solid #c3dbcc; padding: 6px 10px; text-align: left; vertical-align: top; }
   th { background: #4a7c3f; color: #fff; font-weight: 600; white-space: nowrap; }
   tr:nth-child(even) { background: #e8f5ec; }
@@ -23,6 +23,16 @@
   hr { border: none; border-top: 2px dashed #c3dbcc; margin: 16px 0; }
   .tip { background: #e8f5ec; border-left: 5px solid #5a8f4c; padding: 12px 20px; border-radius: 0 8px 8px 0; margin: 10px 0; }
   .tip strong { color: #2d5a27; }
+  .toc { background: #e8f5ec; border: 1px solid #c3dbcc; border-radius: 8px; padding: 14px 20px; margin: 12px 0 16px; }
+  .toc h2 { font-size: 1em; color: #1a4f2e; margin: 0 0 8px; border: none; padding: 0; background: none; }
+  .toc > ol { margin: 0; list-style: none; counter-reset: toc; }
+  .toc > ol > li { counter-increment: toc; margin: 3px 0; }
+  .toc > ol > li::before { content: counter(toc) ". "; font-weight: 600; color: #2d5a27; }
+  .toc a { color: #236b3e; text-decoration: none; font-size: 0.9em; }
+  .toc a:hover { text-decoration: underline; color: #1a4f2e; }
+  .toc ol ol { list-style: none; margin: 2px 0 2px 16px; }
+  .toc ol ol > li::before { content: "— "; color: #5a8f4c; }
+
 </style>
 </head>
 <body>
@@ -32,27 +42,53 @@
 
 <blockquote><strong>核心洞见：</strong>表达式求值的所有变体共享同一个循环模版——数字拼接 → 遇到触发条件 → 结算并更新状态。区别只在于触发条件和结算时哪些变量需要更新。<br><br><strong>而整个问题的核心只有一个：理解「什么时候触发结算」。</strong></blockquote>
 
+
+<div class="toc">
+  <h2>目录</h2>
+  <ol>
+    <li><a href="#sec1">1. 理解什么时候触发</a>
+      <ol>
+        <li><a href="#t1">触发一：碰到一个新的运算符符号</a></li>
+        <li><a href="#t2">触发二：到了最后一个字符（虚拟结尾符）</a></li>
+        <li><a href="#t3">触发三：最开始的符号（虚拟开头符）</a></li>
+      </ol>
+    </li>
+    <li><a href="#sec2">2. 理解触发时什么状态需要更新</a>
+      <ol>
+        <li><a href="#compare">代码对比</a></li>
+      </ol>
+    </li>
+    <li><a href="#sec3">3. 通用算法模版</a>
+      <ol>
+        <li><a href="#s31">3.1 加减法（仅 + 和 -）</a></li>
+        <li><a href="#s32">3.2 四则运算（+ - * /）LeetCode 227</a></li>
+        <li><a href="#s33">3.3 带括号的加减法（+ - ( )）</a></li>
+      </ol>
+    </li>
+  </ol>
+</div>
+
 <hr>
 
-<h2>1. 理解什么时候触发</h2>
+<h2 id="sec1">1. 理解什么时候触发</h2>
 
 <p>这是全篇唯一需要真正想清楚的逻辑。其余所有变体只是换个触发符号、多几行结算代码而已。触发只有三种情形，且它们本质上是同一件事。</p>
 
-<h3>触发一：碰到一个新的运算符符号</h3>
+<h3 id="t1">触发一：碰到一个新的运算符符号</h3>
 
 <p>数字 <code>num</code> 是在累积的，它属于「上一个符号」<code>sign</code> 管辖。一旦读到新符号，<code>num</code> 就攒到头了，必须先把<strong>上一次的运算结算掉</strong>，才能空出 <code>num</code> 给下一轮。</p>
 
 <div class="tip">
-<strong>「碰到新符号，就是结算以前的运算」。</strong>当前符号 <code>c</code> 只是扳机——它自己并不参与这次结算，结算用的是上一个 <code>sign</code>。扣完扳机，<code>c</code> 取代 <code>sign</code> 留给下一轮。</div>
+<strong>「碰到新符号，就是结算以前的运算」。</strong>当前符号 <code>c</code> 只是扳机——它自己并不参与这次结算，结算用的是上一个 <code>sign</code>。扣完扳机，<code>c</code> 取代 <code>sign</code> 留给下一轮。（这条对无括号的 3.1 / 3.2 成立；3.3 带括号后分派对象换成 <code>c</code>，见 §3.3。）</div>
 
-<h3>触发二：到了最后一个字符（虚拟结尾符）</h3>
+<h3 id="t2">触发二：到了最后一个字符（虚拟结尾符）</h3>
 
 <p>表达式末尾没有运算符来「推」出结算，但最后一个 <code>num</code> 不能丢。所以 <code>i == len-1</code> 在所有变体里都出现——它相当于在末尾补了一个虚拟的结束符，同样触发一次结算。</p>
 
 <div class="tip">
 <strong>把最后一个字符也当作一次结算触发。</strong>这正是 <code>i == len-1</code> 出现在每个触发条件里的原因，也是为什么这个 <code>if</code> 不能是 <code>else if</code>（否则最后一个字符是数字时会被数字分支吃掉，漏掉结算）。</div>
 
-<h3>触发三：最开始的符号（虚拟开头符）</h3>
+<h3 id="t3">触发三：最开始的符号（虚拟开头符）</h3>
 
 <p>同理，第一个数字前其实也隐含了一个「起点」：<code>sign = '+'</code>，<code>res = 0</code>。它等价于在表达式最前面虚拟放了一个 <code>+</code>，只是这个 <code>+</code> 不触发结算，而是作为 <code>num</code> 的初始归属。初始化代码就是在扮演这个虚拟开头符。</p>
 
@@ -80,7 +116,7 @@
 
 <hr>
 
-<h2>2. 理解触发时什么状态需要更新</h2>
+<h2 id="sec2">2. 理解触发时什么状态需要更新</h2>
 
 <table>
   <tr><th>符号</th><th>结算操作</th><th>重置的变量</th></tr>
@@ -110,7 +146,7 @@
 <strong>口诀：</strong>运算符越多，延迟越多——<code>±</code> 立即结算，<code>±*/</code> 需缓冲 <code>lastNum</code>，<code>±()</code> 需栈暂存外层上下文。
 </div>
 
-<h3>代码对比</h3>
+<h3 id="compare">代码对比</h3>
 
 <table>
   <tr><th>方法</th><th>额外变量</th><th>循环外收尾</th></tr>
@@ -122,9 +158,9 @@
 </body>
 <hr>
 
-<h2>3. 通用算法模版</h2>
+<h2 id="sec3">3. 通用算法模版</h2>
 
-<h3>3.1 加减法（仅 + 和 -）</h3>
+<h3 id="s31">3.1 加减法（仅 + 和 -）</h3>
 
 <p>结算时机最直接：读到运算符（或末尾），就用上一个 <code>sign</code> 把<strong>刚读完的这个数</strong> <code>num</code> 立刻累进 <code>res</code>，随后重置 <code>num</code>，并把当前符号存为新的 <code>sign</code>。无缓冲、无延迟。</p>
 
@@ -135,7 +171,7 @@ num = 0; sign = ch;</code></pre>
 
 <div class="tip"><strong>时机：</strong>被结算的数就是「当前符号前面、刚读完的那个数」。读到符号的瞬间就完成入账，所以循环内已结算完，<code>res</code> 即最终结果，<strong>循环外无需收尾</strong>。</div>
 
-<h3>3.2 四则运算（+ - * /）LeetCode 227</h3>
+<h3 id="s32">3.2 四则运算（+ - * /）LeetCode 227</h3>
 
 <p><strong>这一版和 3.1 的结算时机完全不同，不要套用，否则容易困惑。包括最后面循环结束还有最后的累加。</strong>因为 * / 优先级高于 + -，一个数不能遇到立刻入账——它后面可能还跟着 * / 会继续改变它。于是引入了lastNum。</p>
 
@@ -180,7 +216,8 @@ num = 0; sign = ch;</code></pre>
 因此 num 永远比结算快一步：它装的是<strong>下一项</strong>的起点，<strong>不是本次要入账的数</strong>。本次冲进 res 的是 <code>lastNum</code>（上次积下的成果），num 只负责被 <code>lastNum = num</code> 接过去开下一项。用 num 入账会把下一项起点错当成这一项的成果。<br>
 （上表 i=7 处：num=4 已跑到 <code>*</code> 前面、即下一项 4×2 的起点；入账的是 lastNum=30。）</div>
 
-<h3>3.3 带括号的加减法（+ - ( )）</h3>
+<h3 id="s33">3.3 带括号的加减法（+ - ( )）</h3>
+<p><strong>分派对象变了：</strong>3.1 / 3.2 的 <code>switch</code> 分派在<strong>上一个符号</strong> <code>sign</code> 上（<code>switch (sign)</code>），当前字符 <code>c</code> 只扣扳机；3.3 的 <code>switch</code> 分派在<strong>当前字符</strong> <code>c</code> 上（<code>switch (c)</code>）——<code>c</code> 既扣扳机又选动作。原因：<code>(</code> <code>)</code> 不是二元运算符，没有「上一个符号管辖的那个数」可结算——<code>(</code> 要保存现场、开启新上下文，<code>)</code> 要先结算内层再合并回外层，这些动作只能由当前字符决定。</p>
 
 <pre><code>int calculateWithParentheses(String s) {
     if (s == null || s.isEmpty()) return 0;
@@ -236,4 +273,12 @@ num = 0; sign = ch;</code></pre>
 <div class="tip">
 <strong>关键：</strong>遇到 <code>(</code> 把当前 <code>res</code> 和 <code>sign</code> 入栈，开启新上下文；遇到 <code>)</code> 先结算括号内，再弹栈合并回外层。<code>sign</code> 用 <code>int</code> 方便入栈。
 </div>
+<table>
+  <tr><th></th><th>3.1 / 3.2（无括号）</th><th>3.3（带括号）</th></tr>
+  <tr><td>谁扣扳机</td><td>当前字符 <code>c</code></td><td>当前字符 <code>c</code>（不变）</td></tr>
+  <tr><td>谁选动作</td><td><code>switch (sign)</code>——上一个符号</td><td><code>switch (c)</code>——当前字符</td></tr>
+  <tr><td>结算用谁</td><td><code>sign</code>（上一个运算符）</td><td><code>res += sign * num</code> 里的 <code>sign</code> 仍是上一个运算符（不变）</td></tr>
+</table>
+
+<div class="tip"><strong>一句话：</strong>变化的是「由谁选动作」——从上一个符号 <code>sign</code> 变成当前字符 <code>c</code>；不变的是「用哪个符号结算」——<code>sign</code> 依旧是上一个运算符。<br><strong><code>(</code> 是唯一扣了扳机却不结算的例外：</strong>它把当前 <code>res</code> 和 <code>sign</code> 压栈保存外层现场，然后 <code>res = 0</code> 清零开新上下文；<code>)</code> 先 <code>res += sign * num</code> 结算括号内，再弹栈 <code>res = lastRes + lastSign * res</code> 合并回外层。<br>而 <code>default</code>（<code>i == len - 1</code> 且末尾是数字）那行 <code>res += sign * num</code>，正是「用上一个符号结算」的最终体现——最后那个数还是拿前面的 <code>sign</code> 入账。</div>
 </html>

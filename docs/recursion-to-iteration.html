@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>递归 → 非递归推导</title>
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif; line-height: 1.45; max-width: 960px; margin: 0 auto; padding: 16px 24px 60px; color: #2d3a31; background: #f5faf6; font-size: 13px; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif; line-height: 1.5; max-width: 960px; margin: 0 auto; padding: 16px 24px 60px; color: #2d3a31; background: #f5faf6; font-size: 15px; }
   h1 { font-size: 1.35em; border-bottom: 3px solid #4a7c3f; padding-bottom: 8px; margin-bottom: 16px; color: #2d5a27; }
   h2 { font-size: 1.2em; color: #3d6b35; margin-top: 20px; padding-left: 8px; border-left: 4px solid #5a8f4c; }
   h3 { font-size: 1.02em; color: #2d3a31; margin-top: 16px; }
@@ -13,7 +13,7 @@
   p { margin: 6px 0; } li { margin: 2px 0; } ol, ul { padding-left: 20px; }
   blockquote { margin: 10px 0; padding: 12px 20px; background: #e8f5ec; border-left: 5px solid #5a8f4c; border-radius: 0 8px 8px 0; }
   blockquote > p { margin: 0; }
-  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9em; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.95em; }
   th, td { border: 1px solid #c3dbcc; padding: 6px 10px; text-align: left; vertical-align: top; }
   th { background: #4a7c3f; color: #fff; font-weight: 600; white-space: nowrap; }
   tr:nth-child(even) { background: #e8f5ec; }
@@ -22,6 +22,16 @@
   p > code, li > code, td > code { background: #e4eddb; padding: 2px 6px; border-radius: 4px; font-size: 0.88em; color: #3d6b35; }
   hr { border: none; border-top: 2px dashed #c3dbcc; margin: 16px 0; }
   td:first-child, th:first-child { text-align: center; white-space: nowrap; }
+  .toc { background: #e8f5ec; border: 1px solid #c3dbcc; border-radius: 8px; padding: 14px 20px; margin: 12px 0 16px; }
+  .toc h2 { font-size: 1em; color: #1a4f2e; margin: 0 0 8px; border: none; padding: 0; background: none; }
+  .toc > ol { margin: 0; list-style: none; counter-reset: toc; }
+  .toc > ol > li { counter-increment: toc; margin: 3px 0; }
+  .toc > ol > li::before { content: counter(toc) ". "; font-weight: 600; color: #2d5a27; }
+  .toc a { color: #236b3e; text-decoration: none; font-size: 0.9em; }
+  .toc a:hover { text-decoration: underline; color: #1a4f2e; }
+  .toc ol ol { list-style: none; margin: 2px 0 2px 16px; }
+  .toc ol ol > li::before { content: "— "; color: #5a8f4c; }
+
 </style>
 </head>
 <body>
@@ -29,13 +39,46 @@
 
 <h1>递归 → 非递归的机械推导方法</h1>
 
-<h2>核心洞察</h2>
+
+<div class="toc">
+  <h2>目录</h2>
+  <ol>
+    <li><a href="#insight">核心洞察</a></li>
+    <li><a href="#rules">推导规则</a>
+      <ol>
+        <li><a href="#inorder">中序遍历</a></li>
+        <li><a href="#rulesummary">推导法则总结</a></li>
+      </ol>
+    </li>
+    <li><a href="#verify">从前序推导验证</a></li>
+    <li><a href="#postorder">后序为什么更复杂</a>
+      <ol>
+        <li><a href="#mark">标记法实现</a></li>
+      </ol>
+    </li>
+    <li><a href="#examples">更多例子</a>
+      <ol>
+        <li><a href="#ex1">例 1：二分查找（尾递归 → while 循环）</a></li>
+        <li><a href="#ex2">例 2：二叉树最大深度（后序 + 返回值）</a></li>
+        <li><a href="#ex3">例 3：快排（分治 + 子问题递推）</a></li>
+        <li><a href="#ex4">例 4：子集 / 全排列（回溯）</a></li>
+        <li><a href="#ex5">例 5：合并两个有序链表（线性递归 → 指针迭代）</a></li>
+      </ol>
+    </li>
+    <li><a href="#map">完整模式图谱</a></li>
+    <li><a href="#workflow">推导工作流</a></li>
+    <li><a href="#path">理解路径</a></li>
+    <li><a href="#visual">可视化</a></li>
+  </ol>
+</div>
+
+<h2 id="insight">核心洞察</h2>
 <p><strong>递归算法的本质是操作系统帮你维护了一个调用栈。</strong> 非递归版本就是自己管这个栈。</p>
 <p>树遍历的递归写法和非递归写法之间存在<strong>机械的、一一对应的推导关系</strong>，尤其是对于"线性递归"模式（递归调用在函数体中按顺序出现一次或多次）。</p>
 
-<h2>推导规则</h2>
+<h2 id="rules">推导规则</h2>
 
-<h3>中序遍历</h3>
+<h3 id="inorder">中序遍历</h3>
 
 <pre>
 // 递归版本                             // 非递归版本
@@ -59,14 +102,14 @@ void traverse(TreeNode node) {           while (cur != null || !stack.isEmpty())
   <tr><td>调用 <code>traverse(right)</code></td><td><code>cur = cur.right</code></td><td>尾（末尾）调用，没有后续操作，无需存档</td></tr>
 </table>
 
-<h3>推导法则总结</h3>
+<h3 id="rulesummary">推导法则总结</h3>
 <pre>
 中间位置的递归调用  →  push(当前节点) + 转向子节点（需要存档，回来还有代码要执行）
 末尾位置的递归调用  →  直接转向子节点（尾调用，无需存档，没有后续代码）
 访问操作的位置     →  决定 visit() 在 push 前还是 pop 后
 </pre>
 
-<h2>从前序推导验证</h2>
+<h2 id="verify">从前序推导验证</h2>
 
 <pre>
 // 前序递归
@@ -99,7 +142,7 @@ void preorder(TreeNode root) {
   <li><strong>中序</strong>：<code>visit</code> 在 <code>pop</code> 之后（左子树访问完，再访问根）</li>
 </ul>
 
-<h2>后序为什么更复杂</h2>
+<h2 id="postorder">后序为什么更复杂</h2>
 
 <pre>
 void postorder(TreeNode node) {
@@ -113,7 +156,7 @@ void postorder(TreeNode node) {
 <p>从 L1 返回时，不是直接 visit，而是还要调用 L2。调用 L2 再返回后才能 visit。</p>
 <p><strong>问题</strong>：压栈时存的节点不足以判断"返回到哪条指令"。需要额外状态。这就是后序需要<strong>标记法（每个节点入栈两次）</strong>或<strong>双栈法</strong>的根本原因。</p>
 
-<h3>标记法实现</h3>
+<h3 id="mark">标记法实现</h3>
 <pre>
 void postorder(TreeNode root) {
     Deque&lt;Object[]&gt; stack = new ArrayDeque&lt;&gt;(); // [node, visited]
@@ -137,9 +180,9 @@ void postorder(TreeNode root) {
 }
 </pre>
 
-<h2>更多例子</h2>
+<h2 id="examples">更多例子</h2>
 
-<h3>例 1：二分查找（尾递归 → while 循环）</h3>
+<h3 id="ex1">例 1：二分查找（尾递归 → while 循环）</h3>
 <pre>
 // 递归                                     // 非递归
 int binarySearch(int[] arr, int t, int l, int r) {    int l = 0, r = arr.length - 1;
@@ -153,20 +196,20 @@ int binarySearch(int[] arr, int t, int l, int r) {    int l = 0, r = arr.length 
 </pre>
 <p><strong>模式</strong>：尾调用 → 不需要栈，直接<strong>更新参数 + 跳转到循环开头</strong>。</p>
 
-<h3>例 2：二叉树最大深度（后序 + 返回值）</h3>
+<h3 id="ex2">例 2：二叉树最大深度（后序 + 返回值）</h3>
 <p>带返回值的递归（分治模式）需要模拟返回值传递。推导结果：双栈（节点栈 + 返回值栈）。</p>
 <p><strong>更好的思路</strong>：对于"后序 + 返回值"模式，很多情况下用<strong>自底向上的 DP</strong> 或 <strong>BFS</strong> 更简洁。</p>
 
-<h3>例 3：快排（分治 + 子问题递推）</h3>
+<h3 id="ex3">例 3：快排（分治 + 子问题递推）</h3>
 <p><strong>模式</strong>：工作栈法（worklist algorithm）。当两个递归调用顺序无关（子问题独立），可以用栈/队列来管理待处理任务。</p>
 
-<h3>例 4：子集 / 全排列（回溯）</h3>
+<h3 id="ex4">例 4：子集 / 全排列（回溯）</h3>
 <p><strong>模式</strong>：栈帧 = (start索引, 循环当前位置i, path快照)。非递归关键：<strong>栈帧 = 这一层需要的所有局部变量</strong>。</p>
 
-<h3>例 5：合并两个有序链表（线性递归 → 指针迭代）</h3>
+<h3 id="ex5">例 5：合并两个有序链表（线性递归 → 指针迭代）</h3>
 <p>链表操作中常见的递归模式：递归构建结果链，返回向上传递。尾递归 → dummy + 尾指针迭代。</p>
 
-<h2>完整模式图谱</h2>
+<h2 id="map">完整模式图谱</h2>
 
 <table>
   <tr><th>递归模式</th><th>特征</th><th>非递归策略</th><th>是否需要栈</th><th>例子</th></tr>
@@ -178,7 +221,7 @@ int binarySearch(int[] arr, int t, int l, int r) {    int l = 0, r = arr.length 
   <tr><td><strong>线性递归（含返回值）</strong></td><td>递归调用结果参与运算</td><td>节点栈 + 返回值栈</td><td>✅ 双栈</td><td>树最大深度</td></tr>
 </table>
 
-<h2>推导工作流</h2>
+<h2 id="workflow">推导工作流</h2>
 
 <pre>
 ① 找到所有递归调用位置
@@ -197,14 +240,14 @@ int binarySearch(int[] arr, int t, int l, int r) {    int l = 0, r = arr.length 
    └── 栈帧里存什么 = 递归函数中所有"需要跨调用存活"的局部变量
 </pre>
 
-<h2>理解路径</h2>
+<h2 id="path">理解路径</h2>
 <ol>
   <li><strong>记忆层</strong> — 记住口诀"一路向左入栈，弹出访问，转向右"</li>
   <li><strong>理解层</strong> — 理解非递归是在手动模拟递归调用栈</li>
   <li><strong>应用层</strong> — 遇到新型递归结构时，用同样的推导规则写出非递归版本</li>
 </ol>
 
-<h2>可视化</h2>
+<h2 id="visual">可视化</h2>
 <p>交互式演示见 <a href="bst-visual.html">bst-visual.html</a>，可逐步骤观察栈的变化。</p>
 
 </body>
